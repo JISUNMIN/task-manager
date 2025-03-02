@@ -5,7 +5,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { Card, CardContent} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FaEnvelope, FaLock } from "react-icons/fa";
@@ -45,7 +45,7 @@ export default function LoginForm() {
   const onSubmit = (data: LoginFormInputs) => {
     login(); // Zustand 상태 변경 (로그인 처리)
     router.push("/dashboard/kanban"); // 로그인 후 이동
-    console.log('로그인 data',data)
+    console.log("로그인 data", data);
   };
 
   return (
@@ -65,28 +65,28 @@ export default function LoginForm() {
                   {...register("email")}
                   type="email"
                   placeholder="이메일"
-                  className="w-full pl-10" // 아이콘을 위한 왼쪽 패딩 추가
+                  className="w-full pl-10"
                 />
                 <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-                {errors.email && (
-                  <p className="text-red-500 text-sm">{errors.email.message}</p>
-                )}
               </div>
+              {errors.email && (
+                <p className="text-red-500 text-sm">{errors.email.message}</p>
+              )}
               <div className="relative">
                 <Input
                   {...register("password")}
                   type="password"
                   placeholder="비밀번호"
-                  className="w-full pl-10" // 아이콘을 위한 왼쪽 패딩 추가
+                  className="w-full pl-10"
                 />
                 <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-                {errors.password && (
-                  <p className="text-red-500 text-sm">
-                    {errors.password.message}
-                  </p>
-                )}
               </div>
-              <Button type="submit" className="w-full">
+              {errors.password && (
+                <p className="text-red-500 text-sm">
+                  {errors.password.message}
+                </p>
+              )}
+              <Button type="submit" className="w-full cursor-pointer">
                 로그인
               </Button>
             </form>
