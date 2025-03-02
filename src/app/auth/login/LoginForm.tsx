@@ -45,6 +45,7 @@ export default function LoginForm() {
   const onSubmit = (data: LoginFormInputs) => {
     login(); // Zustand 상태 변경 (로그인 처리)
     router.push("/dashboard/kanban"); // 로그인 후 이동
+    console.log('로그인 data',data)
   };
 
   return (
