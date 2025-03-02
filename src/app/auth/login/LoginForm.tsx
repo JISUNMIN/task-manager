@@ -8,6 +8,9 @@ import * as yup from "yup";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { FaEnvelope, FaLock } from "react-icons/fa";
+import Image from "next/image";
+import { logo } from "@/assets/images";
 
 // 유효성 검사 스키마 (yup)
 const loginSchema = yup.object().shape({
@@ -45,45 +48,50 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <Card className="w-96 shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-center text-xl font-semibold">
-            로그인
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <Input
-                {...register("email")}
-                type="email"
-                placeholder="이메일"
-                className="w-full"
-              />
-              {errors.email && (
-                <p className="text-red-500 text-sm">{errors.email.message}</p>
-              )}
-            </div>
-            <div>
-              <Input
-                {...register("password")}
-                type="password"
-                placeholder="비밀번호"
-                className="w-full"
-              />
-              {errors.password && (
-                <p className="text-red-500 text-sm">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-            <Button type="submit" className="w-full">
-              로그인
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+    <div className="flex min-h-screen items-center justify-center bg-green-50">
+      <div>
+        <div className="flex justify-center mt-8">
+          <Image src={logo} alt="Logo" width={150} height={300} />
+        </div>
+        <p className="text-2xl font-extrabold text-center text-gray-800  drop-shadow-md">
+          Squirrel Board
+        </p>
+        <Card className="w-96 shadow-lg">
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="relative">
+                <Input
+                  {...register("email")}
+                  type="email"
+                  placeholder="이메일"
+                  className="w-full pl-10" // 아이콘을 위한 왼쪽 패딩 추가
+                />
+                <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                {errors.email && (
+                  <p className="text-red-500 text-sm">{errors.email.message}</p>
+                )}
+              </div>
+              <div className="relative">
+                <Input
+                  {...register("password")}
+                  type="password"
+                  placeholder="비밀번호"
+                  className="w-full pl-10" // 아이콘을 위한 왼쪽 패딩 추가
+                />
+                <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                {errors.password && (
+                  <p className="text-red-500 text-sm">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+              <Button type="submit" className="w-full">
+                로그인
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
