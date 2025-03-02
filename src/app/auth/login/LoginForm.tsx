@@ -44,12 +44,12 @@ export default function LoginForm() {
 
   const onSubmit = (data: LoginFormInputs) => {
     login(); // Zustand 상태 변경 (로그인 처리)
-    router.push("/dashboard/kanban"); // 로그인 후 이동
+    // router.push("/dashboard/kanban"); // 로그인 후 이동
     console.log("로그인 data", data);
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-green-50">
+    <div className="flex min-h-screen items-center justify-center">
       <div>
         <div className="flex justify-center mt-8">
           <Image src={logo} alt="Logo" width={150} height={300} />
