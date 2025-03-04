@@ -1,3 +1,4 @@
+"use client";
 import { faker } from "@faker-js/faker";
 
 export const mockProjects = Array.from({ length: 10 }, () => ({
