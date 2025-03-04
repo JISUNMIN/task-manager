@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import TaskCard from "./TaskCard";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import { mockProjects } from "@/mocks/project";
+import { logo } from "@/assets/images";
+import Image from "next/image";
 
 const KanbanBoard = () => {
   const router = useRouter();
@@ -39,16 +42,43 @@ const KanbanBoard = () => {
       <div
         className={`transition-transform transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-0`}
       >
-        <div className="w-64 bg-white p-4 h-full flex flex-col">
+        <div className="w-80 bg-white p-4 h-full flex flex-col overflow-y-auto">
+          {/* 로고 */}
+          <div className="flex justify-center mt-8">
+            <Image src={logo} alt="Logo" width={150} height={300} />
+          </div>
+          <p className="text-2xl font-extrabold text-center text-gray-800  drop-shadow-md mb-2">
+            Squirrel Board
+          </p>
           <div>
-            <h2 className="text-xl font-semibold mt-20">Sidebar</h2>
-            <p className="text-sm">Here is your sidebar content</p>
+            <ul>
+              {mockProjects.map((project) => (
+                <li
+                  // hover:bg-green-50
+                  className="mb-2 border-b border-gray-300 bg-gray-50 p-3 rounded-md shadow-sm 
+                   cursor-pointer hover:bg-gray-100 transition-colors duration-200"
+                  key={project.name}
+                  onClick={() =>
+                    console.log(`클릭한 프로젝트: ${project.name}`)
+                  }
+                >
+                  <p className="font-semibold text-gray-700">
+                    📌 프로젝트명: {project.name}
+                  </p>
+                  <p className="text-gray-600">👤 담당자: {project.manager}</p>
+                  <p className="text-gray-600">
+                    📊 진행률: {project.progress}%
+                  </p>
+                  <p className="text-gray-600">🗓 마감일: {project.dueDate}</p>
+                </li>
+              ))}
+            </ul>
           </div>
           {/* 콘텐츠 영역 */}
           <div className="mt-auto">
             <button
               onClick={handleNavigate}
-              className="w-full py-2 bg-blue-500 text-white rounded"
+              className="w-full py-2 bg-blue-500 text-white rounded cursor-pointer"
             >
               프로젝트 현황
             </button>
@@ -58,7 +88,7 @@ const KanbanBoard = () => {
 
       {/* 칸반 보드 영역 */}
       <div
-        className={`flex-grow p-8  mt-10 transition-all duration-300 ${isSidebarOpen ? "ml-64" : ""}`}
+        className={`flex-grow p-8  mt-10 transition-all duration-300 ${isSidebarOpen ? "ml-80" : ""}`}
       >
         <h1 className="text-3xl font-semibold mb-6">Kanban Board</h1>
         <div className="grid grid-cols-3 gap-4">
