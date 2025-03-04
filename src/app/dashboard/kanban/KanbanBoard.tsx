@@ -39,23 +39,25 @@ const KanbanBoard = () => {
   return (
     <div className="flex flex-col md:flex-row">
       {/* 왼쪽 사이드바 열기 버튼 */}
-      <button
-        onClick={toggleSidebar}
-        className="fixed left-4 top-4 px-4 py-2 bg-gray-300 text-gray-800 rounded z-20"
-      >
-        {isSidebarOpen ? (
-          <FaTimes className="w-6 h-6" />
-        ) : (
-          <FaBars className="w-6 h-6" />
-        )}
-      </button>
+      {!(isTaskInfoPanelOpen && window.innerWidth <= 425) && (
+        <button
+          onClick={toggleSidebar}
+          className="fixed left-4 top-4 px-4 py-2 bg-gray-300 text-gray-800 rounded z-20"
+        >
+          {isSidebarOpen ? (
+            <FaTimes className="w-6 h-6" />
+          ) : (
+            <FaBars className="w-6 h-6" />
+          )}
+        </button>
+      )}
 
       {/* 사이드바 */}
       <Sidebar isSidebarOpen={isSidebarOpen} />
 
       {/* 칸반 보드 영역 */}
       <div
-        className={`flex-grow p-8 mt-10 transition-all duration-300 ${isSidebarOpen ? "ml-[12vw]" : ""} ${isTaskInfoPanelOpen ? "mr-[20vw]" : ""} min-h-screen`}
+        className={`p-8 mt-10 transition-all duration-300 ${isSidebarOpen ? "ml-[12vw]" : ""} ${isTaskInfoPanelOpen ? "mr-[20vw]" : ""} min-h-screen`}
       >
         <h1 className="text-3xl font-semibold mb-6">Kanban Board</h1>
 

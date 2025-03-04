@@ -6,10 +6,9 @@ import { useRouter } from "next/navigation";
 
 interface SidebarProps {
   isSidebarOpen: boolean;
-  toggleSidebar: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen }) => {
   const router = useRouter();
 
   const handleNavigate = () => {

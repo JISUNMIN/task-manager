@@ -23,7 +23,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       >
         <FaAngleDoubleRight className="w-6 h-6" />
       </button>
-      <div className="w-[20vw] bg-green-50 p-4 h-full flex flex-col overflow-y-auto "></div>
+      <div className="bg-green-50 p-4 h-full flex flex-col overflow-y-auto "></div>
     </div>
   );
 };
