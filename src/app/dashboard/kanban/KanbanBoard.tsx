@@ -6,12 +6,14 @@ import { FaBars, FaTimes, FaPlus } from "react-icons/fa";
 import Sidebar from "./Sidebar";
 import { status, useKanbanStore } from "@/store/useKanbanStore";
 import KanbanColumnBadge from "./KanbanColumnBadge";
+import TaskInfoPanel from "./TaskInfoPanel";
 
 const KanbanBoard = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
   const [activeColumn, setActiveColumn] = useState<status | null>(null);
-
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
+  const togglePanel = () => setTaskInfoPanelrOpen(!isTaskInfoPanelOpen);
 
   const columns = useKanbanStore((state) => state.columns);
   const newTaskInput = useKanbanStore((state) => state.newTaskInput);
@@ -30,8 +32,12 @@ const KanbanBoard = () => {
     }
   };
 
+  const handleInput = () => {
+    setTaskInfoPanelrOpen(true);
+  };
+
   return (
-    <div className="flex">
+    <div className="flex flex-col md:flex-row">
       {/* 왼쪽 사이드바 열기 버튼 */}
       <button
         onClick={toggleSidebar}
@@ -45,16 +51,16 @@ const KanbanBoard = () => {
       </button>
 
       {/* 사이드바 */}
-      <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+      <Sidebar isSidebarOpen={isSidebarOpen} />
 
       {/* 칸반 보드 영역 */}
       <div
-        className={`flex-grow p-8 mt-10 transition-all duration-300 ${isSidebarOpen ? "ml-80" : ""} min-h-screen`}
+        className={`flex-grow p-8 mt-10 transition-all duration-300 ${isSidebarOpen ? "ml-[12vw]" : ""} ${isTaskInfoPanelOpen ? "mr-[20vw]" : ""} min-h-screen`}
       >
         <h1 className="text-3xl font-semibold mb-6">Kanban Board</h1>
 
         {/* 칸반 열 영역 */}
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {Object.keys(columns).map((columnKey) => {
             const column = columns[columnKey as status];
             return (
@@ -78,16 +84,11 @@ const KanbanBoard = () => {
                     <input
                       type="text"
                       value={newTaskInput}
+                      onClick={handleInput}
                       onChange={(e) => setNewTaskInput(e.target.value)}
                       placeholder="Enter new task"
                       className="w-full p-2 border rounded"
                     />
-                    <button
-                      onClick={() => handleAddTask(columnKey as status)}
-                      className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
-                    >
-                      Add Task
-                    </button>
                   </div>
                 )}
 
@@ -105,6 +106,12 @@ const KanbanBoard = () => {
             );
           })}
         </div>
+
+        {/* 사이드바 */}
+        <TaskInfoPanel
+          isTaskInfoPanelOpen={isTaskInfoPanelOpen}
+          togglePanel={togglePanel}
+        />
       </div>
     </div>
   );
