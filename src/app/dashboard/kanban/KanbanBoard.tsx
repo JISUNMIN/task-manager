@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TaskCard from "./TaskCard";
 import { FaBars, FaTimes, FaPlus } from "react-icons/fa";
 import Sidebar from "./Sidebar";
@@ -35,6 +35,15 @@ const KanbanBoard = () => {
   const handleInput = () => {
     setTaskInfoPanelrOpen(true);
   };
+  
+  // 사이드바와 activeColumn 상태 변화 콘솔 출력
+  useEffect(() => {
+    console.log("Sidebar open status:", isSidebarOpen);
+  }, [isSidebarOpen]);
+
+  useEffect(() => {
+    console.log("Active column status:", activeColumn);
+  }, [activeColumn]);
 
   return (
     <div className="flex flex-col md:flex-row">
@@ -57,12 +66,15 @@ const KanbanBoard = () => {
 
       {/* 칸반 보드 영역 */}
       <div
-        className={`p-8 mt-10 transition-all duration-300 ${isSidebarOpen ? "ml-[12vw]" : ""} ${isTaskInfoPanelOpen ? "mr-[20vw]" : ""} min-h-screen`}
+        className={`p-8 mt-10 transition-all duration-300 ${isSidebarOpen ? "ml-[12vw]" : ""} ${isTaskInfoPanelOpen ? "mr-[20vw]" : ""} min-h-screen z-2`}
       >
         <h1 className="text-3xl font-semibold mb-6">Kanban Board</h1>
 
         {/* 칸반 열 영역 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+          onClick={() => console.log("test")}
+        >
           {Object.keys(columns).map((columnKey) => {
             const column = columns[columnKey as status];
             return (

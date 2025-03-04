@@ -17,7 +17,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen }) => {
 
   return (
     <div
-      className={`transition-transform transform  ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-0 `}
+      className={`transition-transform transform  ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-0 z-1`}
     >
       <div className="w-80 bg-green-50 p-4 h-full flex flex-col overflow-y-auto ">
         {/* 로고 */}
