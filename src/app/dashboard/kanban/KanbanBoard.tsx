@@ -2,19 +2,33 @@
 
 import React, { useState } from "react";
 import TaskCard from "./TaskCard";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaTimes, FaPlus } from "react-icons/fa";
 import Sidebar from "./Sidebar";
+import { status, useKanbanStore } from "@/store/useKanbanStore";
+import KanbanColumnBadge from "./KanbanColumnBadge";
 
 const KanbanBoard = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [activeColumn, setActiveColumn] = useState<status | null>(null);
+
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
-  // 더미 데이터 (카드들)
-  const tasks = [
-    { title: "Task 1", description: "This is task 1" },
-    { title: "Task 2", description: "This is task 2" },
-    { title: "Task 3", description: "This is task 3" },
-  ];
+  const columns = useKanbanStore((state) => state.columns);
+  const newTaskInput = useKanbanStore((state) => state.newTaskInput);
+  const addTask = useKanbanStore((state) => state.addTask);
+  const setNewTaskInput = useKanbanStore((state) => state.setNewTaskInput);
+  const startAddingTask = useKanbanStore((state) => state.startAddingTask);
+  const stopAddingTask = useKanbanStore((state) => state.stopAddingTask);
+
+  // 칸반 열에 추가할 작업을 저장
+  const handleAddTask = (columnName: status) => {
+    if (newTaskInput.trim()) {
+      addTask(columnName, newTaskInput);
+      setNewTaskInput(""); // 입력값 초기화
+      stopAddingTask(); // 추가 입력 모드 종료
+      setActiveColumn(null); // 작업 추가 후 열 닫기
+    }
+  };
 
   return (
     <div className="flex">
@@ -35,17 +49,61 @@ const KanbanBoard = () => {
 
       {/* 칸반 보드 영역 */}
       <div
-        className={`flex-grow p-8 mt-10 transition-all duration-300 ${isSidebarOpen ? "ml-80" : ""}  min-h-screen`}
+        className={`flex-grow p-8 mt-10 transition-all duration-300 ${isSidebarOpen ? "ml-80" : ""} min-h-screen`}
       >
         <h1 className="text-3xl font-semibold mb-6">Kanban Board</h1>
-        <div className="grid grid-cols-3 gap-4">
-          {tasks.map((task, index) => (
-            <TaskCard
-              key={index}
-              title={task.title}
-              description={task.description}
-            />
-          ))}
+
+        {/* 칸반 열 영역 */}
+        <div className="grid grid-cols-5 gap-4">
+          {Object.keys(columns).map((columnKey) => {
+            const column = columns[columnKey as status];
+            return (
+              <div key={columnKey} className="flex flex-col">
+                <div className="flex justify-between items-center mb-4">
+                  <KanbanColumnBadge columnKey={columnKey as status} />
+                  <button
+                    onClick={() => {
+                      setActiveColumn(columnKey as status);
+                      startAddingTask();
+                    }}
+                    className="px-2 py-1 bg-gray-400 text-white rounded"
+                  >
+                    <FaPlus />
+                  </button>
+                </div>
+
+                {/* 입력 필드 표시 */}
+                {activeColumn === columnKey && (
+                  <div className="mb-4">
+                    <input
+                      type="text"
+                      value={newTaskInput}
+                      onChange={(e) => setNewTaskInput(e.target.value)}
+                      placeholder="Enter new task"
+                      className="w-full p-2 border rounded"
+                    />
+                    <button
+                      onClick={() => handleAddTask(columnKey as status)}
+                      className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+                    >
+                      Add Task
+                    </button>
+                  </div>
+                )}
+
+                {/* 칸반 열에 해당하는 작업 카드들 */}
+                <div>
+                  {column.map((task, index) => (
+                    <TaskCard
+                      key={index}
+                      title={task}
+                      description="Task description"
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
