@@ -1,3 +1,4 @@
+"use client";
 import { status } from "@/store/useKanbanStore";
 import React from "react";
 
