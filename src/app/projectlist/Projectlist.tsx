@@ -1,6 +1,6 @@
 import React from "react";
 import ProjectCard from "./ProjectCard";
-import { getMockData } from "@/mocks/project";
+import getMockData from "@/mocks/project";
 
 const ProjectList = () => {
   const mockProjects = getMockData();

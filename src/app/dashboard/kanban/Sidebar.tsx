@@ -1,5 +1,5 @@
 import React from "react";
-import { getMockData } from "@/mocks/project";
+import getMockData from "@/mocks/project";
 import { logo } from "@/assets/images";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
