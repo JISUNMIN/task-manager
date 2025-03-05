@@ -29,4 +29,4 @@ class ProjectMock {
   }
 }
 
-export default new ProjectMock();
+export const getMockData = new ProjectMock().getMockData;

@@ -1,9 +1,9 @@
 import React from "react";
 import ProjectCard from "./ProjectCard";
-import ProjectMock from "@/mocks/project";
+import { getMockData } from "@/mocks/project";
 
 const ProjectList = () => {
-  const mockProjects = ProjectMock.getMockData();
+  const mockProjects = getMockData();
 
   return (
     <div className="mx-auto max-w-screen-lg p-6">
