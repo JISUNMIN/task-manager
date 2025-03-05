@@ -7,6 +7,7 @@ export interface Project {
   manager: string;
   progress: number;
   dueDate: string;
+  url: string;
 }
 
 const ProjectMock = () => {
@@ -19,6 +20,7 @@ const ProjectMock = () => {
         manager: faker.person.fullName(),
         progress: faker.number.int({ min: 0, max: 100 }),
         dueDate: faker.date.future().toISOString().split("T")[0],
+        url: faker.company.name(),
       }));
     };
 

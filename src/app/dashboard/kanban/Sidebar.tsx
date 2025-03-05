@@ -17,35 +17,6 @@ import Image from "next/image";
 import { logo } from "@/assets/images";
 import { useRouter } from "next/navigation";
 
-// Menu items.
-const items = [
-  {
-    title: "Home",
-    url: "#",
-    icon: Home,
-  },
-  {
-    title: "Inbox",
-    url: "#",
-    icon: Inbox,
-  },
-  {
-    title: "Calendar",
-    url: "#",
-    icon: Calendar,
-  },
-  {
-    title: "Search",
-    url: "#",
-    icon: Search,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
-  },
-];
-
 export function AppSidebar() {
   const router = useRouter();
   const mockProjects = getMockData();
@@ -81,19 +52,21 @@ export function AppSidebar() {
                           console.log(`클릭한 프로젝트: ${project.name}`)
                         }
                       >
-                        <SidebarMenuButton className=" flex flex-col items-start mb-2 border-b border-gray-300 bg-gray-50 p-3 rounded-md shadow-sm cursor-pointer  h-full ">
-                          <p className="font-semibold text-gray-700">
-                            📌 프로젝트명: {project.name}
-                          </p>
-                          <p className="text-gray-600">
-                            👤 담당자: {project.manager}
-                          </p>
-                          <p className="text-gray-600">
-                            📊 진행률: {project.progress}%
-                          </p>
-                          <p className="text-gray-600">
-                            🗓 마감일: {project.dueDate}
-                          </p>
+                        <SidebarMenuButton className="flex flex-col items-start mb-2 border-b border-gray-300 bg-gray-50 p-3 rounded-md shadow-sm h-full">
+                          <a href={"#"}>
+                            <p className="font-semibold text-gray-700">
+                              📌 프로젝트명: {project.name}
+                            </p>
+                            <p className="text-gray-600">
+                              👤 담당자: {project.manager}
+                            </p>
+                            <p className="text-gray-600">
+                              📊 진행률: {project.progress}%
+                            </p>
+                            <p className="text-gray-600">
+                              🗓 마감일: {project.dueDate}
+                            </p>
+                          </a>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     ))}
