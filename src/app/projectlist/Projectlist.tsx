@@ -1,8 +1,10 @@
 import React from "react";
 import ProjectCard from "./ProjectCard";
-import { mockProjects } from "@/mocks/project";
+import ProjectMock from "@/mocks/project";
 
 const ProjectList = () => {
+  const mockProjects = ProjectMock.getMockData();
+
   return (
     <div className="mx-auto max-w-screen-lg p-6">
       <h1 className="text-3xl font-extrabold text-gray-800 mb-3">
