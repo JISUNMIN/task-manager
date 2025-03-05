@@ -1,5 +1,5 @@
 import React from "react";
-import { mockProjects } from "@/mocks/project";
+import ProjectMock from "@/mocks/project";
 import { logo } from "@/assets/images";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -10,6 +10,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen }) => {
   const router = useRouter();
+  const mockProjects = ProjectMock.getMockData();
 
   const handleNavigate = () => {
     router.push("/projectlist");
