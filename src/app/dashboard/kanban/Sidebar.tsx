@@ -29,20 +29,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen }) => {
         </p>
         <div>
           <ul>
-            {mockProjects.map((project) => (
-              <li
-                className="mb-2 border-b border-gray-300 bg-gray-50 p-3 rounded-md shadow-sm cursor-pointer hover:bg-gray-100 transition-colors duration-200"
-                key={project.name}
-                onClick={() => console.log(`클릭한 프로젝트: ${project.name}`)}
-              >
-                <p className="font-semibold text-gray-700">
-                  📌 프로젝트명: {project.name}
-                </p>
-                <p className="text-gray-600">👤 담당자: {project.manager}</p>
-                <p className="text-gray-600">📊 진행률: {project.progress}%</p>
-                <p className="text-gray-600">🗓 마감일: {project.dueDate}</p>
-              </li>
-            ))}
+            {Array.isArray(mockProjects) &&
+              mockProjects.map((project) => (
+                <li
+                  className="mb-2 border-b border-gray-300 bg-gray-50 p-3 rounded-md shadow-sm cursor-pointer hover:bg-gray-100 transition-colors duration-200"
+                  key={project.name}
+                  onClick={() =>
+                    console.log(`클릭한 프로젝트: ${project.name}`)
+                  }
+                >
+                  <p className="font-semibold text-gray-700">
+                    📌 프로젝트명: {project.name}
+                  </p>
+                  <p className="text-gray-600">👤 담당자: {project.manager}</p>
+                  <p className="text-gray-600">
+                    📊 진행률: {project.progress}%
+                  </p>
+                  <p className="text-gray-600">🗓 마감일: {project.dueDate}</p>
+                </li>
+              ))}
           </ul>
         </div>
         <div className="mt-auto">
