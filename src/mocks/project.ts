@@ -27,6 +27,13 @@ class ProjectMock {
   public getMockData(): Project[] {
     return this.list;
   }
+
+  public generateNewData(count: number): void {
+    this.list = this.generateList(count);
+  }
 }
 
-export const getMockData = new ProjectMock().getMockData;
+// ProjectMock 인스턴스 생성 및 getMockData 접근
+export const getMockData = new ProjectMock().getMockData.bind(
+  new ProjectMock()
+);
