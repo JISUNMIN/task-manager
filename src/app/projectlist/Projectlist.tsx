@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import ProjectCard from "./ProjectCard";
 import getMockData from "@/mocks/project";
