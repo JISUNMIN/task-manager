@@ -1,5 +1,6 @@
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ResizableHandle, ResizablePanel } from "@/components/ui/resizable";
+import { ResizablePanel } from "@/components/ui/resizable";
 import { Textarea } from "@/components/ui/textarea";
 import React from "react";
 import { FaAngleDoubleRight } from "react-icons/fa";
@@ -18,13 +19,19 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   return (
     <ResizablePanel
       defaultSize={25}
+      minSize={isTaskInfoPanelOpen ? 30 : 0}
+      maxSize={!isTaskInfoPanelOpen ? 0 : 50}
       className={`min-h-screen bg-green-50 transition-transform transform  ${isTaskInfoPanelOpen ? "translate-x-0" : "translate-x-full"}  `}
     >
-      <ResizableHandle withHandle />
       {/* 닫기 버튼 */}
-      <button onClick={togglePanel} className=" text-gray-600 cursor-pointer">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={togglePanel}
+        className="text-gray-600 ml-2"
+      >
         <FaAngleDoubleRight className="w-6 h-6" />
-      </button>
+      </Button>
       <div className=" p-4 h-full flex flex-col overflow-y-auto ">
         <Input
           className="border-0 h-12 placeholder:text-lg"

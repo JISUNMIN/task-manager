@@ -126,4 +126,7 @@
   body {
     @apply bg-green-50 text-foreground;
   }
+  button {
+    @apply cursor-pointer;
+  }
 }

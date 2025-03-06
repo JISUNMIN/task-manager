@@ -10,7 +10,11 @@ import { status, useKanbanStore } from "@/store/useKanbanStore";
 import KanbanColumnBadge from "./KanbanColumnBadge";
 import TaskInfoPanel from "./TaskInfoPanel";
 import { Button } from "@/components/ui/button";
-import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/resizable";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
 
 const KanbanBoard = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -114,6 +118,7 @@ const KanbanBoard = () => {
           </div>
         </ResizablePanel>
 
+        {isTaskInfoPanelOpen && <ResizableHandle withHandle />}
         <TaskInfoPanel
           isTaskInfoPanelOpen={isTaskInfoPanelOpen}
           togglePanel={togglePanel}
