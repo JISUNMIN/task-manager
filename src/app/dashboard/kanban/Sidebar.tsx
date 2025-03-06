@@ -6,6 +6,7 @@ import getMockData from "@/mocks/project";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -72,14 +73,16 @@ export function AppSidebar() {
                     ))}
                 </ul>
               </div>
-              <div className="mt-auto">
-                <button
-                  onClick={handleNavigate}
-                  className="w-full py-2 bg-blue-500 text-white rounded cursor-pointer"
-                >
-                  프로젝트 현황
-                </button>
-              </div>
+              <SidebarFooter>
+                <div className="mt-auto">
+                  <button
+                    onClick={handleNavigate}
+                    className="w-full py-2 bg-blue-500 text-white rounded cursor-pointer"
+                  >
+                    프로젝트 현황
+                  </button>
+                </div>
+              </SidebarFooter>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

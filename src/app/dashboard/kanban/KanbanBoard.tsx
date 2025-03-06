@@ -9,6 +9,7 @@ import { AppSidebar } from "./Sidebar";
 import { status, useKanbanStore } from "@/store/useKanbanStore";
 import KanbanColumnBadge from "./KanbanColumnBadge";
 import TaskInfoPanel from "./TaskInfoPanel";
+import { Button } from "@/components/ui/button";
 
 const KanbanBoard = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -60,7 +61,7 @@ const KanbanBoard = () => {
 
           {/* 칸반 열 영역 */}
           <div
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4"
             onClick={() => console.log("test")}
           >
             {Object.keys(columns).map((columnKey) => {
@@ -69,15 +70,17 @@ const KanbanBoard = () => {
                 <div key={columnKey} className="flex flex-col">
                   <div className="flex justify-between items-center mb-4">
                     <KanbanColumnBadge columnKey={columnKey as status} />
-                    <button
+                    <Button
+                      variant="outline"
+                      size="icon"
                       onClick={() => {
                         setActiveColumn(columnKey as status);
                         startAddingTask();
                       }}
-                      className="px-2 py-1 bg-gray-400 text-white rounded"
+                      className="bg-gray-400 text-white rounded"
                     >
                       <FaPlus />
-                    </button>
+                    </Button>
                   </div>
 
                   {/* 입력 필드 표시 */}

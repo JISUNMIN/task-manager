@@ -1,4 +1,5 @@
 "use client";
+import { Badge } from "@/components/ui/badge";
 import { status } from "@/store/useKanbanStore";
 import React from "react";
 
@@ -32,14 +33,14 @@ const KanbanColumnBadge = ({ columnKey }: { columnKey: status }) => {
   }
 
   return (
-    <div
-      className={`flex items-center space-x-2 border border-solid ${bgColor} rounded-2xl pr-3 pl-3`}
+    <Badge 
+      className={`${bgColor} rounded-2xl pr-3 pl-3 `}
     >
       <div
         className={`w-3 h-3 ${dotColor} rounded-full border-2 border-solid ${dotColor}`}
       ></div>
       <span className="text-xl font-semibold text-gray-100">{columnKey}</span>
-    </div>
+    </Badge >
   );
 };
 
