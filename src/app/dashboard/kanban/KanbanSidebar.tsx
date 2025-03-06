@@ -18,7 +18,7 @@ import Image from "next/image";
 import { logo } from "@/assets/images";
 import { useRouter } from "next/navigation";
 
-export function AppSidebar() {
+export function KanbanSidebar() {
   const router = useRouter();
   const mockProjects = getMockData();
 
