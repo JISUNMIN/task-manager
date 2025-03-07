@@ -14,43 +14,34 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
+import { Input } from "@/components/ui/input";
 
 const KanbanBoard = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
-  const [activeColumn, setActiveColumn] = useState<status | null>(null);
-  const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
   const togglePanel = () => setTaskInfoPanelrOpen(!isTaskInfoPanelOpen);
 
-  const columns = useKanbanStore((state) => state.columns);
-  const newTaskInput = useKanbanStore((state) => state.newTaskInput);
-  const addTask = useKanbanStore((state) => state.addTask);
-  const setNewTaskInput = useKanbanStore((state) => state.setNewTaskInput);
-  const startAddingTask = useKanbanStore((state) => state.startAddingTask);
-  const stopAddingTask = useKanbanStore((state) => state.stopAddingTask);
+  const {
+    columns,
+    newTaskInputs,
+    addTask,
+    updateTask,
+    setNewTaskInput,
+    resetTaskInput,
+  } = useKanbanStore();
 
   // 칸반 열에 추가할 작업을 저장
-  const handleAddTask = (columnName: status) => {
-    if (newTaskInput.trim()) {
-      addTask(columnName, newTaskInput);
+  const handleAddTask = (columnName: status, text, index) => {
+    console.log("text", text);
+    setTaskInfoPanelrOpen(true);
+    if (newTaskInputs) {
+      updateTask(columnName, text, index);
       setNewTaskInput(""); // 입력값 초기화
-      stopAddingTask(); // 추가 입력 모드 종료
-      setActiveColumn(null); // 작업 추가 후 열 닫기
+      resetTaskInput(); // 추가 입력 모드 종료
     }
   };
 
-  const handleInput = () => {
-    setTaskInfoPanelrOpen(true);
-  };
-
-  // 사이드바와 activeColumn 상태 변화 콘솔 출력
-  useEffect(() => {
-    console.log("Sidebar open status:", isSidebarOpen);
-  }, [isSidebarOpen]);
-
-  useEffect(() => {
-    console.log("Active column status:", activeColumn);
-  }, [activeColumn]);
+  console.log("columns확인용", columns);
 
   return (
     <SidebarProvider>
@@ -63,12 +54,11 @@ const KanbanBoard = () => {
             <h1 className="text-3xl font-semibold mb-6">Kanban Board</h1>
 
             {/* 칸반 열 영역 */}
-            <div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4"
-              onClick={() => console.log("test")}
-            >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
               {Object.keys(columns).map((columnKey) => {
-                const column = columns[columnKey as status];
+                const keys = Object.keys(columns);
+                const columnIndex = keys.indexOf(columnKey);
+
                 return (
                   <div key={columnKey} className="flex flex-col">
                     <div className="flex justify-between items-center mb-4">
@@ -77,8 +67,7 @@ const KanbanBoard = () => {
                         variant="outline"
                         size="icon"
                         onClick={() => {
-                          setActiveColumn(columnKey as status);
-                          startAddingTask();
+                          addTask(columnIndex);
                         }}
                         className="bg-gray-400 text-white rounded"
                       >
@@ -86,17 +75,31 @@ const KanbanBoard = () => {
                       </Button>
                     </div>
 
-                    {/* 입력 필드 표시 */}
-
-                    <div className="mb-4">
-                      <input
-                        type="text"
-                        value={newTaskInput}
-                        onClick={handleInput}
-                        onChange={(e) => setNewTaskInput(e.target.value)}
-                        placeholder="Enter new task"
-                        className="w-full p-2 border rounded"
-                      />
+                    {/* 칸반 항목들 세로로 정렬 */}
+                    <div className="flex flex-col">
+                      {columns[columnKey as status].map((item, itemIndex) => {
+                        console.log("item", item);
+                        return (
+                          <div
+                            key={`${columnIndex}-${itemIndex}`}
+                            className="mb-4"
+                          >
+                            <Input
+                              type="text"
+                              value={item}
+                              onChange={(e) =>
+                                handleAddTask(
+                                  columnKey as status,
+                                  e.target.value,
+                                  itemIndex
+                                )
+                              }
+                              placeholder="Enter new task"
+                              className="w-full p-2 border rounded"
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
