@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import TaskCard from "./TaskCard";
 import { FaPlus } from "react-icons/fa";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -88,28 +87,16 @@ const KanbanBoard = () => {
                     </div>
 
                     {/* 입력 필드 표시 */}
-                    {activeColumn === columnKey && (
-                      <div className="mb-4">
-                        <input
-                          type="text"
-                          value={newTaskInput}
-                          onClick={handleInput}
-                          onChange={(e) => setNewTaskInput(e.target.value)}
-                          placeholder="Enter new task"
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                    )}
 
-                    {/* 칸반 열에 해당하는 작업 카드들 */}
-                    <div>
-                      {column.map((task, index) => (
-                        <TaskCard
-                          key={index}
-                          title={task}
-                          description="Task description"
-                        />
-                      ))}
+                    <div className="mb-4">
+                      <input
+                        type="text"
+                        value={newTaskInput}
+                        onClick={handleInput}
+                        onChange={(e) => setNewTaskInput(e.target.value)}
+                        placeholder="Enter new task"
+                        className="w-full p-2 border rounded"
+                      />
                     </div>
                   </div>
                 );
