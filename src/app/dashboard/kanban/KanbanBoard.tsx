@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useRef, useState } from "react";
 import { FaPlus } from "react-icons/fa";
+import { debounce } from "lodash";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { KanbanSidebar } from "./KanbanSidebar";
@@ -17,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 const KanbanBoard = () => {
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
   const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
   const togglePanel = () => setTaskInfoPanelrOpen(!isTaskInfoPanelOpen);
 
@@ -31,16 +32,12 @@ const KanbanBoard = () => {
   } = useKanbanStore();
 
   // 칸반 열에 추가할 작업을 저장
-  const handleAddTask = (columnName: status, text, index) => {
-    console.log("text", text);
-    setTaskInfoPanelrOpen(true);
-    if (newTaskInputs) {
-      updateTask(columnName, text, index);
-      setNewTaskInput(""); // 입력값 초기화
-      resetTaskInput(); // 추가 입력 모드 종료
+  const handleInputChange = debounce((columnKey: status, itemIndex: number) => {
+    if (inputRefs.current[`${columnKey}-${itemIndex}`]) {
+      const value = inputRefs.current[`${columnKey}-${itemIndex}`]?.value || "";
+      updateTask(columnKey, value, itemIndex);
     }
-  };
-
+  }, 1500);
   console.log("columns확인용", columns);
 
   return (
@@ -86,11 +83,16 @@ const KanbanBoard = () => {
                           >
                             <Input
                               type="text"
-                              value={item}
-                              onChange={(e) =>
-                                handleAddTask(
+                              ref={(el) =>
+                                (inputRefs.current[
+                                  `${columnKey}-${itemIndex}`
+                                ] = el)
+                              }
+                              defaultValue={item?.title}
+                              onClick={() => setTaskInfoPanelrOpen(true)}
+                              onChange={() =>
+                                handleInputChange(
                                   columnKey as status,
-                                  e.target.value,
                                   itemIndex
                                 )
                               }

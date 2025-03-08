@@ -18,12 +18,9 @@ interface KanbanStore {
   };
   newTaskInputs: { [key in status]: string }; // 각 열별 입력 상태
   addTask: (index: number) => void;
-  updateTask: (
-    columnName: "To Do" | "Ready" | "In Progress" | "On Hold" | "Completed",
-    task: string
-  ) => void;
+  updateTask: (columnName: status, task: string, index: number) => void;
   setTaskDescription: (
-    columnName: "To Do" | "Ready" | "In Progress" | "On Hold" | "Completed",
+    columnName: status,
     taskIndex: number,
     description: string
   ) => void;
@@ -35,11 +32,11 @@ interface KanbanStore {
 
 export const useKanbanStore = create<KanbanStore>((set) => ({
   columns: {
-    "To Do": [],
-    Ready: [],
-    "In Progress": [],
-    "On Hold": [],
-    Completed: [],
+    "To Do": [{ title: "" }],
+    Ready: [{ title: "" }],
+    "In Progress": [{ title: "" }],
+    "On Hold": [{ title: "" }],
+    Completed: [{ title: "" }],
   },
   newTaskInputs: {
     "To Do": "",
@@ -49,11 +46,11 @@ export const useKanbanStore = create<KanbanStore>((set) => ({
     Completed: "",
   },
   isAddingTask: false, // 초기 상태는 입력 영역이 표시되지 않음
-  addTask: (index:number) =>
+  addTask: (index: number) =>
     set((state) => {
-      const columnKeys: ColumnKeys[] = Object.keys(
+      const columnKeys: status[] = Object.keys(
         state.columns
-      ) as ColumnKeys[];
+      ) as status[];
       console.log("columns", state.columns);
       const columnKey = columnKeys[index]; // index에 해당하는 key 찾기
 
