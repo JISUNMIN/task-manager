@@ -7,15 +7,18 @@ export type status =
   | "On Hold"
   | "Completed";
 
+type Task = {
+  title: string;
+};
+
+// columns 전체 타입
+type Columns = {
+  [key in status]: Task[];
+};
+
 // 칸반 보드의 상태를 저장할 스토어
 interface KanbanStore {
-  columns: {
-    "To Do": string[];
-    Ready: string[];
-    "In Progress": string[];
-    "On Hold": string[];
-    Completed: string[];
-  };
+  columns: Columns;
   addTask: (index: number) => void;
   updateTask: (columnName: status, task: string, index: number) => void;
 }

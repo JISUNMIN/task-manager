@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ResizablePanel } from "@/components/ui/resizable";
-import { Textarea } from "@/components/ui/textarea";
 import { useKanbanStore } from "@/store/useKanbanStore";
 import React, { useCallback } from "react";
 import { FaAngleDoubleRight } from "react-icons/fa";
@@ -22,10 +21,13 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const { updateTask, columns } = useKanbanStore();
   const [columnKey, itemIndexStr] = focusedInputKey.split("-");
 
-  const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    updateTask(columnKey, value, itemIndexStr);
-  }, []);
+  const onChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      updateTask(columnKey, value, itemIndexStr);
+    },
+    [focusedInputKey]
+  );
 
   return (
     <ResizablePanel
@@ -50,7 +52,6 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           onChange={onChange}
           value={columns[columnKey][itemIndexStr].title}
         />
-        <Textarea />
       </div>
     </ResizablePanel>
   );
