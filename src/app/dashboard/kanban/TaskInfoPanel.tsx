@@ -4,6 +4,7 @@ import { ResizablePanel } from "@/components/ui/resizable";
 import { useKanbanStore } from "@/store/useKanbanStore";
 import React, { useCallback } from "react";
 import { FaAngleDoubleRight } from "react-icons/fa";
+import TextareaAutosize from "react-textarea-autosize";
 
 <FaAngleDoubleRight className="w-6 h-6" />;
 
@@ -46,8 +47,8 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         <FaAngleDoubleRight className="w-6 h-6" />
       </Button>
       <div className=" p-4 h-full flex flex-col overflow-y-auto ">
-        <Input
-          className="border-0 h-12 placeholder:text-lg"
+        <TextareaAutosize
+          className="w-full rounded border p-2 resize-none"
           placeholder="추가할 작업을 입력하세요"
           onChange={onChange}
           value={columns[columnKey][itemIndexStr].title}

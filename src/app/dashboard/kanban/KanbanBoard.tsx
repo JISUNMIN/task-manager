@@ -15,7 +15,7 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import { Input } from "@/components/ui/input";
+import TextareaAutosize from "react-textarea-autosize";
 
 const KanbanBoard = () => {
   const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
@@ -76,7 +76,7 @@ const KanbanBoard = () => {
                             key={`${columnIndex}-${itemIndex}`}
                             className="mb-4"
                           >
-                            <Input
+                            <TextareaAutosize
                               type="text"
                               value={columns[columnKey][itemIndex].title}
                               onChange={(e) =>
