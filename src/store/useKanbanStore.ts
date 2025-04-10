@@ -16,18 +16,8 @@ interface KanbanStore {
     "On Hold": string[];
     Completed: string[];
   };
-  newTaskInputs: { [key in status]: string }; // 각 열별 입력 상태
   addTask: (index: number) => void;
   updateTask: (columnName: status, task: string, index: number) => void;
-  setTaskDescription: (
-    columnName: status,
-    taskIndex: number,
-    description: string
-  ) => void;
-  resetTaskInput: () => void;
-  setNewTaskInput: (input: string) => void;
-  isAddingTask: boolean; // 새 작업을 추가할 때 활성화되는 상태
-  toggleAddingTask: () => void; // 버튼을 눌렀을 때 입력 영역을 토글하는 함수
 }
 
 export const useKanbanStore = create<KanbanStore>((set) => ({
@@ -38,19 +28,10 @@ export const useKanbanStore = create<KanbanStore>((set) => ({
     "On Hold": [{ title: "" }],
     Completed: [{ title: "" }],
   },
-  newTaskInputs: {
-    "To Do": "",
-    Ready: "",
-    "In Progress": "",
-    "On Hold": "",
-    Completed: "",
-  },
   isAddingTask: false, // 초기 상태는 입력 영역이 표시되지 않음
   addTask: (index: number) =>
     set((state) => {
-      const columnKeys: status[] = Object.keys(
-        state.columns
-      ) as status[];
+      const columnKeys: status[] = Object.keys(state.columns) as status[];
       console.log("columns", state.columns);
       const columnKey = columnKeys[index]; // index에 해당하는 key 찾기
 
@@ -75,19 +56,4 @@ export const useKanbanStore = create<KanbanStore>((set) => ({
         },
       };
     }),
-  setTaskDescription: (columnName, taskIndex, description) =>
-    set((state) => {
-      const updatedTasks = [...state.columns[columnName]];
-      updatedTasks[taskIndex] = description;
-      return {
-        columns: {
-          ...state.columns,
-          [columnName]: updatedTasks,
-        },
-      };
-    }),
-  resetTaskInput: () => set({ newTaskInput: "" }),
-  setNewTaskInput: (input) => set({ newTaskInput: input }),
-  toggleAddingTask: () =>
-    set((state) => ({ isAddingTask: !state.isAddingTask })),
 }));

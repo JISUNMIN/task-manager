@@ -2,7 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ResizablePanel } from "@/components/ui/resizable";
 import { Textarea } from "@/components/ui/textarea";
-import React from "react";
+import { useKanbanStore } from "@/store/useKanbanStore";
+import React, { useCallback } from "react";
 import { FaAngleDoubleRight } from "react-icons/fa";
 
 <FaAngleDoubleRight className="w-6 h-6" />;
@@ -10,12 +11,22 @@ import { FaAngleDoubleRight } from "react-icons/fa";
 interface TaskInfoPanelProps {
   isTaskInfoPanelOpen: boolean;
   togglePanel: () => void;
+  focusedInputKey: string;
 }
 
 const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   isTaskInfoPanelOpen,
   togglePanel,
+  focusedInputKey,
 }) => {
+  const { updateTask, columns } = useKanbanStore();
+  const [columnKey, itemIndexStr] = focusedInputKey.split("-");
+
+  const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    updateTask(columnKey, value, itemIndexStr);
+  }, []);
+
   return (
     <ResizablePanel
       defaultSize={25}
@@ -36,6 +47,8 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         <Input
           className="border-0 h-12 placeholder:text-lg"
           placeholder="추가할 작업을 입력하세요"
+          onChange={onChange}
+          value={columns[columnKey][itemIndexStr].title}
         />
         <Textarea />
       </div>
