@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ResizablePanel } from "@/components/ui/resizable";
-import { useKanbanStore } from "@/store/useKanbanStore";
+import { status, useKanbanStore } from "@/store/useKanbanStore";
 import React, { useCallback } from "react";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
+import KanbanColumnBadge from "./KanbanColumnBadge";
 
 <FaAngleDoubleRight className="w-6 h-6" />;
 
@@ -46,6 +47,9 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       >
         <FaAngleDoubleRight className="w-6 h-6" />
       </Button>
+      <div className="pl-4">
+        <KanbanColumnBadge columnKey={columnKey as status} />
+      </div>
       <div className=" p-4 h-full flex flex-col overflow-y-auto ">
         <TextareaAutosize
           className="w-full rounded border p-2 resize-none"
