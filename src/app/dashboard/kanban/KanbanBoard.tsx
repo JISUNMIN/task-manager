@@ -19,9 +19,7 @@ import TextareaAutosize from "react-textarea-autosize";
 const KanbanBoard = () => {
   const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
   const togglePanel = () => setTaskInfoPanelrOpen(!isTaskInfoPanelOpen);
-  const [focusedInputKey, setFocusedInputKey] = useState<string | null>(
-    "Completed-0"
-  );
+  const [focusedInputKey, setFocusedInputKey] = useState<string>("Completed-0");
 
   const { columns, addTask, updateTask } = useKanbanStore();
 
@@ -31,7 +29,7 @@ const KanbanBoard = () => {
     value: string,
     itemIndex: number
   ) => {
-    updateTask(columnKey, value, itemIndex);
+    updateTask(columnKey, itemIndex, { title: value });
   };
 
   return (
@@ -76,8 +74,10 @@ const KanbanBoard = () => {
                             className="mb-4"
                           >
                             <TextareaAutosize
-                              type="text"
-                              value={columns[columnKey][itemIndex].title}
+                              value={
+                                columns[columnKey as status][Number(itemIndex)]
+                                  .title
+                              }
                               onChange={(e) =>
                                 handleInputChange(
                                   columnKey as status,
@@ -108,7 +108,6 @@ const KanbanBoard = () => {
           isTaskInfoPanelOpen={isTaskInfoPanelOpen}
           togglePanel={togglePanel}
           focusedInputKey={focusedInputKey}
-          handleInputChange={handleInputChange}
         />
       </ResizablePanelGroup>
     </SidebarProvider>

@@ -24,9 +24,9 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const [columnKey, itemIndexStr] = focusedInputKey.split("-");
 
   const onChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const value = e.target.value;
-      updateTask(columnKey, value, itemIndexStr);
+      updateTask(columnKey as status, Number(itemIndexStr), { title: value });
     },
     [focusedInputKey]
   );
@@ -55,7 +55,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           className="w-full rounded border p-2 resize-none"
           placeholder="추가할 작업을 입력하세요"
           onChange={onChange}
-          value={columns[columnKey][itemIndexStr].title}
+          value={columns[columnKey as status][Number(itemIndexStr)].title}
         />
       </div>
     </ResizablePanel>

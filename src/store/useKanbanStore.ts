@@ -10,6 +10,7 @@ export type status =
 
 type Task = {
   title: string;
+  desc: string;
 };
 
 type Columns = {
@@ -19,17 +20,17 @@ type Columns = {
 export const useKanbanStore = create<{
   columns: Columns;
   addTask: (index: number) => void;
-  updateTask: (columnName: status, task: string, index: number) => void;
+  updateTask: (columnName: status, index: number, task: Partial<Task>) => void;
 }>()(
   devtools(
     persist(
       (set) => ({
         columns: {
-          "To Do": [{ title: "" }],
-          Ready: [{ title: "" }],
-          "In Progress": [{ title: "" }],
-          "On Hold": [{ title: "" }],
-          Completed: [{ title: "" }],
+          "To Do": [{ title: "", desc: "" }],
+          Ready: [{ title: "", desc: "" }],
+          "In Progress": [{ title: "", desc: "" }],
+          "On Hold": [{ title: "", desc: "" }],
+          Completed: [{ title: "", desc: "" }],
         },
         addTask: (index: number) =>
           set((state) => {
@@ -43,10 +44,13 @@ export const useKanbanStore = create<{
               },
             };
           }),
-        updateTask: (columnName, task, index) =>
+        updateTask: (columnName, index, updatedFields) =>
           set((state) => {
             const updatedColumn = [...state.columns[columnName]];
-            updatedColumn.splice(index, 1, { title: task });
+            updatedColumn[index] = {
+              ...updatedColumn[index], // 기존 task 유지
+              ...updatedFields, // 수정할 필드만 덮어씀
+            };
             return {
               columns: {
                 ...state.columns,
