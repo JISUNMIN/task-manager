@@ -6,7 +6,7 @@ import React, { useCallback } from "react";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
 import KanbanColumnBadge from "./KanbanColumnBadge";
-import TiptapEditor from "@/components/ui/editor/TiptapEditor";
+import Editor from "@/components/ui/editor/Editor";
 
 <FaAngleDoubleRight className="w-6 h-6" />;
 
@@ -52,13 +52,15 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         <KanbanColumnBadge columnKey={columnKey as status} />
       </div>
       <div className=" p-4 h-full flex flex-col overflow-y-auto ">
-        <TextareaAutosize
+        {/* <TextareaAutosize
           className="w-full rounded border p-2 resize-none"
           placeholder="추가할 작업을 입력하세요"
           onChange={onChange}
           value={columns[columnKey as status][Number(itemIndexStr)].title}
-        />
-        <TiptapEditor />
+        /> */}
+        <div className="bg-amber-200">
+          <Editor />
+        </div>
       </div>
     </ResizablePanel>
   );
