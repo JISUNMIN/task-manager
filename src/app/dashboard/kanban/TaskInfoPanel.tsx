@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ResizablePanel } from "@/components/ui/resizable";
 import { status, useKanbanStore } from "@/store/useKanbanStore";
 import React, { useCallback } from "react";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
 import KanbanColumnBadge from "./KanbanColumnBadge";
+import Editor from "@/components/ui/editor/Editor";
 
 <FaAngleDoubleRight className="w-6 h-6" />;
 
@@ -23,12 +23,19 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const { updateTask, columns } = useKanbanStore();
   const [columnKey, itemIndexStr] = focusedInputKey.split("-");
 
-  const onChange = useCallback(
+  const onChangeTitle = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const value = e.target.value;
       updateTask(columnKey as status, Number(itemIndexStr), { title: value });
     },
     [focusedInputKey]
+  );
+
+  const onChangeDesc = useCallback(
+    (value: string) => {
+      updateTask(columnKey as status, Number(itemIndexStr), { desc: value });
+    },
+    [columnKey, itemIndexStr]
   );
 
   return (
@@ -54,9 +61,15 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         <TextareaAutosize
           className="w-full rounded border p-2 resize-none"
           placeholder="추가할 작업을 입력하세요"
-          onChange={onChange}
+          onChange={onChangeTitle}
           value={columns[columnKey as status][Number(itemIndexStr)].title}
         />
+        <div className="bg-amber-200">
+          <Editor
+            onChange={onChangeDesc}
+            content={columns[columnKey as status][Number(itemIndexStr)].desc}
+          />
+        </div>
       </div>
     </ResizablePanel>
   );
