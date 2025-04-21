@@ -163,7 +163,13 @@ const SlashCommands = ({ editor }: { editor: any }) => {
   ) : null;
 };
 
-export default function Editor() {
+export default function Editor({
+  onChange,
+  content,
+}: {
+  onChange?: (content: string) => void;
+  content?: string;
+}) {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -175,8 +181,18 @@ export default function Editor() {
       }),
       SlashCommandKeyHandler,
     ],
-    content: "",
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      onChange?.(html); 
+    },
+    content: content ?? "",
   });
+
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content ?? "", false);
+    }
+  }, [content]);
 
   return (
     <div className="relative border p-4 rounded">
