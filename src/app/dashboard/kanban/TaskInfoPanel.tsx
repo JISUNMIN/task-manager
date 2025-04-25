@@ -28,8 +28,9 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   togglePanel,
   focusedInputKey,
 }) => {
-  const { updateTask, columns } = useKanbanStore();
+  const { updateTask, columns, moveTask } = useKanbanStore();
   const [columnKey, itemIndexStr] = focusedInputKey.split("-");
+  const taskIndex = Number(itemIndexStr);
 
   const onChangeTitle = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -64,14 +65,15 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       </Button>
       <div className="pl-4">
         <Grid className="grid grid-cols-[1fr_1fr] gap-y-10">
-          <div>상태</div>
-          <Select>
+          <span>상태</span>
+          <Select
+            value={columnKey}
+            onValueChange={(newStatus) => {
+              moveTask(columnKey as status, newStatus as status, taskIndex);
+            }}
+          >
             <SelectTrigger className="w-[180px]">
-              <SelectValue
-                placeholder={
-                  <KanbanColumnBadge columnKey={columnKey as status} />
-                }
-              />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {ALL_STATUS.map((status) => (
@@ -88,12 +90,12 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           className="w-full rounded border p-2 resize-none"
           placeholder="추가할 작업을 입력하세요"
           onChange={onChangeTitle}
-          value={columns[columnKey as status][Number(itemIndexStr)].title}
+          value={columns[columnKey as status][Number(itemIndexStr)]?.title}
         />
         <div className="bg-amber-200">
           <Editor
             onChange={onChangeDesc}
-            content={columns[columnKey as status][Number(itemIndexStr)].desc}
+            content={columns[columnKey as status][Number(itemIndexStr)]?.desc}
           />
         </div>
       </div>

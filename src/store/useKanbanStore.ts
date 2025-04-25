@@ -29,6 +29,7 @@ export const useKanbanStore = create<{
   columns: Columns;
   addTask: (index: number) => void;
   updateTask: (columnName: status, index: number, task: Partial<Task>) => void;
+  moveTask: (fromColumn: status, toColumn: status, index: number) => void;
 }>()(
   devtools(
     persist(
@@ -63,6 +64,21 @@ export const useKanbanStore = create<{
               columns: {
                 ...state.columns,
                 [columnName]: updatedColumn,
+              },
+            };
+          }),
+        moveTask: (fromColumn, toColumn, index) =>
+          set((state) => {
+            const fromTasks = [...state.columns[fromColumn]];
+            const taskToMove = fromTasks.splice(index, 1)[0];
+
+            if (!taskToMove) return state;
+
+            return {
+              columns: {
+                ...state.columns,
+                [fromColumn]: fromTasks,
+                [toColumn]: [taskToMove, ...state.columns[toColumn]],
               },
             };
           }),

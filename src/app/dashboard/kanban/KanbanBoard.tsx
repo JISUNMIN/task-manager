@@ -67,7 +67,6 @@ const KanbanBoard = () => {
                     {/* 칸반 항목들 세로로 정렬 */}
                     <div className="flex flex-col">
                       {columns[columnKey as status].map((item, itemIndex) => {
-                        console.log("item", item);
                         return (
                           <div
                             key={`${columnIndex}-${itemIndex}`}
