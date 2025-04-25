@@ -8,6 +8,14 @@ export type status =
   | "On Hold"
   | "Completed";
 
+export const ALL_STATUS: status[] = [
+  "To Do",
+  "Ready",
+  "In Progress",
+  "On Hold",
+  "Completed",
+];
+
 type Task = {
   title: string;
   desc: string;

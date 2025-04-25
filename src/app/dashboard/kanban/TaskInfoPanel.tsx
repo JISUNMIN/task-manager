@@ -1,11 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { ResizablePanel } from "@/components/ui/resizable";
-import { status, useKanbanStore } from "@/store/useKanbanStore";
+import { ALL_STATUS, status, useKanbanStore } from "@/store/useKanbanStore";
 import React, { useCallback } from "react";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
 import KanbanColumnBadge from "./KanbanColumnBadge";
 import Editor from "@/components/ui/editor/Editor";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import Grid from "@/layout/Grid";
 
 <FaAngleDoubleRight className="w-6 h-6" />;
 
@@ -55,7 +63,25 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         <FaAngleDoubleRight className="w-6 h-6" />
       </Button>
       <div className="pl-4">
-        <KanbanColumnBadge columnKey={columnKey as status} />
+        <Grid className="grid grid-cols-[1fr_1fr] gap-y-10">
+          <div>상태</div>
+          <Select>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue
+                placeholder={
+                  <KanbanColumnBadge columnKey={columnKey as status} />
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {ALL_STATUS.map((status) => (
+                <SelectItem key={status} value={status}>
+                  <KanbanColumnBadge columnKey={status} />
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Grid>
       </div>
       <div className=" p-4 h-full flex flex-col overflow-y-auto ">
         <TextareaAutosize
