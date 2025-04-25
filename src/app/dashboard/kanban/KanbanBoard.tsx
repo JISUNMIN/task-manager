@@ -21,7 +21,7 @@ const KanbanBoard = () => {
   const togglePanel = () => setTaskInfoPanelrOpen(!isTaskInfoPanelOpen);
   const [focusedInputKey, setFocusedInputKey] = useState<string>("Completed-0");
 
-  const { columns, addTask, updateTask } = useKanbanStore();
+  const { columns, addTask, updateTask, removeColumn } = useKanbanStore();
 
   // 칸반 열에 추가할 작업을 저장
   const handleInputChange = (
@@ -91,6 +91,13 @@ const KanbanBoard = () => {
                               placeholder="Enter new task"
                               className="w-full p-2 border rounded"
                             />
+                            <button
+                              onClick={() =>
+                                removeColumn(columnKey as status, itemIndex)
+                              }
+                            >
+                              삭제
+                            </button>
                           </div>
                         );
                       })}
