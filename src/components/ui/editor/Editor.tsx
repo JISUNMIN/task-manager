@@ -7,7 +7,7 @@ import Heading from "@tiptap/extension-heading";
 import BulletList from "@tiptap/extension-bullet-list";
 import ListItem from "@tiptap/extension-list-item";
 import { useCallback, useEffect, useState } from "react";
-import "./style.scss";
+import styles from "./style.module.scss";
 import { Extension } from "@tiptap/core";
 
 const SlashCommandKeyHandler = Extension.create({
@@ -183,7 +183,7 @@ export default function Editor({
     ],
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
-      onChange?.(html); 
+      onChange?.(html);
     },
     content: content ?? "",
   });
@@ -199,7 +199,7 @@ export default function Editor({
       {editor && <SlashCommands editor={editor} />}
       <EditorContent
         editor={editor}
-        className="min-h-[150px] focus:outline-none"
+        className={`min-h-[150px] focus:outline-none ${styles.editorContent}`}
       />
     </div>
   );
