@@ -15,13 +15,15 @@ import {
   ResizableHandle,
 } from "@/components/ui/resizable";
 import TextareaAutosize from "react-textarea-autosize";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 const KanbanBoard = () => {
   const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
   const togglePanel = () => setTaskInfoPanelrOpen(!isTaskInfoPanelOpen);
   const [focusedInputKey, setFocusedInputKey] = useState<string>("Completed-0");
 
-  const { columns, addTask, updateTask, removeColumn } = useKanbanStore();
+  const { columns, addTask, updateTask, moveTask, removeColumn } =
+    useKanbanStore();
 
   // 칸반 열에 추가할 작업을 저장
   const handleInputChange = (
@@ -30,6 +32,23 @@ const KanbanBoard = () => {
     itemIndex: number
   ) => {
     updateTask(columnKey, itemIndex, { title: value });
+  };
+
+  const handleDragEnd = (result, columnKey) => {
+    const { source, destination } = result;
+
+    console.log(
+      "columnKey",
+      columnKey,
+      "source.index",
+      source.index,
+      "destination.index",
+      destination.index
+    );
+
+    if (!destination) return;
+
+    moveTask(columnKey, columnKey, destination.index);
   };
 
   return (
@@ -66,41 +85,74 @@ const KanbanBoard = () => {
 
                     {/* 칸반 항목들 세로로 정렬 */}
                     <div className="flex flex-col">
-                      {columns[columnKey as status].map((item, itemIndex) => {
-                        return (
-                          <div
-                            key={`${columnIndex}-${itemIndex}`}
-                            className="mb-4"
-                          >
-                            <TextareaAutosize
-                              value={
-                                columns[columnKey as status][Number(itemIndex)]
-                                  .title
-                              }
-                              onChange={(e) =>
-                                handleInputChange(
-                                  columnKey as status,
-                                  e.target.value,
-                                  itemIndex
-                                )
-                              }
-                              onFocus={() =>
-                                setFocusedInputKey(`${columnKey}-${itemIndex}`)
-                              }
-                              onClick={() => setTaskInfoPanelrOpen(true)}
-                              placeholder="Enter new task"
-                              className="w-full p-2 border rounded"
-                            />
-                            <button
-                              onClick={() =>
-                                removeColumn(columnKey as status, itemIndex)
-                              }
+                      <DragDropContext
+                        onDragEnd={(result) => handleDragEnd(result, columnKey)}
+                      >
+                        <Droppable droppableId="droppable-column">
+                          {(provided) => (
+                            <div
+                              className="flex flex-col"
+                              ref={provided.innerRef}
+                              {...provided.droppableProps}
                             >
-                              삭제
-                            </button>
-                          </div>
-                        );
-                      })}
+                              {columns[columnKey as status].map(
+                                (item, itemIndex) => (
+                                  <Draggable
+                                    key={`${columnIndex}-${itemIndex}`}
+                                    draggableId={`${columnIndex}-${itemIndex}`}
+                                    index={itemIndex}
+                                  >
+                                    {(provided) => (
+                                      <div
+                                        className="mb-4"
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                      >
+                                        <TextareaAutosize
+                                          value={
+                                            columns[columnKey as status][
+                                              Number(itemIndex)
+                                            ].title
+                                          }
+                                          onChange={(e) =>
+                                            handleInputChange(
+                                              columnKey as status,
+                                              e.target.value,
+                                              itemIndex
+                                            )
+                                          }
+                                          onFocus={() =>
+                                            setFocusedInputKey(
+                                              `${columnKey}-${itemIndex}`
+                                            )
+                                          }
+                                          onClick={() =>
+                                            setTaskInfoPanelrOpen(true)
+                                          }
+                                          placeholder="Enter new task"
+                                          className="w-full p-2 border rounded"
+                                        />
+                                        <button
+                                          onClick={() =>
+                                            removeColumn(
+                                              columnKey as status,
+                                              itemIndex
+                                            )
+                                          }
+                                        >
+                                          삭제
+                                        </button>
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                )
+                              )}
+                              {provided.placeholder}
+                            </div>
+                          )}
+                        </Droppable>
+                      </DragDropContext>
                     </div>
                   </div>
                 );
