@@ -63,6 +63,13 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         <FaAngleDoubleRight className="w-6 h-6" />
       </Button>
       <div className="pl-4">
+        <TextareaAutosize
+          style={{ fontSize: "20px" }}
+          className="w-full p-2 resize-none"
+          placeholder="제목을 입력하세요"
+          onChange={onChangeTitle}
+          value={columns[columnKey as status][Number(itemIndexStr)]?.title}
+        />
         <Grid className="grid grid-cols-[1fr_6fr] gap-y-10">
           <div className="flex items-center">
             <TbCircleDotted />
@@ -74,7 +81,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
               moveTask(columnKey as status, newStatus as status, taskIndex, 0);
             }}
           >
-            <SelectTrigger className="w-[180px] pt-5 pb-5">
+            <SelectTrigger className="pt-5 pb-5 ">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -88,12 +95,6 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         </Grid>
       </div>
       <div className=" p-4 h-full flex flex-col overflow-y-auto ">
-        <TextareaAutosize
-          className="w-full rounded border p-2 resize-none"
-          placeholder="추가할 작업을 입력하세요"
-          onChange={onChangeTitle}
-          value={columns[columnKey as status][Number(itemIndexStr)]?.title}
-        />
         <div>
           <Editor
             onChange={onChangeDesc}

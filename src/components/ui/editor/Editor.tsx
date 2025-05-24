@@ -13,19 +13,30 @@ import { Extension } from "@tiptap/core";
 const SlashCommandKeyHandler = Extension.create({
   addKeyboardShortcuts() {
     return {
-      Enter: () => {
-        // Slash 메뉴가 열려 있을 때만 처리
-        if (typeof window !== "undefined") {
-          const event = new CustomEvent("slash-command-enter");
-          window.dispatchEvent(event);
-          return true; // 기본 줄바꿈 방지
+      Enter: ({ editor }) => {
+        const { state } = editor;
+        const { from } = state.selection;
+        const textBefore = state.doc.textBetween(
+          Math.max(0, from - 50),
+          from,
+          "\n",
+          "\0"
+        );
+
+        const isSlashCommand = /\/(\w*)$/.test(textBefore);
+
+        if (isSlashCommand) {
+          if (typeof window !== "undefined") {
+            const event = new CustomEvent("slash-command-enter");
+            window.dispatchEvent(event);
+            return true; // 기본 줄바꿈 방지
+          }
         }
-        return false;
+        return false; // 기본 동작 유지
       },
     };
   },
 });
-
 const SlashCommands = ({ editor }: { editor: any }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [filtered, setFiltered] = useState<typeof commands>([]);
@@ -177,7 +188,7 @@ export default function Editor({
       BulletList,
       ListItem,
       Placeholder.configure({
-        placeholder: 'Type "/" for commands...',
+        placeholder: "명령어 사용시에는 '/'를 누르세요...",
       }),
       SlashCommandKeyHandler,
     ],
