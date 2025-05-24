@@ -14,8 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Grid from "@/layout/Grid";
-
-<FaAngleDoubleRight className="w-6 h-6" />;
+import { TbCircleDotted } from "react-icons/tb";
 
 interface TaskInfoPanelProps {
   isTaskInfoPanelOpen: boolean;
@@ -64,15 +63,18 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         <FaAngleDoubleRight className="w-6 h-6" />
       </Button>
       <div className="pl-4">
-        <Grid className="grid grid-cols-[1fr_1fr] gap-y-10">
-          <span>상태</span>
+        <Grid className="grid grid-cols-[1fr_6fr] gap-y-10">
+          <div className="flex items-center">
+            <TbCircleDotted />
+            <span className="text-gray-700">Status</span>
+          </div>
           <Select
             value={columnKey}
             onValueChange={(newStatus) => {
-              moveTask(columnKey as status, newStatus as status, taskIndex);
+              moveTask(columnKey as status, newStatus as status, taskIndex, 0);
             }}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] pt-5 pb-5">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -92,7 +94,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           onChange={onChangeTitle}
           value={columns[columnKey as status][Number(itemIndexStr)]?.title}
         />
-        <div className="bg-amber-200">
+        <div>
           <Editor
             onChange={onChangeDesc}
             content={columns[columnKey as status][Number(itemIndexStr)]?.desc}
