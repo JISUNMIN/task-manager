@@ -29,7 +29,12 @@ export const useKanbanStore = create<{
   columns: Columns;
   addTask: (index: number) => void;
   updateTask: (columnName: status, index: number, task: Partial<Task>) => void;
-  moveTask: (fromColumn: status, toColumn: status, index: number) => void;
+  moveTask: (
+    fromColumn: status,
+    toColumn: status,
+    fromIndex: number,
+    toIndex: number
+  ) => void;
   removeColumn: (columnKey: status, index: number) => void;
 }>()(
   devtools(
@@ -68,20 +73,32 @@ export const useKanbanStore = create<{
               },
             };
           }),
-        moveTask: (fromColumn, toColumn, index) =>
+        moveTask: (fromColumn, toColumn, fromIndex, toIndex) =>
           set((state) => {
             const fromTasks = [...state.columns[fromColumn]];
-            const taskToMove = fromTasks.splice(index, 1)[0];
+            const taskToMove = fromTasks.splice(fromIndex, 1)[0];
 
             if (!taskToMove) return state;
 
-            return {
-              columns: {
-                ...state.columns,
-                [fromColumn]: fromTasks,
-                [toColumn]: [taskToMove, ...state.columns[toColumn]],
-              },
-            };
+            if (fromColumn === toColumn) {
+              fromTasks.splice(toIndex, 0, taskToMove);
+              return {
+                columns: {
+                  ...state.columns,
+                  [fromColumn]: fromTasks,
+                },
+              };
+            } else {
+              const toTasks = [...state.columns[toColumn]];
+              toTasks.splice(toIndex, 0, taskToMove);
+              return {
+                columns: {
+                  ...state.columns,
+                  [fromColumn]: fromTasks,
+                  [toColumn]: toTasks,
+                },
+              };
+            }
           }),
         removeColumn: (columnKey, index) => {
           set((state) => {

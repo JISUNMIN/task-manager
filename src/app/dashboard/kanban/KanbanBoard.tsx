@@ -15,7 +15,13 @@ import {
   ResizableHandle,
 } from "@/components/ui/resizable";
 import TextareaAutosize from "react-textarea-autosize";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+} from "@hello-pangea/dnd";
+import { FaTrash } from "react-icons/fa";
 
 const KanbanBoard = () => {
   const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
@@ -34,21 +40,16 @@ const KanbanBoard = () => {
     updateTask(columnKey, itemIndex, { title: value });
   };
 
-  const handleDragEnd = (result, columnKey) => {
+  const handleDragEnd = (result: DropResult, columnKey: status) => {
     const { source, destination } = result;
 
-    console.log(
-      "columnKey",
-      columnKey,
-      "source.index",
-      source.index,
-      "destination.index",
-      destination.index
-    );
-
+    // 드래그 취소된 경우(destination이 없을 경우)
     if (!destination) return;
 
-    moveTask(columnKey, columnKey, destination.index);
+    // 위치가 같으면 아무 것도 하지 않음
+    if (source.index === destination.index) return;
+
+    moveTask(columnKey, columnKey, source.index, destination.index);
   };
 
   return (
@@ -86,7 +87,9 @@ const KanbanBoard = () => {
                     {/* 칸반 항목들 세로로 정렬 */}
                     <div className="flex flex-col">
                       <DragDropContext
-                        onDragEnd={(result) => handleDragEnd(result, columnKey)}
+                        onDragEnd={(result) =>
+                          handleDragEnd(result, columnKey as status)
+                        }
                       >
                         <Droppable droppableId="droppable-column">
                           {(provided) => (
@@ -109,6 +112,13 @@ const KanbanBoard = () => {
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}
                                       >
+                                        {/* 드래그 핸들 */}
+                                        <div
+                                          {...provided.dragHandleProps}
+                                          className="text-gray-800 text-right"
+                                        >
+                                          ⠿
+                                        </div>
                                         <TextareaAutosize
                                           value={
                                             columns[columnKey as status][
@@ -133,16 +143,18 @@ const KanbanBoard = () => {
                                           placeholder="Enter new task"
                                           className="w-full p-2 border rounded"
                                         />
-                                        <button
+                                        <div
                                           onClick={() =>
                                             removeColumn(
                                               columnKey as status,
                                               itemIndex
                                             )
                                           }
+                                          className="flex items-center"
                                         >
-                                          삭제
-                                        </button>
+                                          <FaTrash />
+                                          <button>Delete</button>
+                                        </div>
                                       </div>
                                     )}
                                   </Draggable>
