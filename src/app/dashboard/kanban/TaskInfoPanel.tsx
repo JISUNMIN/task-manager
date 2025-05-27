@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import Grid from "@/layout/Grid";
 import { TbCircleDotted } from "react-icons/tb";
+import { useMediaQuery } from "usehooks-ts";
 
 interface TaskInfoPanelProps {
   isTaskInfoPanelOpen: boolean;
@@ -30,6 +31,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const { updateTask, columns, moveTask } = useKanbanStore();
   const [columnKey, itemIndexStr] = focusedInputKey.split("-");
   const taskIndex = Number(itemIndexStr);
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const onChangeTitle = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -49,8 +51,8 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   return (
     <ResizablePanel
       defaultSize={25}
-      minSize={isTaskInfoPanelOpen ? 30 : 0}
-      maxSize={!isTaskInfoPanelOpen ? 0 : 50}
+      minSize={isTaskInfoPanelOpen ? (isMobile ? 100 : 30) : 0}
+      maxSize={isTaskInfoPanelOpen ? (isMobile ? 100 : 50) : 0}
       className={`min-h-screen bg-green-50 transition-transform transform  ${isTaskInfoPanelOpen ? "translate-x-0" : "translate-x-full"}  `}
     >
       {/* 닫기 버튼 */}
@@ -65,6 +67,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       <div className="pl-4">
         <TextareaAutosize
           style={{ fontSize: "20px" }}
+          maxRows={2}
           className="w-full p-2 resize-none"
           placeholder="제목을 입력하세요"
           onChange={onChangeTitle}
