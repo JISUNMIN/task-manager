@@ -21,12 +21,14 @@ interface TaskInfoPanelProps {
   isTaskInfoPanelOpen: boolean;
   togglePanel: () => void;
   focusedInputKey: string;
+  handleFocusedInputKey: (columnKey: string, itemIndex: number) => void;
 }
 
 const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   isTaskInfoPanelOpen,
   togglePanel,
   focusedInputKey,
+  handleFocusedInputKey,
 }) => {
   const { updateTask, columns, moveTask } = useKanbanStore();
   const [columnKey, itemIndexStr] = focusedInputKey.split("-");
@@ -82,6 +84,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
             value={columnKey}
             onValueChange={(newStatus) => {
               moveTask(columnKey as status, newStatus as status, taskIndex, 0);
+              handleFocusedInputKey(newStatus, taskIndex);
             }}
           >
             <SelectTrigger className="pt-5 pb-5 ">

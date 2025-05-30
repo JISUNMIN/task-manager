@@ -55,7 +55,10 @@ export const useKanbanStore = create<{
             return {
               columns: {
                 ...state.columns,
-                [columnKey]: [...state.columns[columnKey], { title: "" }],
+                [columnKey]: [
+                  ...state.columns[columnKey],
+                  { title: "", desc: "" },
+                ],
               },
             };
           }),
@@ -80,6 +83,7 @@ export const useKanbanStore = create<{
 
             if (!taskToMove) return state;
 
+            // 같은 column별 이동
             if (fromColumn === toColumn) {
               fromTasks.splice(toIndex, 0, taskToMove);
               return {
@@ -88,13 +92,18 @@ export const useKanbanStore = create<{
                   [fromColumn]: fromTasks,
                 },
               };
-            } else {
+            }
+            // 다른 column별 이동
+            else {
               const toTasks = [...state.columns[toColumn]];
               toTasks.splice(toIndex, 0, taskToMove);
               return {
                 columns: {
                   ...state.columns,
-                  [fromColumn]: fromTasks,
+                  [fromColumn]:
+                    fromTasks.length === 0
+                      ? [{ title: "", desc: "" }]
+                      : fromTasks,
                   [toColumn]: toTasks,
                 },
               };

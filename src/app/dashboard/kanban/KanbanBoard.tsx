@@ -61,6 +61,10 @@ const KanbanBoard = () => {
     setFocusedInputKey(`${destination.droppableId}-${destination.index}`);
   };
 
+  const handleFocusedInputKey = (columnKey: string, itemIndex: number) => {
+    setFocusedInputKey(`${columnKey}-${itemIndex}`);
+  };
+
   useEffect(() => {
     const ref = inputRefs.current[focusedInputKey];
     if (ref) {
@@ -201,6 +205,7 @@ const KanbanBoard = () => {
           isTaskInfoPanelOpen={isTaskInfoPanelOpen}
           togglePanel={togglePanel}
           focusedInputKey={focusedInputKey}
+          handleFocusedInputKey={handleFocusedInputKey}
         />
       </ResizablePanelGroup>
     </SidebarProvider>
