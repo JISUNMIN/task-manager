@@ -57,6 +57,7 @@ const KanbanBoard = () => {
       source.index,
       destination.index
     );
+    setFocusedInputKey(`${destination.droppableId}-${destination.index}`);
   };
 
   return (
