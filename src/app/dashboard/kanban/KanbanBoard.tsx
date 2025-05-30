@@ -75,6 +75,8 @@ const KanbanBoard = () => {
                 {Object.keys(columns).map((columnKey) => {
                   const keys = Object.keys(columns);
                   const columnIndex = keys.indexOf(columnKey);
+                  const isOnlyOneTask =
+                    columns[columnKey as status].length <= 1;
 
                   return (
                     <div key={columnKey} className="flex flex-col">
@@ -151,7 +153,12 @@ const KanbanBoard = () => {
                                             itemIndex
                                           )
                                         }
-                                        className="flex items-center mt-1 hover:text-red-600"
+                                        className={`flex items-center mt-1 ${
+                                          isOnlyOneTask
+                                            ? "text-gray-400 cursor-not-allowed"
+                                            : "hover:text-red-600"
+                                        }`}
+                                        disabled={isOnlyOneTask}
                                       >
                                         <FaTrash className="mr-1" />
                                         Delete

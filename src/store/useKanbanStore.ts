@@ -102,6 +102,12 @@ export const useKanbanStore = create<{
           }),
         removeColumn: (columnKey, index) => {
           set((state) => {
+            const column = state.columns[columnKey];
+
+            if (column.length <= 1) {
+              return state;
+            }
+
             const newColumns = { ...state.columns };
 
             if (newColumns[columnKey]) {
