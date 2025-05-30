@@ -75,7 +75,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           onChange={onChangeTitle}
           value={columns[columnKey as status][Number(itemIndexStr)]?.title}
         />
-        <Grid className="grid grid-cols-[1fr_6fr] gap-y-10">
+        <Grid className="grid grid-cols-[1fr_6fr] gap-y-10 px-5">
           <div className="flex items-center">
             <TbCircleDotted />
             <span className="text-gray-700">Status</span>
@@ -87,7 +87,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
               handleFocusedInputKey(newStatus, taskIndex);
             }}
           >
-            <SelectTrigger className="pt-5 pb-5 ">
+            <SelectTrigger className="py-5 w-full sm:w-[200px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
