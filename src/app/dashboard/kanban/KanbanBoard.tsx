@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -26,6 +26,7 @@ const KanbanBoard = () => {
   const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
   const togglePanel = () => setTaskInfoPanelrOpen(!isTaskInfoPanelOpen);
   const [focusedInputKey, setFocusedInputKey] = useState<string>("Completed-0");
+  const inputRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
 
   const { columns, addTask, updateTask, moveTask, removeColumn } =
     useKanbanStore();
@@ -59,6 +60,13 @@ const KanbanBoard = () => {
     );
     setFocusedInputKey(`${destination.droppableId}-${destination.index}`);
   };
+
+  useEffect(() => {
+    const ref = inputRefs.current[focusedInputKey];
+    if (ref) {
+      ref.focus();
+    }
+  }, [focusedInputKey]);
 
   return (
     <SidebarProvider>
@@ -125,6 +133,11 @@ const KanbanBoard = () => {
                                       </div>
 
                                       <TextareaAutosize
+                                        ref={(el) => {
+                                          inputRefs.current[
+                                            `${columnKey}-${itemIndex}`
+                                          ] = el;
+                                        }}
                                         value={
                                           columns[columnKey as status][
                                             itemIndex
