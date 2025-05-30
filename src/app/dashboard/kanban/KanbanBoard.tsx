@@ -44,7 +44,6 @@ const KanbanBoard = () => {
     const { source, destination } = result;
 
     if (!destination) return;
-
     // 같은 위치에서 놓으면 처리 안함
     if (
       source.droppableId === destination.droppableId &&
@@ -108,6 +107,7 @@ const KanbanBoard = () => {
                                   key={`${columnKey}-${itemIndex}`}
                                   draggableId={`${columnKey}-${itemIndex}`}
                                   index={itemIndex}
+                                  isDragDisabled={isOnlyOneTask}
                                 >
                                   {(provided) => (
                                     <div
@@ -117,7 +117,9 @@ const KanbanBoard = () => {
                                       {...provided.dragHandleProps}
                                     >
                                       {/* 드래그 핸들 */}
-                                      <div className="text-gray-800 text-right">
+                                      <div
+                                        className={`text-gray-800 text-right ${isOnlyOneTask ? "invisible" : ""}`}
+                                      >
                                         ⠿
                                       </div>
 
