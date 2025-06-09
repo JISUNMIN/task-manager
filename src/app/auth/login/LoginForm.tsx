@@ -42,10 +42,29 @@ export default function LoginForm() {
     resolver: yupResolver(loginSchema), // yup 유효성 검사 연결
   });
 
-  const onSubmit = (data: LoginFormInputs) => {
-    login(); // Zustand 상태 변경 (로그인 처리)
-    // router.push("/dashboard/kanban"); // 로그인 후 이동
-    console.log("로그인 data", data);
+  const onSubmit = async (data: LoginFormInputs) => {
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        alert(errorData.error || "로그인에 실패했습니다.");
+        return;
+      }
+
+      const result = await res.json();
+      login(result.user, result.token); // Zustand 상태 업데이트 (login 함수에 user, token 인자 받도록 수정 필요)
+      router.push("/dashboard/kanban"); // 로그인 성공 후 이동
+    } catch (error) {
+      alert("서버와 통신 중 오류가 발생했습니다.");
+      console.error(error);
+    }
   };
 
   return (
