@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import Grid from "@/layout/Grid";
 import { TbCircleDotted } from "react-icons/tb";
+import { FaPeopleGroup } from "react-icons/fa6";
 import { useMediaQuery } from "usehooks-ts";
 
 interface TaskInfoPanelProps {
@@ -75,10 +76,10 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           onChange={onChangeTitle}
           value={columns[columnKey as status][Number(itemIndexStr)]?.title}
         />
-        <Grid className="grid grid-cols-[1fr_6fr] gap-y-10 px-5">
+        <Grid className="grid grid-cols-[1fr_6fr] px-5">
           <div className="flex items-center">
             <TbCircleDotted />
-            <span className="text-gray-700">Status</span>
+            <span className="text-gray-700 ml-1">Status</span>
           </div>
           <Select
             value={columnKey}
@@ -87,7 +88,30 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
               handleFocusedInputKey(newStatus, taskIndex);
             }}
           >
-            <SelectTrigger className="py-5 w-full sm:w-[200px]">
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {ALL_STATUS.map((status) => (
+                <SelectItem key={status} value={status}>
+                  <KanbanColumnBadge columnKey={status} />
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <div className="flex items-center">
+            <FaPeopleGroup />
+            <span className="text-gray-700 ml-1">Assignee</span>
+          </div>
+          <Select
+            value={columnKey}
+            onValueChange={(newStatus) => {
+              moveTask(columnKey as status, newStatus as status, taskIndex, 0);
+              handleFocusedInputKey(newStatus, taskIndex);
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-[200px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
