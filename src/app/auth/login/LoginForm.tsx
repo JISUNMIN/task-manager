@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import Image from "next/image";
 import { logo } from "@/assets/images";
+import { showToast, ToastMode } from "@/lib/toast";
 
 // 유효성 검사 스키마 (yup)
 const loginSchema = yup.object().shape({
@@ -54,7 +55,11 @@ export default function LoginForm() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        alert(errorData.error || "로그인에 실패했습니다.");
+        showToast({
+          type: ToastMode.ERROR,
+          action: "SAVE",
+          content: errorData.error || "로그인에 실패했습니다.",
+        });
         return;
       }
 
@@ -62,7 +67,11 @@ export default function LoginForm() {
       login({ userId: result.userId }); // 필요 시 토큰이나 기타 정보도 저장
       router.replace("/dashboard/kanban");
     } catch (error) {
-      alert("서버와 통신 중 오류가 발생했습니다.");
+      showToast({
+        type: ToastMode.ERROR,
+        action: "SAVE",
+        content: "서버와 통신 중 오류가 발생했습니다.",
+      });
       console.error(error);
     }
   };
