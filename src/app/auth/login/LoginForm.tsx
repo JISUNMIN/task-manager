@@ -14,10 +14,7 @@ import { logo } from "@/assets/images";
 
 // 유효성 검사 스키마 (yup)
 const loginSchema = yup.object().shape({
-  email: yup
-    .string()
-    .email("올바른 이메일을 입력해주세요.")
-    .required("이메일을 입력해주세요."),
+  userId: yup.string().required("아이디를 입력해주세요."),
   password: yup
     .string()
     .min(6, "비밀번호는 최소 6자리 이상이어야 합니다.")
@@ -25,7 +22,7 @@ const loginSchema = yup.object().shape({
 });
 
 interface LoginFormInputs {
-  email: string;
+  userId: string;
   password: string;
 }
 
@@ -49,7 +46,10 @@ export default function LoginForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          userId: data.userId,
+          password: data.password,
+        }),
       });
 
       if (!res.ok) {
@@ -59,8 +59,8 @@ export default function LoginForm() {
       }
 
       const result = await res.json();
-      login(result.user, result.token); // Zustand 상태 업데이트 (login 함수에 user, token 인자 받도록 수정 필요)
-      router.push("/dashboard/kanban"); // 로그인 성공 후 이동
+      login({ userId: result.userId }); // 필요 시 토큰이나 기타 정보도 저장
+      router.push("/dashboard/kanban");
     } catch (error) {
       alert("서버와 통신 중 오류가 발생했습니다.");
       console.error(error);
@@ -81,15 +81,15 @@ export default function LoginForm() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="relative">
                 <Input
-                  {...register("email")}
-                  type="email"
+                  {...register("userId")}
+                  type="string"
                   placeholder="이메일"
                   className="w-full pl-10"
                 />
                 <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
               </div>
-              {errors.email && (
-                <p className="text-red-500 text-sm">{errors.email.message}</p>
+              {errors.userId && (
+                <p className="text-red-500 text-sm">{errors.userId.message}</p>
               )}
               <div className="relative">
                 <Input

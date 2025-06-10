@@ -4,32 +4,37 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
 
 export async function POST(req: NextRequest) {
-  const { email, password } = await req.json();
+  try {
+    const { userId, password } = await req.json();
 
-  // 유저 찾기
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
+    // 1) userId로 유저 조회
+    const user = await prisma.user.findUnique({
+      where: { userId },
+    });
 
-  if (!user) {
-    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    if (!user) {
+      return NextResponse.json(
+        { error: "사용자를 찾을 수 없습니다." },
+        { status: 401 }
+      );
+    }
+
+    // 2) 비밀번호 비교 (bcrypt)
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+      return NextResponse.json(
+        { error: "비밀번호가 일치하지 않습니다." },
+        { status: 401 }
+      );
+    }
+
+    // 3) 성공 시 유저 정보 반환 (비밀번호는 제외)
+    return NextResponse.json({ userId: user.userId, name: user.name });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "서버 오류가 발생했습니다." },
+      { status: 500 }
+    );
   }
-
-  // 비밀번호 비교
-  const passwordMatch = await bcrypt.compare(password, user.password);
-  if (!passwordMatch) {
-    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
-  }
-
-  // 토큰 생성 (지금은 mock)
-  const token = "real-jwt-token-here"; // 실제 사용 시 JWT 사용 권장
-
-  return NextResponse.json({
-    token,
-    user: {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-    },
-  });
 }
