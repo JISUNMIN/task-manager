@@ -60,7 +60,7 @@ export default function LoginForm() {
 
       const result = await res.json();
       login({ userId: result.userId }); // 필요 시 토큰이나 기타 정보도 저장
-      router.push("/dashboard/kanban");
+      router.replace("/dashboard/kanban");
     } catch (error) {
       alert("서버와 통신 중 오류가 발생했습니다.");
       console.error(error);

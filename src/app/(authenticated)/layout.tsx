@@ -9,16 +9,15 @@ export default function AuthenticatedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { isAuthenticated, hasHydrated } = useAuthStore();
   const router = useRouter();
 
+  // 주소창에 path 입력했을떄 login안되어 있을시 막기 위함
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/auth/login");
+    if (hasHydrated && !isAuthenticated) {
+      router.replace("/auth/login");
     }
-  }, [isAuthenticated]);
-
-  if (!isAuthenticated) return null;
+  }, [hasHydrated, isAuthenticated]);
 
   return <>{children}</>;
 }
