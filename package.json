@@ -2,6 +2,7 @@
   "name": "task-manager",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -52,6 +53,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/bcrypt": "^5.0.2",
     "@types/lodash": "^4.17.16",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -63,6 +65,7 @@
     "prettier": "^3.5.2",
     "prisma": "^6.9.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   }
 }
