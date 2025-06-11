@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/useAuthStore";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -11,8 +9,7 @@ import { Button } from "@/components/ui/button";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import Image from "next/image";
 import { logo } from "@/assets/images";
-import { showToast, ToastMode } from "@/lib/toast";
-import axios from "axios";
+import useLogin from "./hooks/useLogin";
 
 // 유효성 검사 스키마 (yup)
 const loginSchema = yup.object().shape({
@@ -29,8 +26,7 @@ interface LoginFormInputs {
 }
 
 export default function LoginForm() {
-  const router = useRouter();
-  const { login } = useAuthStore();
+  const { loginMutation } = useLogin();
 
   // react-hook-form을 사용한 폼 상태 관리
   const {
@@ -42,26 +38,7 @@ export default function LoginForm() {
   });
 
   const onSubmit = async (data: LoginFormInputs) => {
-    try {
-      const res = await axios.post("/api/auth/login", {
-        userId: data.userId,
-        password: data.password,
-      });
-
-      const result = res.data;
-      login({ userId: result.userId }); // 필요 시 토큰이나 기타 정보도 저장
-      router.replace("/dashboard/kanban");
-    } catch (error) {
-      const message =
-        error.response?.data?.error || "서버와 통신 중 오류가 발생했습니다.";
-
-      showToast({
-        type: ToastMode.ERROR,
-        action: "SAVE",
-        content: message,
-      });
-      console.error(error);
-    }
+    loginMutation(data);
   };
 
   return (
