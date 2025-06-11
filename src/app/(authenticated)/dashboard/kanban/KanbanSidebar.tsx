@@ -1,6 +1,5 @@
 "use client";
 
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
 import getMockData from "@/mocks/project";
 
 import {
@@ -14,16 +13,24 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { logo } from "@/assets/images";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export function KanbanSidebar() {
   const router = useRouter();
   const mockProjects = getMockData();
+  const { logout } = useAuthStore();
 
   const handleNavigate = () => {
     router.push("/projectlist");
+  };
+
+  const handleLogout = () => {
+    logout();
+    router.replace("/login");
   };
 
   return (
@@ -74,13 +81,21 @@ export function KanbanSidebar() {
                 </ul>
               </div>
               <SidebarFooter>
-                <div className="mt-auto">
-                  <button
+                <div className="mt-auto flex flex-col gap-1">
+                  <Button
+                    variant="default"
+                    className="w-full"
                     onClick={handleNavigate}
-                    className="w-full py-2 bg-blue-500 text-white rounded cursor-pointer"
                   >
                     프로젝트 현황
-                  </button>
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="w-full"
+                    onClick={handleLogout}
+                  >
+                    로그아웃
+                  </Button>
                 </div>
               </SidebarFooter>
             </SidebarMenu>

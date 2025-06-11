@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/useAuthStore";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -11,13 +9,11 @@ import { Button } from "@/components/ui/button";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import Image from "next/image";
 import { logo } from "@/assets/images";
+import useLogin from "./hooks/useLogin";
 
 // 유효성 검사 스키마 (yup)
 const loginSchema = yup.object().shape({
-  email: yup
-    .string()
-    .email("올바른 이메일을 입력해주세요.")
-    .required("이메일을 입력해주세요."),
+  userId: yup.string().required("아이디를 입력해주세요."),
   password: yup
     .string()
     .min(6, "비밀번호는 최소 6자리 이상이어야 합니다.")
@@ -25,13 +21,12 @@ const loginSchema = yup.object().shape({
 });
 
 interface LoginFormInputs {
-  email: string;
+  userId: string;
   password: string;
 }
 
 export default function LoginForm() {
-  const router = useRouter();
-  const { login } = useAuthStore();
+  const { loginMutation } = useLogin();
 
   // react-hook-form을 사용한 폼 상태 관리
   const {
@@ -42,10 +37,8 @@ export default function LoginForm() {
     resolver: yupResolver(loginSchema), // yup 유효성 검사 연결
   });
 
-  const onSubmit = (data: LoginFormInputs) => {
-    login(); // Zustand 상태 변경 (로그인 처리)
-    // router.push("/dashboard/kanban"); // 로그인 후 이동
-    console.log("로그인 data", data);
+  const onSubmit = async (data: LoginFormInputs) => {
+    loginMutation(data);
   };
 
   return (
@@ -62,15 +55,15 @@ export default function LoginForm() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="relative">
                 <Input
-                  {...register("email")}
-                  type="email"
+                  {...register("userId")}
+                  type="string"
                   placeholder="이메일"
                   className="w-full pl-10"
                 />
                 <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
               </div>
-              {errors.email && (
-                <p className="text-red-500 text-sm">{errors.email.message}</p>
+              {errors.userId && (
+                <p className="text-red-500 text-sm">{errors.userId.message}</p>
               )}
               <div className="relative">
                 <Input

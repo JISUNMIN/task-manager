@@ -1,13 +1,34 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+interface User {
+  userId: string;
+}
 
 interface AuthState {
   isAuthenticated: boolean;
-  login: () => void;
+  user: User | null;
+  hasHydrated: boolean;
+  login: (user: User) => void;
   logout: () => void;
+  setHasHydrated: (value: boolean) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  isAuthenticated: false,
-  login: () => set({ isAuthenticated: true }),
-  logout: () => set({ isAuthenticated: false }),
-}));
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      isAuthenticated: false,
+      user: null,
+      hasHydrated: false,
+      login: (user) => set({ isAuthenticated: true, user }),
+      logout: () => set({ isAuthenticated: false, user: null }),
+      setHasHydrated: (value) => set({ hasHydrated: value }),
+    }),
+    {
+      name: "auth-storage",
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
+    }
+  )
+);
