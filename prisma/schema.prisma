@@ -13,4 +13,37 @@ model User {
   password String
   userId   String @unique(map: "user_userId_key")
   name     String
+  tasks    Task[]
+}
+
+
+model Project {
+  id    Int    @id @default(autoincrement())
+  name  String
+  tasks Task[]
+}
+
+model Task {
+  id        Int     @id @default(autoincrement())
+  title     String
+  desc      String
+  status    Status
+  order     Int     @default(0)
+
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id])
+
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Status {
+  TODO        // "To Do"
+  READY       // "Ready"
+  IN_PROGRESS // "In Progress"
+  ON_HOLD     // "On Hold"
+  COMPLETED   // "Completed"
 }

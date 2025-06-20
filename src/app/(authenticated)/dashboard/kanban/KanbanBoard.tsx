@@ -5,7 +5,7 @@ import { FaPlus, FaTrash } from "react-icons/fa";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { KanbanSidebar } from "./KanbanSidebar";
-import { status, useKanbanStore } from "@/store/useKanbanStore";
+import { Status, useKanbanStore } from "@/store/useKanbanStore";
 import KanbanColumnBadge from "./KanbanColumnBadge";
 import TaskInfoPanel from "./TaskInfoPanel";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ import {
   Draggable,
   DropResult,
 } from "@hello-pangea/dnd";
+import { useKanban } from "@/hooks/useKanban";
 
 const KanbanBoard = () => {
   const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
@@ -28,12 +29,16 @@ const KanbanBoard = () => {
   const [focusedInputKey, setFocusedInputKey] = useState<string>("Completed-0");
   const inputRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
 
-  const { columns, addTask, updateTask, moveTask, removeColumn } =
-    useKanbanStore();
+  // const { columns, addTask, updateTask, moveTask, removeColumn } =
+  //   useKanbanStore();
+
+  const { columns } = useKanbanStore();
+  const { isLoading, createTask, editTask, deleteTask, moveTask } =
+    useKanban(1);
 
   // 칸반 열에 추가할 작업을 저장
   const handleInputChange = (
-    columnKey: status,
+    columnKey: Status,
     value: string,
     itemIndex: number
   ) => {
@@ -52,12 +57,13 @@ const KanbanBoard = () => {
     )
       return;
 
-    moveTask(
-      source.droppableId as status,
-      destination.droppableId as status,
-      source.index,
-      destination.index
-    );
+      moveTask({
+        fromStatus: source.droppableId as Status,
+        toStatus: destination.droppableId as Status,
+        fromIndex: source.index,
+        toIndex: destination.index,
+      });
+      
     setFocusedInputKey(`${destination.droppableId}-${destination.index}`);
   };
 
@@ -88,17 +94,17 @@ const KanbanBoard = () => {
                   const keys = Object.keys(columns);
                   const columnIndex = keys.indexOf(columnKey);
                   const isOnlyOneTask =
-                    columns[columnKey as status].length <= 1;
+                    columns[columnKey as Status].length <= 1;
 
                   return (
                     <div key={columnKey} className="flex flex-col">
                       <div className="flex justify-between items-center mb-4">
-                        <KanbanColumnBadge columnKey={columnKey as status} />
+                        <KanbanColumnBadge columnKey={columnKey as Status} />
                         <Button
                           variant="outline"
                           size="icon"
                           onClick={() => {
-                            addTask(columnIndex);
+                            createTask(columnKey as Status);
                           }}
                           className="bg-gray-400 text-white rounded"
                         >
@@ -114,7 +120,7 @@ const KanbanBoard = () => {
                             ref={provided.innerRef}
                             {...provided.droppableProps}
                           >
-                            {columns[columnKey as status].map(
+                            {columns[columnKey as Status].map(
                               (item, itemIndex) => (
                                 <Draggable
                                   key={`${columnKey}-${itemIndex}`}
@@ -143,16 +149,17 @@ const KanbanBoard = () => {
                                           ] = el;
                                         }}
                                         value={
-                                          columns[columnKey as status][
+                                          columns[columnKey as Status][
                                             itemIndex
                                           ].title
                                         }
                                         onChange={(e) =>
-                                          handleInputChange(
-                                            columnKey as status,
-                                            e.target.value,
-                                            itemIndex
-                                          )
+                                          editTask({
+                                            taskId: 1, // TODO: 실제 id 연결 필요
+                                            updatedFields: {
+                                              title: e.target.value,
+                                            },
+                                          })
                                         }
                                         onFocus={() =>
                                           setFocusedInputKey(
@@ -167,12 +174,7 @@ const KanbanBoard = () => {
                                       />
 
                                       <button
-                                        onClick={() =>
-                                          removeColumn(
-                                            columnKey as status,
-                                            itemIndex
-                                          )
-                                        }
+                                        onClick={() => deleteTask(1)}
                                         className={`flex items-center mt-1 ${
                                           isOnlyOneTask
                                             ? "text-gray-400 cursor-not-allowed"
