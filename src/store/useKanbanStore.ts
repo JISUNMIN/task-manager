@@ -1,14 +1,14 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
-export type status =
+export type Status =
   | "To Do"
   | "Ready"
   | "In Progress"
   | "On Hold"
   | "Completed";
 
-export const ALL_STATUS: status[] = [
+export const ALL_STATUS: Status[] = [
   "To Do",
   "Ready",
   "In Progress",
@@ -16,26 +16,26 @@ export const ALL_STATUS: status[] = [
   "Completed",
 ];
 
-type Task = {
+export type Task = {
   title: string;
   desc: string;
 };
 
 type Columns = {
-  [key in status]: Task[];
+  [key in Status]: Task[];
 };
 
 export const useKanbanStore = create<{
   columns: Columns;
   addTask: (index: number) => void;
-  updateTask: (columnName: status, index: number, task: Partial<Task>) => void;
+  updateTask: (columnName: Status, index: number, task: Partial<Task>) => void;
   moveTask: (
-    fromColumn: status,
-    toColumn: status,
+    fromColumn: Status,
+    toColumn: Status,
     fromIndex: number,
     toIndex: number
   ) => void;
-  removeColumn: (columnKey: status, index: number) => void;
+  removeColumn: (columnKey: Status, index: number) => void;
 }>()(
   devtools(
     persist(
@@ -49,7 +49,7 @@ export const useKanbanStore = create<{
         },
         addTask: (index: number) =>
           set((state) => {
-            const columnKeys = Object.keys(state.columns) as status[];
+            const columnKeys = Object.keys(state.columns) as Status[];
             const columnKey = columnKeys[index];
             if (!columnKey) return state;
             return {

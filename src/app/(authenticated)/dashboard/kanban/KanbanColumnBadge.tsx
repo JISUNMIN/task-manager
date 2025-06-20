@@ -1,9 +1,9 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
-import { status } from "@/store/useKanbanStore";
+import { Status } from "@/store/useKanbanStore";
 import React from "react";
 
-const KanbanColumnBadge = ({ columnKey }: { columnKey: status }) => {
+const KanbanColumnBadge = ({ columnKey }: { columnKey: Status }) => {
   let bgColor, dotColor;
 
   switch (columnKey) {

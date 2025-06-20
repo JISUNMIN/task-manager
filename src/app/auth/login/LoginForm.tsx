@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import Image from "next/image";
 import { logo } from "@/assets/images";
-import useLogin from "./hooks/useLogin";
+import useLogin from "../../../hooks/useLogin";
 
 // 유효성 검사 스키마 (yup)
 const loginSchema = yup.object().shape({

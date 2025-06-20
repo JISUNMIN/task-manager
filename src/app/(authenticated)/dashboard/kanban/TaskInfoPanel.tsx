@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ResizablePanel } from "@/components/ui/resizable";
-import { ALL_STATUS, status, useKanbanStore } from "@/store/useKanbanStore";
+import { ALL_STATUS, Status, useKanbanStore } from "@/store/useKanbanStore";
 import React, { useCallback } from "react";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
@@ -39,14 +39,14 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const onChangeTitle = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const value = e.target.value;
-      updateTask(columnKey as status, Number(itemIndexStr), { title: value });
+      updateTask(columnKey as Status, Number(itemIndexStr), { title: value });
     },
     [focusedInputKey]
   );
 
   const onChangeDesc = useCallback(
     (value: string) => {
-      updateTask(columnKey as status, Number(itemIndexStr), { desc: value });
+      updateTask(columnKey as Status, Number(itemIndexStr), { desc: value });
     },
     [columnKey, itemIndexStr]
   );
@@ -74,7 +74,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           className="w-full p-2 resize-none"
           placeholder="제목을 입력하세요"
           onChange={onChangeTitle}
-          value={columns[columnKey as status][Number(itemIndexStr)]?.title}
+          value={columns[columnKey as Status][Number(itemIndexStr)]?.title}
         />
         <Grid className="grid grid-cols-[1fr_6fr] px-5">
           <div className="flex items-center">
@@ -84,7 +84,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           <Select
             value={columnKey}
             onValueChange={(newStatus) => {
-              moveTask(columnKey as status, newStatus as status, taskIndex, 0);
+              moveTask(columnKey as Status, newStatus as Status, taskIndex, 0);
               handleFocusedInputKey(newStatus, taskIndex);
             }}
           >
@@ -107,7 +107,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           <Select
             value={columnKey}
             onValueChange={(newStatus) => {
-              moveTask(columnKey as status, newStatus as status, taskIndex, 0);
+              moveTask(columnKey as Status, newStatus as Status, taskIndex, 0);
               handleFocusedInputKey(newStatus, taskIndex);
             }}
           >
@@ -128,7 +128,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         <div>
           <Editor
             onChange={onChangeDesc}
-            content={columns[columnKey as status][Number(itemIndexStr)]?.desc}
+            content={columns[columnKey as Status][Number(itemIndexStr)]?.desc}
           />
         </div>
       </div>
