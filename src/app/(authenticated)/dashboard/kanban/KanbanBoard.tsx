@@ -5,7 +5,7 @@ import { FaPlus, FaTrash } from "react-icons/fa";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { KanbanSidebar } from "./KanbanSidebar";
-import { status, useKanbanStore } from "@/store/useKanbanStore";
+import { Status, useKanbanStore } from "@/store/useKanbanStore";
 import KanbanColumnBadge from "./KanbanColumnBadge";
 import TaskInfoPanel from "./TaskInfoPanel";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ const KanbanBoard = () => {
 
   // 칸반 열에 추가할 작업을 저장
   const handleInputChange = (
-    columnKey: status,
+    columnKey: Status,
     value: string,
     itemIndex: number
   ) => {
@@ -53,8 +53,8 @@ const KanbanBoard = () => {
       return;
 
     moveTask(
-      source.droppableId as status,
-      destination.droppableId as status,
+      source.droppableId as Status,
+      destination.droppableId as Status,
       source.index,
       destination.index
     );
@@ -88,12 +88,12 @@ const KanbanBoard = () => {
                   const keys = Object.keys(columns);
                   const columnIndex = keys.indexOf(columnKey);
                   const isOnlyOneTask =
-                    columns[columnKey as status].length <= 1;
+                    columns[columnKey as Status].length <= 1;
 
                   return (
                     <div key={columnKey} className="flex flex-col">
                       <div className="flex justify-between items-center mb-4">
-                        <KanbanColumnBadge columnKey={columnKey as status} />
+                        <KanbanColumnBadge columnKey={columnKey as Status} />
                         <Button
                           variant="outline"
                           size="icon"
@@ -114,7 +114,7 @@ const KanbanBoard = () => {
                             ref={provided.innerRef}
                             {...provided.droppableProps}
                           >
-                            {columns[columnKey as status].map(
+                            {columns[columnKey as Status].map(
                               (item, itemIndex) => (
                                 <Draggable
                                   key={`${columnKey}-${itemIndex}`}
@@ -143,13 +143,13 @@ const KanbanBoard = () => {
                                           ] = el;
                                         }}
                                         value={
-                                          columns[columnKey as status][
+                                          columns[columnKey as Status][
                                             itemIndex
                                           ].title
                                         }
                                         onChange={(e) =>
                                           handleInputChange(
-                                            columnKey as status,
+                                            columnKey as Status,
                                             e.target.value,
                                             itemIndex
                                           )
@@ -169,7 +169,7 @@ const KanbanBoard = () => {
                                       <button
                                         onClick={() =>
                                           removeColumn(
-                                            columnKey as status,
+                                            columnKey as Status,
                                             itemIndex
                                           )
                                         }
