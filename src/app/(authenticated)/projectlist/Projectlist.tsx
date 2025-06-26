@@ -8,11 +8,11 @@ const ProjectList = () => {
   const { listData } = useProjects();
   const router = useRouter();
 
-  console.log("listData", listData);
-
   const onClickProject = (projectId: number) => {
     router.replace(`/dashboard/kanban?projectId=${projectId}`);
   };
+
+  if (!listData) return <div>로딩중...</div>;
 
   return (
     <div className="mx-auto max-w-screen-lg p-6">

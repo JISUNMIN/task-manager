@@ -26,7 +26,6 @@ export function KanbanSidebar() {
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId");
 
-
   const handleNavigate = () => {
     router.push("/projectlist");
   };
@@ -36,6 +35,7 @@ export function KanbanSidebar() {
     router.replace("/login");
   };
 
+  if (!listData) return <div>로딩중...</div>;
 
   return (
     <Sidebar>

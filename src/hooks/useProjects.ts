@@ -7,7 +7,7 @@ type Project = {
   id: number;
   projectId: string;
   progress: number;
-  deadline: Date;
+  deadline: string;
   managerId: number;
   tasks: Task[];
 };
