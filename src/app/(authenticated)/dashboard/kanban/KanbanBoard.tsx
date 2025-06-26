@@ -31,7 +31,7 @@ const KanbanBoard = () => {
   const [focusedInputKey, setFocusedInputKey] = useState<string>("Completed-0");
   const inputRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const searchParams = useSearchParams();
-  const projectId = searchParams.get("projectId");
+  const projectId = searchParams.get("projectId") ?? undefined;
   const { detailData, createMutate, deleteMutate } = useProjects(projectId);
   const { user } = useAuthStore();
 
@@ -92,8 +92,8 @@ const KanbanBoard = () => {
   };
 
   const handleDeleteTask = (columnKey: Status, itemIndex: number) => {
-    const taskId = columns[columnKey][itemIndex];
-    deleteMutate(taskId);
+    const task = columns[columnKey][itemIndex];
+    deleteMutate({ id: task.id });
     removeColumn(columnKey, itemIndex);
   };
 
@@ -106,7 +106,12 @@ const KanbanBoard = () => {
 
   useEffect(() => {
     if (detailData?.tasks) {
-      initializeColumns(detailData.tasks);
+      initializeColumns(
+        detailData.tasks.map((task) => ({
+          ...task,
+          status: task.status as Status,
+        }))
+      );
     }
   }, [detailData, initializeColumns]);
 

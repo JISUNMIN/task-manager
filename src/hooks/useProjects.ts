@@ -1,4 +1,5 @@
 import { showToast, ToastMode } from "@/lib/toast";
+import { Task } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -8,6 +9,7 @@ type Project = {
   progress: number;
   deadline: Date;
   managerId: number;
+  tasks: Task[];
 };
 
 type CreateParams = {
@@ -43,10 +45,10 @@ const useProjects = (targetId?: string | number) => {
     data: detailData,
     isPending: isDetailPending,
     isFetching: isDetailFetching,
-  } = useQuery<Project[], Error>({
+  } = useQuery<Project, Error>({
     queryKey: ["projects", "list", "detail", targetId],
     queryFn: async () => {
-      const res = await axios.get<Project[]>(
+      const res = await axios.get<Project>(
         `${PROJECT_API_PATH}/${targetId}/kanban`
       );
       return res.data;
@@ -66,7 +68,7 @@ const useProjects = (targetId?: string | number) => {
   });
 
   //delete
-  const { mutate: deleteMutate } = useMutation<void, Error, { id: string }>({
+  const { mutate: deleteMutate } = useMutation<void, Error, { id: number }>({
     mutationFn: async (data) => {
       const { id } = data;
       await axios.delete(`${TASK_PROJECT_API_PATH}/${id}`);
