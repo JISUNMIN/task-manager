@@ -15,34 +15,25 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...compat.extends(
+    "next/core-web-vitals",
+    "next/typescript",
+    "@typescript-eslint/recommended"
+  ),
   {
     rules: {
-      "@typescript-eslint/no-unused-vars": "warn", // Error → Warn으로 변경
+      "@typescript-eslint/no-unused-vars": "warn",
+      ...reactHooks.configs.recommended.rules,
+      "react-refresh/only-export-components": [
+        "warn",
+        { allowConstantExport: true },
+      ],
+    },
+    plugins: {
+      "react-hooks": reactHooks,
+      "react-refresh": reactRefresh,
     },
   },
-  tseslint.config(
-    { ignores: ["dist"] },
-    {
-      extends: [js.configs.recommended, tseslint.configs.recommended],
-      files: ["**/*.{ts,tsx}"],
-      languageOptions: {
-        ecmaVersion: 2020,
-        globals: globals.browser,
-      },
-      plugins: {
-        "react-hooks": reactHooks,
-        "react-refresh": reactRefresh,
-      },
-      rules: {
-        ...reactHooks.configs.recommended.rules,
-        "react-refresh/only-export-components": [
-          "warn",
-          { allowConstantExport: true },
-        ],
-      },
-    }
-  ),
 ];
 
 export default eslintConfig;

@@ -8,7 +8,9 @@ const ProjectList = () => {
   const { listData } = useProjects();
   const router = useRouter();
 
-  const onClickProject = (projectId: string) => {
+  console.log("listData", listData);
+
+  const onClickProject = (projectId: number) => {
     router.replace(`/dashboard/kanban?projectId=${projectId}`);
   };
 

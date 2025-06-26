@@ -4,10 +4,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ProjectCardProps {
   project: {
-    name: string;
+    id:number;
+    name?: string;
     managerId: number;
     progress: number;
-    deadline: string;
+    deadline: Date;
   };
   onClick: () => void;
 }

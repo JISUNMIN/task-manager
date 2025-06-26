@@ -5,15 +5,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { projectId: number } }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
+    const { projectId } = await params;
     const project = await prisma.project.findUnique({
       include: {
         manager: true,
         tasks: true,
       },
-      where: { id: Number(params.projectId) },
+      where: { id: Number(projectId) },
     });
 
     if (!project) {

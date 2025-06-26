@@ -6,13 +6,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { taskId: string } }
+  { params }: { params: Promise<{ taskId: string }> }
 ) {
   try {
-    const taskId = Number(params.taskId);
+    const { taskId } = await params;
 
     const newTask = await prisma.task.delete({
-      where: { id: taskId },
+      where: { id: Number(taskId) },
     });
     return NextResponse.json(newTask, { status: 201 });
   } catch (error) {
