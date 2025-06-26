@@ -17,6 +17,7 @@ export const ALL_STATUS: Status[] = [
 ];
 
 export type Task = {
+  id: number;
   title: string;
   desc: string;
 };
@@ -27,6 +28,9 @@ type Columns = {
 
 export const useKanbanStore = create<{
   columns: Columns;
+  initializeColumns: (
+    tasks: { id: number; title: string; desc: string; status: Status }[]
+  ) => void;
   addTask: (index: number) => void;
   updateTask: (columnName: Status, index: number, task: Partial<Task>) => void;
   moveTask: (
@@ -41,11 +45,32 @@ export const useKanbanStore = create<{
     persist(
       (set) => ({
         columns: {
-          "To Do": [{ title: "", desc: "" }],
-          Ready: [{ title: "", desc: "" }],
-          "In Progress": [{ title: "", desc: "" }],
-          "On Hold": [{ title: "", desc: "" }],
-          Completed: [{ title: "", desc: "" }],
+          "To Do": [{ id: 0, title: "", desc: "" }],
+          Ready: [{ id: 0, title: "", desc: "" }],
+          "In Progress": [{ id: 0, title: "", desc: "" }],
+          "On Hold": [{ id: 0, title: "", desc: "" }],
+          Completed: [{ id: 0, title: "", desc: "" }],
+        },
+        initializeColumns: (tasks) => {
+          const newColumns: Columns = {
+            "To Do": [],
+            Ready: [],
+            "In Progress": [],
+            "On Hold": [],
+            Completed: [],
+          };
+
+          tasks.forEach((task) => {
+            if (ALL_STATUS.includes(task.status)) {
+              newColumns[task.status].push({
+                id: task.id,
+                title: task.title,
+                desc: task.desc,
+              });
+            }
+          });
+
+          set({ columns: newColumns });
         },
         addTask: (index: number) =>
           set((state) => {

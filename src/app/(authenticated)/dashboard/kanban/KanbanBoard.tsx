@@ -21,15 +21,28 @@ import {
   Draggable,
   DropResult,
 } from "@hello-pangea/dnd";
+import useProjects from "@/hooks/useProjects";
+import { useSearchParams } from "next/navigation";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const KanbanBoard = () => {
   const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
   const togglePanel = () => setTaskInfoPanelrOpen(!isTaskInfoPanelOpen);
   const [focusedInputKey, setFocusedInputKey] = useState<string>("Completed-0");
   const inputRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get("projectId");
+  const { detailData, createMutate, deleteMutate } = useProjects(projectId);
+  const { user } = useAuthStore();
 
-  const { columns, addTask, updateTask, moveTask, removeColumn } =
-    useKanbanStore();
+  const {
+    columns,
+    initializeColumns,
+    addTask,
+    updateTask,
+    moveTask,
+    removeColumn,
+  } = useKanbanStore();
 
   // 칸반 열에 추가할 작업을 저장
   const handleInputChange = (
@@ -65,12 +78,37 @@ const KanbanBoard = () => {
     setFocusedInputKey(`${columnKey}-${itemIndex}`);
   };
 
+  const handleCreateTask = (columnKey: Status, columnIndex: number) => {
+    addTask(columnIndex);
+
+    createMutate({
+      title: "",
+      desc: "",
+      status: columnKey,
+      projectId: Number(projectId),
+      userId: 1, // 실제 로그인 유저 ID로 대체
+      managerId: 1, // 실제 매니저 ID로 대체
+    });
+  };
+
+  const handleDeleteTask = (columnKey: Status, itemIndex: number) => {
+    const taskId = columns[columnKey][itemIndex];
+    deleteMutate(taskId);
+    removeColumn(columnKey, itemIndex);
+  };
+
   useEffect(() => {
     const ref = inputRefs.current[focusedInputKey];
     if (ref) {
       ref.focus();
     }
   }, [focusedInputKey]);
+
+  useEffect(() => {
+    if (detailData?.tasks) {
+      initializeColumns(detailData.tasks);
+    }
+  }, [detailData, initializeColumns]);
 
   return (
     <SidebarProvider>
@@ -97,9 +135,9 @@ const KanbanBoard = () => {
                         <Button
                           variant="outline"
                           size="icon"
-                          onClick={() => {
-                            addTask(columnIndex);
-                          }}
+                          onClick={() =>
+                            handleCreateTask(columnKey as Status, columnIndex)
+                          }
                           className="bg-gray-400 text-white rounded"
                         >
                           <FaPlus />
@@ -168,7 +206,7 @@ const KanbanBoard = () => {
 
                                       <button
                                         onClick={() =>
-                                          removeColumn(
+                                          handleDeleteTask(
                                             columnKey as Status,
                                             itemIndex
                                           )

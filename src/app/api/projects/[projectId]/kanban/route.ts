@@ -1,4 +1,4 @@
-// app/api/projects/[projectId]/tasks/route.ts
+// app/api/projects/[projectId]/kanban/route.ts
 // 특정 projectId로 조회
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
