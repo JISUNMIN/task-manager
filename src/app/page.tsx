@@ -11,7 +11,7 @@ export default function HomePage() {
     if (hasHydrated && !isAuthenticated) {
       router.replace("/auth/login");
     } else if (hasHydrated && isAuthenticated) {
-      router.replace("/dashboard/kanban");
+      router.replace("/projectlist");
     }
   }, [hasHydrated, isAuthenticated]);
 

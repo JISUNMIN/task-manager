@@ -1,7 +1,5 @@
 "use client";
 
-import getMockData from "@/mocks/project";
-
 import {
   Sidebar,
   SidebarContent,
@@ -16,13 +14,18 @@ import {
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { logo } from "@/assets/images";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
+import useProjects from "@/hooks/useProjects";
+import { convertDateToString, formatDate } from "@/lib/utils/helpers";
 
 export function KanbanSidebar() {
   const router = useRouter();
-  const mockProjects = getMockData();
+  const { listData } = useProjects();
   const { logout } = useAuthStore();
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get("projectId");
+
 
   const handleNavigate = () => {
     router.push("/projectlist");
@@ -32,6 +35,7 @@ export function KanbanSidebar() {
     logout();
     router.replace("/login");
   };
+
 
   return (
     <Sidebar>
@@ -51,28 +55,31 @@ export function KanbanSidebar() {
             <SidebarMenu>
               <div>
                 <ul>
-                  {Array.isArray(mockProjects) &&
-                    mockProjects.map((project) => (
+                  {Array.isArray(listData) &&
+                    listData.map((project) => (
                       <SidebarMenuItem
-                        className=" "
-                        key={project.name}
+                        key={project.projectId}
                         onClick={() =>
-                          console.log(`클릭한 프로젝트: ${project.name}`)
+                          console.log(`클릭한 프로젝트: ${project.projectId}`)
                         }
                       >
                         <SidebarMenuButton className="flex flex-col items-start mb-2 border-b border-gray-300 bg-gray-50 p-3 rounded-md shadow-sm h-full">
                           <a href={"#"}>
                             <p className="font-semibold text-gray-700">
-                              📌 프로젝트명: {project.name}
+                              📌 프로젝트명: {project.projectId}
                             </p>
                             <p className="text-gray-600">
-                              👤 담당자: {project.manager}
+                              👤 담당자: {project.managerId}
                             </p>
                             <p className="text-gray-600">
                               📊 진행률: {project.progress}%
                             </p>
                             <p className="text-gray-600">
-                              🗓 마감일: {project.dueDate}
+                              🗓 마감일:
+                              {convertDateToString(
+                                new Date(project.deadline),
+                                "-"
+                              )}
                             </p>
                           </a>
                         </SidebarMenuButton>
