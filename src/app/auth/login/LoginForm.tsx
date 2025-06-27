@@ -10,6 +10,7 @@ import { FaEnvelope, FaLock } from "react-icons/fa";
 import Image from "next/image";
 import { logo } from "@/assets/images";
 import useLogin from "../../../hooks/useLogin";
+import { useRouter } from "next/navigation";
 
 // 유효성 검사 스키마 (yup)
 const loginSchema = yup.object().shape({
@@ -27,6 +28,7 @@ interface LoginFormInputs {
 
 export default function LoginForm() {
   const { loginMutation } = useLogin();
+  const router = useRouter();
 
   // react-hook-form을 사용한 폼 상태 관리
   const {
@@ -39,6 +41,10 @@ export default function LoginForm() {
 
   const onSubmit = async (data: LoginFormInputs) => {
     loginMutation(data);
+  };
+
+  const onClickSignup = () => {
+    router.push("/auth/signup");
   };
 
   return (
@@ -82,6 +88,15 @@ export default function LoginForm() {
               <Button type="submit" className="w-full cursor-pointer">
                 로그인
               </Button>
+              <p className="text-sm text-center mt-4 text-gray-600">
+                계정이 없으신가요?{" "}
+                <span
+                  onClick={onClickSignup}
+                  className="text-blue-600 font-semibold cursor-pointer hover:underline"
+                >
+                  회원가입
+                </span>
+              </p>
             </form>
           </CardContent>
         </Card>
