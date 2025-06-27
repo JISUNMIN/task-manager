@@ -17,23 +17,26 @@ import {
 } from "react-icons/fa";
 import Image from "next/image";
 import { logo } from "@/assets/images";
+import useSignup from "@/hooks/useSignup";
 
 interface SignupInputs {
-  username: string;
-  email: string;
+  name: string;
+  userId: string;
   password: string;
+  confirmPassword: string;
 }
 
 const schema = yup.object().shape({
-  username: yup.string().required("이름을 입력해주세요."),
-  email: yup
-    .string()
-    .email("유효하지 않은 이메일입니다.")
-    .required("이메일을 입력해주세요."),
+  name: yup.string().required("이름을 입력해주세요."),
+  userId: yup.string().required("아이디를 입력해주세요."),
   password: yup
     .string()
     .min(6, "6자리 이상 입력해주세요.")
     .required("비밀번호를 입력해주세요."),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref("password"), ""], "비밀번호가 일치하지 않습니다.")
+    .required("비밀번호 확인을 입력해주세요."),
 });
 
 function FeatureBoxes() {
@@ -88,8 +91,10 @@ export default function SignupForm() {
     resolver: yupResolver(schema),
   });
 
+  const { createMutate } = useSignup();
+
   const onSubmit = (data: SignupInputs) => {
-    alert("가입 완료! 🎉");
+    createMutate(data);
     console.log("회원가입 데이터:", data);
   };
 
@@ -98,7 +103,7 @@ export default function SignupForm() {
       {/* 왼쪽 섹션: 로고 및 소개 + FeatureBoxes */}
       <div className="md:w-1/2 bg-brown-50 flex flex-col items-center justify-start p-8 space-y-8">
         {/* 로고 및 말풍선 박스 */}
-        <h2 className="text-3xl font-extrabold text-brown-700 mb-6 tracking-wide">
+        <h2 className="text-3xl font-extrabold  mb-6 tracking-wide text-center">
           Squireal Dashboard
         </h2>
         <div className="flex flex-col items-center relative">
@@ -138,28 +143,28 @@ export default function SignupForm() {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <div className="relative">
                   <Input
-                    {...register("username")}
+                    {...register("name")}
                     placeholder="이름"
                     className="pl-10"
                   />
                   <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-400" />
-                  {errors.username && (
+                  {errors.name && (
                     <p className="text-sm text-red-500 mt-1">
-                      {errors.username.message}
+                      {errors.name.message}
                     </p>
                   )}
                 </div>
 
                 <div className="relative">
                   <Input
-                    {...register("email")}
-                    placeholder="이메일"
+                    {...register("userId")}
+                    placeholder="아이디"
                     className="pl-10"
                   />
                   <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-400" />
-                  {errors.email && (
+                  {errors.userId && (
                     <p className="text-sm text-red-500 mt-1">
-                      {errors.email.message}
+                      {errors.userId.message}
                     </p>
                   )}
                 </div>
@@ -175,6 +180,21 @@ export default function SignupForm() {
                   {errors.password && (
                     <p className="text-sm text-red-500 mt-1">
                       {errors.password.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="relative">
+                  <Input
+                    {...register("confirmPassword")}
+                    type="password"
+                    placeholder="비밀번호 확인"
+                    className="pl-10"
+                  />
+                  <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-400" />
+                  {errors.confirmPassword && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.confirmPassword.message}
                     </p>
                   )}
                 </div>
