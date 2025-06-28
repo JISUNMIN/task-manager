@@ -32,7 +32,7 @@ export function KanbanSidebar() {
 
   const handleLogout = () => {
     logout();
-    router.replace("/login");
+    router.replace("/auth/login");
   };
 
   if (!listData) return <div>로딩중...</div>;
