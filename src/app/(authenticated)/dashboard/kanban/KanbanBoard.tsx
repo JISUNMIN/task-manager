@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -24,6 +24,7 @@ import {
 import useProjects from "@/hooks/useProjects";
 import { useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
+import { debounce } from "lodash";
 
 const KanbanBoard = () => {
   const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
@@ -32,7 +33,8 @@ const KanbanBoard = () => {
   const inputRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId") ?? undefined;
-  const { detailData, createMutate, deleteMutate } = useProjects(projectId);
+  const { detailData, createMutate, deleteMutate, updateMutate } =
+    useProjects(projectId);
   const { user } = useAuthStore();
 
   const {
@@ -95,6 +97,25 @@ const KanbanBoard = () => {
     const task = columns[columnKey][itemIndex];
     deleteMutate({ id: task.id });
     removeColumn(columnKey, itemIndex);
+  };
+
+  const debouncedUpdate = useMemo(
+    () =>
+      debounce((taskId: number, newTitle: string) => {
+        updateMutate({ id: taskId, title: newTitle });
+      }, 2000),
+    []
+  );
+  const handleUpdateTask = (
+    columnKey: Status,
+    value: string,
+    itemIndex: number
+  ) => {
+    const task = columns[columnKey][itemIndex];
+    // 로컬 상태
+    updateTask(columnKey, itemIndex, { title: value });
+    // API 요청 debounce 처리
+    debouncedUpdate(task.id, value);
   };
 
   useEffect(() => {
@@ -191,7 +212,7 @@ const KanbanBoard = () => {
                                           ].title
                                         }
                                         onChange={(e) =>
-                                          handleInputChange(
+                                          handleUpdateTask(
                                             columnKey as Status,
                                             e.target.value,
                                             itemIndex
