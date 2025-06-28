@@ -6,7 +6,7 @@ import * as yup from "yup";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FaEnvelope, FaLock } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
 import Image from "next/image";
 import { logo } from "@/assets/images";
 import useLogin from "../../../hooks/useLogin";
@@ -60,14 +60,13 @@ export default function LoginForm() {
         <Card className="w-96 shadow-lg">
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="relative">
-                <Input
+              <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
+                <FaUser className="mr-2 w-4 h-4" />
+                <input
                   {...register("userId")}
-                  type="string"
-                  placeholder="이메일"
-                  className="w-full pl-10"
+                  placeholder="아이디"
+                  className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
                 />
-                <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
               </div>
               {errors.userId && (
                 <p className="text-red-500 text-sm">{errors.userId.message}</p>

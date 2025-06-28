@@ -18,7 +18,7 @@ export function PasswordInput({
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 transition-colors duration-200 focus-within:border-gray-700">
+    <div className="flex items-center rounded-md px-3 py-2 text-sm  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
       <FaLock className="text-brown-400 mr-2" />
       <input
         {...register(name)}

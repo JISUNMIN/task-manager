@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   FaUser,
-  FaEnvelope,
   FaProjectDiagram,
   FaTasks,
   FaUserCheck,
@@ -157,19 +156,6 @@ export default function SignupForm() {
                   <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
                     <FaUser className="mr-2 w-4 h-4" />
                     <input
-                      {...register("name")}
-                      placeholder="이름"
-                      className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
-                    />
-                  </div>
-                  {errors.name && (
-                    <p className="text-sm text-red-500 -mt-2">
-                      {errors.name.message}
-                    </p>
-                  )}
-                  <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
-                    <FaEnvelope className="mr-2 w-4 h-4" />
-                    <input
                       {...register("userId")}
                       placeholder="아이디"
                       className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
@@ -201,6 +187,18 @@ export default function SignupForm() {
                   {errors.confirmPassword && (
                     <p className="text-sm text-red-500 -mt-2">
                       {errors.confirmPassword.message}
+                    </p>
+                  )}
+                  <div className="flex items-center rounded-md px-3 py-2 text-sm  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
+                    <input
+                      {...register("name")}
+                      placeholder="이름"
+                      className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
+                    />
+                  </div>
+                  {errors.name && (
+                    <p className="text-sm text-red-500 -mt-2">
+                      {errors.name.message}
                     </p>
                   )}
                 </div>
