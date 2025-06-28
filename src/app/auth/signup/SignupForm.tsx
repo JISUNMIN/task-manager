@@ -26,15 +26,28 @@ interface SignupInputs {
 }
 
 const schema = yup.object().shape({
-  name: yup.string().required("이름을 입력해주세요."),
-  userId: yup.string().required("아이디를 입력해주세요."),
+  name: yup
+    .string()
+    .min(2, "이름은 최소 2자 이상이어야 합니다.")
+    .max(20, "이름은 최대 20자 이내여야 합니다.")
+    .required("이름을 입력해주세요."),
+
+  userId: yup
+    .string()
+    .matches(/^[a-z0-9]+$/, "아이디는 영문 소문자와 숫자만 사용할 수 있습니다.")
+    .min(4, "아이디는 최소 4자 이상이어야 합니다.")
+    .max(12, "아이디는 최대 12자 이내여야 합니다.")
+    .required("아이디를 입력해주세요."),
+
   password: yup
     .string()
-    .min(6, "6자리 이상 입력해주세요.")
+    .min(6, "비밀번호는 최소 6자 이상이어야 합니다.")
+    .max(20, "비밀번호는 최대 20자 이내여야 합니다.")
     .required("비밀번호를 입력해주세요."),
+
   confirmPassword: yup
     .string()
-    .oneOf([yup.ref("password"), ""], "비밀번호가 일치하지 않습니다.")
+    .oneOf([yup.ref("password")], "비밀번호가 일치하지 않습니다.")
     .required("비밀번호 확인을 입력해주세요."),
 });
 

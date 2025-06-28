@@ -1,5 +1,7 @@
+import { showToast, ToastMode } from "@/lib/toast";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 
 export type CreateParams = {
   name: string;
@@ -11,16 +13,44 @@ export type CreateParams = {
 const API_PATH = "/api/auth/signup";
 
 const useSignup = () => {
-  const { mutate: createMutate } = useMutation<void, Error, CreateParams>({
+  const router = useRouter();
+  const { mutate: createMutate } = useMutation<void, AxiosError, CreateParams>({
     mutationFn: async (data) => {
-      console.log("1");
       await axios.post(API_PATH, data);
     },
     onSuccess: () => {
-      console.log("회원가입 성공");
+      showToast({
+        type: ToastMode.SUCCESS,
+        action: "REGISTER",
+      });
+      router.replace("/auth/login");
     },
     onError: (error) => {
-      console.error("회원가입 실패:", error.message);
+      const status = error?.response?.status;
+
+      switch (status) {
+        case 400:
+          showToast({
+            type: ToastMode.ERROR,
+            action: "REGISTER",
+            content: "필수값이 누락되었습니다.",
+          });
+          break;
+        case 409:
+          showToast({
+            type: ToastMode.ERROR,
+            action: "ISEXIST",
+          });
+          break;
+        case 500:
+        default:
+          showToast({
+            type: ToastMode.ERROR,
+            action: "REGISTER",
+            content: "서버 오류가 발생했습니다.",
+          });
+          break;
+      }
     },
   });
 
