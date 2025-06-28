@@ -4,11 +4,9 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   FaUser,
-  FaLock,
   FaEnvelope,
   FaProjectDiagram,
   FaTasks,
@@ -18,6 +16,7 @@ import {
 import Image from "next/image";
 import { logo } from "@/assets/images";
 import useSignup from "@/hooks/useSignup";
+import { PasswordInput } from "@/components/inputs/PasswordInput";
 
 interface SignupInputs {
   name: string;
@@ -168,29 +167,24 @@ export default function SignupForm() {
                       {errors.userId.message}
                     </p>
                   )}
-                  <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
-                    <FaLock className="mr-2 w-4 h-4" />
-                    <input
-                      {...register("password")}
-                      type="password"
-                      placeholder="비밀번호"
-                      className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
-                    />
-                  </div>
+                  <PasswordInput
+                    register={register}
+                    name="password"
+                    placeholder="비밀번호"
+                    errors={errors}
+                  />
                   {errors.password && (
                     <p className="text-sm text-red-500 -mt-2">
                       {errors.password.message}
                     </p>
                   )}
-                  <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
-                    <FaLock className="mr-2 w-4 h-4" />
-                    <input
-                      {...register("confirmPassword")}
-                      type="password"
-                      placeholder="비밀번호 확인"
-                      className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
-                    />
-                  </div>
+
+                  <PasswordInput
+                    register={register}
+                    name="confirmPassword"
+                    placeholder="비밀번호 확인"
+                    errors={errors}
+                  />
                   {errors.confirmPassword && (
                     <p className="text-sm text-red-500 -mt-2">
                       {errors.confirmPassword.message}
