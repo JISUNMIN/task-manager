@@ -58,18 +58,18 @@ export function KanbanSidebar() {
                   {Array.isArray(listData) &&
                     listData.map((project) => (
                       <SidebarMenuItem
-                        key={project.projectId}
+                        key={project.id}
                         onClick={() =>
-                          console.log(`클릭한 프로젝트: ${project.projectId}`)
+                          console.log(`클릭한 프로젝트: ${project.id}`)
                         }
                       >
                         <SidebarMenuButton className="flex flex-col items-start mb-2 border-b border-gray-300 bg-gray-50 p-3 rounded-md shadow-sm h-full">
                           <a href={"#"}>
                             <p className="font-semibold text-gray-700">
-                              📌 프로젝트명: {project.projectId}
+                              📌 프로젝트명: {project.projectName}
                             </p>
                             <p className="text-gray-600">
-                              👤 담당자: {project.managerId}
+                              👤 담당자: {project.manager.name}
                             </p>
                             <p className="text-gray-600">
                               📊 진행률: {project.progress}%
