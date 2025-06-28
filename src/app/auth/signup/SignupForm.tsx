@@ -100,6 +100,7 @@ export default function SignupForm() {
     formState: { errors },
   } = useForm<SignupInputs>({
     resolver: yupResolver(schema),
+    mode: "onBlur",
   });
 
   const { createMutate } = useSignup();
@@ -153,30 +154,30 @@ export default function SignupForm() {
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <div className="flex flex-col gap-4">
-                  <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
-                    <FaUser className="mr-2 w-4 h-4" />
-                    <input
-                      {...register("userId")}
-                      placeholder="아이디"
-                      className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
-                    />
+                  <div className="flex flex-col gap-1">
+                    <label htmlFor="userId" className="text-sm text-gray-600">
+                      아이디
+                    </label>
+                    <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
+                      <FaUser className="mr-2 w-4 h-4" />
+                      <input
+                        {...register("userId")}
+                        placeholder="아이디"
+                        className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
+                      />
+                    </div>
+                    {errors.userId && (
+                      <p className="text-sm text-red-500 -mt-1">
+                        {errors.userId.message}
+                      </p>
+                    )}
                   </div>
-                  {errors.userId && (
-                    <p className="text-sm text-red-500 -mt-2">
-                      {errors.userId.message}
-                    </p>
-                  )}
                   <PasswordInput
                     register={register}
                     name="password"
                     placeholder="비밀번호"
                     errors={errors}
                   />
-                  {errors.password && (
-                    <p className="text-sm text-red-500 -mt-2">
-                      {errors.password.message}
-                    </p>
-                  )}
 
                   <PasswordInput
                     register={register}
@@ -184,23 +185,23 @@ export default function SignupForm() {
                     placeholder="비밀번호 확인"
                     errors={errors}
                   />
-                  {errors.confirmPassword && (
-                    <p className="text-sm text-red-500 -mt-2">
-                      {errors.confirmPassword.message}
-                    </p>
-                  )}
-                  <div className="flex items-center rounded-md px-3 py-2 text-sm  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
-                    <input
-                      {...register("name")}
-                      placeholder="이름"
-                      className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
-                    />
+                  <div className="flex flex-col gap-1">
+                    <label htmlFor="name" className="text-sm text-gray-600">
+                      이름
+                    </label>
+                    <div className="flex items-center rounded-md px-3 py-2 text-sm  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
+                      <input
+                        {...register("name")}
+                        placeholder="이름"
+                        className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
+                      />
+                    </div>
+                    {errors.name && (
+                      <p className="text-sm text-red-500 -mt-1">
+                        {errors.name.message}
+                      </p>
+                    )}
                   </div>
-                  {errors.name && (
-                    <p className="text-sm text-red-500 -mt-2">
-                      {errors.name.message}
-                    </p>
-                  )}
                 </div>
 
                 <Button type="submit" className="w-full">
