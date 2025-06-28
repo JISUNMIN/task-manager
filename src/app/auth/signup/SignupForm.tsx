@@ -141,59 +141,58 @@ export default function SignupForm() {
           <Card className="shadow-xl border-2 border-brown-200">
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                <div className="relative">
-                  <Input
-                    {...register("name")}
-                    placeholder="이름"
-                    className="pl-10"
-                  />
-                  <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-400" />
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
+                    <FaUser className="mr-2 w-4 h-4" />
+                    <input
+                      {...register("name")}
+                      placeholder="이름"
+                      className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
+                    />
+                  </div>
                   {errors.name && (
-                    <p className="text-sm text-red-500 mt-1">
+                    <p className="text-sm text-red-500 -mt-2">
                       {errors.name.message}
                     </p>
                   )}
-                </div>
-
-                <div className="relative">
-                  <Input
-                    {...register("userId")}
-                    placeholder="아이디"
-                    className="pl-10"
-                  />
-                  <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-400" />
+                  <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
+                    <FaEnvelope className="mr-2 w-4 h-4" />
+                    <input
+                      {...register("userId")}
+                      placeholder="아이디"
+                      className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
+                    />
+                  </div>
                   {errors.userId && (
-                    <p className="text-sm text-red-500 mt-1">
+                    <p className="text-sm text-red-500 -mt-2">
                       {errors.userId.message}
                     </p>
                   )}
-                </div>
-
-                <div className="relative">
-                  <Input
-                    {...register("password")}
-                    type="password"
-                    placeholder="비밀번호"
-                    className="pl-10"
-                  />
-                  <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-400" />
+                  <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
+                    <FaLock className="mr-2 w-4 h-4" />
+                    <input
+                      {...register("password")}
+                      type="password"
+                      placeholder="비밀번호"
+                      className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
+                    />
+                  </div>
                   {errors.password && (
-                    <p className="text-sm text-red-500 mt-1">
+                    <p className="text-sm text-red-500 -mt-2">
                       {errors.password.message}
                     </p>
                   )}
-                </div>
-
-                <div className="relative">
-                  <Input
-                    {...register("confirmPassword")}
-                    type="password"
-                    placeholder="비밀번호 확인"
-                    className="pl-10"
-                  />
-                  <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-400" />
+                  <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
+                    <FaLock className="mr-2 w-4 h-4" />
+                    <input
+                      {...register("confirmPassword")}
+                      type="password"
+                      placeholder="비밀번호 확인"
+                      className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
+                    />
+                  </div>
                   {errors.confirmPassword && (
-                    <p className="text-sm text-red-500 mt-1">
+                    <p className="text-sm text-red-500 -mt-2">
                       {errors.confirmPassword.message}
                     </p>
                   )}
