@@ -62,7 +62,7 @@ export default function LoginForm() {
         <p className="text-2xl font-extrabold text-center text-gray-800  drop-shadow-md">
           Squirrel Board
         </p>
-        <Card className="w-96 shadow-lg">
+<Card className="w-full max-w-[20rem] sm:max-w-[24rem] sm:w-96 shadow-lg">
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="flex flex-col gap-1">
