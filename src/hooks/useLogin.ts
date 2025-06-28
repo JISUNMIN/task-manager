@@ -2,12 +2,17 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 import { showToast, ToastMode } from "@/lib/toast";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useAuthStore } from "@/store/useAuthStore";
 
-type LoginFormInputs = {
+type LoginParams = {
   userId: string;
   password: string;
+};
+
+type LoginResponse = {
+  userId: string;
+  token: string;
 };
 
 const API_PATH = "/api/auth/login";
@@ -16,8 +21,12 @@ const useLogin = () => {
   const router = useRouter();
   const { login } = useAuthStore();
 
-  const { mutate: loginMutation, isPending } = useMutation({
-    mutationFn: async (data: LoginFormInputs) => {
+  const { mutate: loginMutation, isPending } = useMutation<
+    LoginResponse,
+    AxiosError,
+    LoginParams
+  >({
+    mutationFn: async (data) => {
       const res = await axios.post(API_PATH, data);
       return res.data;
     },
@@ -27,11 +36,9 @@ const useLogin = () => {
       // localStorage.setItem("token", result.token); 등
 
       login({ userId: result.userId });
-      showToast({ type: ToastMode.SUCCESS, action: "SAVE" });
-
       router.replace("/dashboard/kanban");
     },
-    onError: (error: any) => {
+    onError: (error) => {
       const message =
         error.response?.data?.error || "서버와 통신 중 오류가 발생했습니다.";
       showToast({ type: ToastMode.ERROR, action: "SAVE", content: message });

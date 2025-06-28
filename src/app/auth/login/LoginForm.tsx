@@ -11,6 +11,7 @@ import Image from "next/image";
 import { logo } from "@/assets/images";
 import useLogin from "../../../hooks/useLogin";
 import { useRouter } from "next/navigation";
+import { PasswordInput } from "@/components/inputs/PasswordInput";
 
 // 유효성 검사 스키마 (yup)
 const loginSchema = yup.object().shape({
@@ -71,17 +72,14 @@ export default function LoginForm() {
               {errors.userId && (
                 <p className="text-red-500 text-sm">{errors.userId.message}</p>
               )}
-              <div className="relative">
-                <Input
-                  {...register("password")}
-                  type="password"
-                  placeholder="비밀번호"
-                  className="w-full pl-10"
-                />
-                <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-              </div>
+              <PasswordInput
+                register={register}
+                name="password"
+                placeholder="비밀번호"
+                errors={errors}
+              />
               {errors.password && (
-                <p className="text-red-500 text-sm">
+                <p className="text-sm text-red-500 -mt-2">
                   {errors.password.message}
                 </p>
               )}
