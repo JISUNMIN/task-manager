@@ -67,6 +67,23 @@ const useProjects = (targetId?: string | number) => {
     onError: () => {},
   });
 
+  //update
+  const { mutate: updateMutate } = useMutation<void, Error, CreateParams>({
+    mutationFn: async (data) => {
+      console.log("data^^^선밍쓰", data);
+      const { id, title } = data;
+      await axios.put(`${TASK_PROJECT_API_PATH}/${id}`, {
+        title,
+        // desc,
+        // status,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
+    },
+    onError: () => {},
+  });
+
   //delete
   const { mutate: deleteMutate } = useMutation<void, Error, { id: number }>({
     mutationFn: async (data) => {
@@ -90,6 +107,8 @@ const useProjects = (targetId?: string | number) => {
     isDetailFetching,
     //create
     createMutate,
+    //update
+    updateMutate,
     //delete
     deleteMutate,
   };
