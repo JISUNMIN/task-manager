@@ -1,14 +1,14 @@
 import { showToast, ToastMode } from "@/lib/toast";
-import { Task } from "@prisma/client";
+import { Task, User } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
 type Project = {
   id: number;
-  projectId: string;
+  projectName: string;
   progress: number;
   deadline: string;
-  managerId: number;
+  manager: User;
   tasks: Task[];
 };
 
@@ -17,7 +17,7 @@ type CreateParams = {
   title: string;
   desc: string;
   status: string;
-  projectId: number;
+  projectName: number;
   userId: number;
   managerId: number;
 };
