@@ -35,8 +35,6 @@ export function KanbanSidebar() {
     router.replace("/auth/login");
   };
 
-  if (!listData) return <div>로딩중...</div>;
-
   return (
     <Sidebar>
       <SidebarContent className="bg-green-50">
