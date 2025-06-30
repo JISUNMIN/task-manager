@@ -24,8 +24,6 @@ export function KanbanSidebar() {
   const { listData } = useProjects();
   const { logout } = useAuthStore();
   const searchParams = useSearchParams();
-  const projectId = searchParams.get("projectId");
-
   const handleNavigate = () => {
     router.push("/projectlist");
   };
@@ -33,6 +31,13 @@ export function KanbanSidebar() {
   const handleLogout = () => {
     logout();
     router.replace("/auth/login");
+  };
+
+  const handleSetProjectId = (newProjectId: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("projectId", String(newProjectId));
+
+    router.replace(`?${params.toString()}`, { scroll: false });
   };
 
   return (
@@ -57,9 +62,7 @@ export function KanbanSidebar() {
                     listData.map((project) => (
                       <SidebarMenuItem
                         key={project.id}
-                        onClick={() =>
-                          console.log(`클릭한 프로젝트: ${project.id}`)
-                        }
+                        onClick={() => handleSetProjectId(project.id)}
                       >
                         <SidebarMenuButton className="flex flex-col items-start mb-2 border-b border-gray-300 bg-gray-50 p-3 rounded-md shadow-sm h-full">
                           <a href={"#"}>
