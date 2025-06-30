@@ -3,7 +3,7 @@ import React from "react";
 import ProjectCard from "./ProjectCard";
 import useProjects from "@/hooks/useProjects";
 import { useRouter } from "next/navigation";
-import LoadingSpinner from "@/app/loading";
+import Loading from "@/app/loading";
 
 const ProjectList = () => {
   const { listData } = useProjects();
@@ -13,7 +13,7 @@ const ProjectList = () => {
     router.replace(`/dashboard/kanban?projectId=${projectId}`);
   };
 
-  if (!listData) return <LoadingSpinner />;
+  if (!listData) return <Loading />;
 
   return (
     <div className="mx-auto max-w-screen-lg p-6">
