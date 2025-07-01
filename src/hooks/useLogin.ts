@@ -23,7 +23,7 @@ const useLogin = () => {
 
   const { mutate: loginMutation, isPending } = useMutation<
     LoginResponse,
-    AxiosError,
+    AxiosError<{ error: string }>,
     LoginParams
   >({
     mutationFn: async (data) => {
