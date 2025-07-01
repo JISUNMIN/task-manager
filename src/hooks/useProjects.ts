@@ -15,11 +15,12 @@ type Project = {
 type CreateParams = {
   id?: number;
   title: string;
-  desc: string;
-  status: string;
-  projectName: number;
-  userId: number;
-  managerId: number;
+  desc?: string;
+  status?: string;
+  projectId?: number;
+  projectName?: number;
+  userId?: number;
+  managerId?: number;
 };
 
 const PROJECT_API_PATH = "/api/projects";
@@ -71,7 +72,6 @@ const useProjects = (targetId?: string | number) => {
   //update
   const { mutate: updateMutate } = useMutation<void, Error, CreateParams>({
     mutationFn: async (data) => {
-      console.log("data^^^선밍쓰", data);
       const { id, title } = data;
       await axios.put(`${TASK_PROJECT_API_PATH}/${id}`, {
         title,

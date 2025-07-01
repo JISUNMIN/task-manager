@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ResizablePanel } from "@/components/ui/resizable";
 import { ALL_STATUS, Status, useKanbanStore } from "@/store/useKanbanStore";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
 import KanbanColumnBadge from "./KanbanColumnBadge";
@@ -17,6 +17,8 @@ import Grid from "@/layout/Grid";
 import { TbCircleDotted } from "react-icons/tb";
 import { FaPeopleGroup } from "react-icons/fa6";
 import { useMediaQuery } from "usehooks-ts";
+import { debounce } from "lodash";
+import useProjects from "@/hooks/useProjects";
 
 interface TaskInfoPanelProps {
   isTaskInfoPanelOpen: boolean;
@@ -32,6 +34,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   handleFocusedInputKey,
 }) => {
   const { updateTask, columns, moveTask } = useKanbanStore();
+  const { updateMutate } = useProjects();
   const [columnKey, itemIndexStr] = focusedInputKey.split("-");
   const taskIndex = Number(itemIndexStr);
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -50,6 +53,23 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     },
     [columnKey, itemIndexStr]
   );
+
+  const debouncedUpdate = useMemo(
+    () =>
+      debounce((taskId: number, newTitle: string) => {
+        updateMutate({ id: taskId, title: newTitle });
+      }, 1500),
+    []
+  );
+  const handleUpdateTask = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    const task = columns[columnKey as Status][taskIndex];
+
+    // 로컬 상태
+    updateTask(columnKey as Status, taskIndex, { title: value });
+    // API 요청 debounce 처리
+    debouncedUpdate(task.id, value);
+  };
 
   return (
     <ResizablePanel
@@ -73,13 +93,13 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           maxRows={2}
           className="w-full p-2 resize-none"
           placeholder="제목을 입력하세요"
-          onChange={onChangeTitle}
+          onChange={handleUpdateTask}
           value={columns[columnKey as Status][Number(itemIndexStr)]?.title}
         />
         <Grid className="grid grid-cols-[1fr_6fr] px-5">
           <div className="flex items-center">
             <TbCircleDotted />
-            <span className="text-gray-700 ml-1">Status</span>
+            <span className="text-gray-700 ml-1"> 상태</span>
           </div>
           <Select
             value={columnKey}
@@ -102,7 +122,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
 
           <div className="flex items-center">
             <FaPeopleGroup />
-            <span className="text-gray-700 ml-1">Assignee</span>
+            <span className="text-gray-700 ml-1"> 할당자</span>
           </div>
           <Select
             value={columnKey}

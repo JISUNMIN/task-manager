@@ -103,7 +103,7 @@ const KanbanBoard = () => {
     () =>
       debounce((taskId: number, newTitle: string) => {
         updateMutate({ id: taskId, title: newTitle });
-      }, 2000),
+      }, 1500),
     []
   );
   const handleUpdateTask = (
@@ -144,15 +144,13 @@ const KanbanBoard = () => {
         <ResizablePanel defaultSize={75}>
           {/* 칸반 보드 영역 */}
           <div className="p-8 mt-10">
-            <h1 className="text-3xl font-semibold mb-6">Kanban Board</h1>
+            <h1 className="text-3xl font-semibold mb-6">작업 보드</h1>
 
             <DragDropContext onDragEnd={handleDragEnd}>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                 {Object.keys(columns).map((columnKey) => {
                   const keys = Object.keys(columns);
                   const columnIndex = keys.indexOf(columnKey);
-                  const isOnlyOneTask =
-                    columns[columnKey as Status].length <= 1;
 
                   return (
                     <div key={columnKey} className="flex flex-col">
@@ -184,7 +182,6 @@ const KanbanBoard = () => {
                                   key={`${columnKey}-${itemIndex}`}
                                   draggableId={`${columnKey}-${itemIndex}`}
                                   index={itemIndex}
-                                  isDragDisabled={isOnlyOneTask}
                                 >
                                   {(provided) => (
                                     <div
@@ -194,9 +191,7 @@ const KanbanBoard = () => {
                                       {...provided.dragHandleProps}
                                     >
                                       {/* 드래그 핸들 */}
-                                      <div
-                                        className={`text-gray-800 text-right ${isOnlyOneTask ? "invisible" : ""}`}
-                                      >
+                                      <div className="text-gray-800 text-right">
                                         ⠿
                                       </div>
 
@@ -237,12 +232,8 @@ const KanbanBoard = () => {
                                             itemIndex
                                           )
                                         }
-                                        className={`flex items-center mt-1 ${
-                                          isOnlyOneTask
-                                            ? "text-gray-400 cursor-not-allowed"
-                                            : "hover:text-red-600"
-                                        }`}
-                                        disabled={isOnlyOneTask}
+                                        className="flex items-center mt-1
+                                         hover:text-red-600"
                                       >
                                         <FaTrash className="mr-1" />
                                         Delete
