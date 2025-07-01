@@ -1,14 +1,17 @@
 import React from "react";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { User } from "@prisma/client";
+import { IoPersonCircle } from "react-icons/io5";
 
 interface ProjectCardProps {
   project: {
     id: number;
-    name?: string;
+    projectName: string;
     managerId: number;
     progress: number;
     deadline: string;
+    manager: User;
   };
   onClick: () => void;
 }
@@ -19,12 +22,16 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
       onClick={onClick}
       className="bg-gray-100 border border-gray-300 rounded-lg p-6 shadow-md cursor-pointer mb-3 hover:bg-gray-200 hover:border-gray-400 hover:scale-105 transition-all"
     >
-      <h3 className="text-xl font-semibold text-gray-800">{project.name}</h3>
+      <h3 className="text-xl font-semibold text-gray-800">
+        {project.projectName}
+      </h3>
       <div className="text-sm text-gray-600 flex gap-1.5 items-center">
-        담당자: {project.managerId}
+        담당자: {project?.manager?.name}
         <Avatar>
-          <AvatarImage src="https://github.com/shadcn.png" />
-          <AvatarFallback>CN</AvatarFallback>
+          <AvatarImage src={project.profileImage ?? ""} />
+          <AvatarFallback>
+            <IoPersonCircle className="w-8 h-8" />
+          </AvatarFallback>
         </Avatar>
       </div>
       <p className="text-sm text-gray-600">진행률: {project.progress}%</p>

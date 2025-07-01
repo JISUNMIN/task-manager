@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 
 import { showToast, ToastMode } from "@/lib/toast";
 import axios, { AxiosError } from "axios";
-import { useAuthStore } from "@/store/useAuthStore";
+import { Role, useAuthStore } from "@/store/useAuthStore";
 
 type LoginParams = {
   userId: string;
@@ -13,6 +13,7 @@ type LoginParams = {
 type LoginResponse = {
   userId: string;
   token: string;
+  role: Role;
 };
 
 const API_PATH = "/api/auth/login";
@@ -35,8 +36,10 @@ const useLogin = () => {
       // 예: 토큰 저장, 유저 정보 저장 등
       // localStorage.setItem("token", result.token); 등
 
-      login({ userId: result.userId });
-      router.replace("/dashboard/kanban");
+      const { userId, role } = result;
+
+      login({ userId, role });
+      router.replace("/projectlist");
     },
     onError: (error) => {
       const message =
