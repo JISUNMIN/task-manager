@@ -14,7 +14,7 @@ async function main() {
   // Project 생성 (managerId는 user1.id로 연결)
   const project1 = await prisma.project.create({
     data: {
-      projectId: "project01",
+      projectName: "project01",
       progress: 0,
       deadline: new Date("2025-12-31"),
       managerId: user1.id,

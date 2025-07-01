@@ -8,7 +8,7 @@ interface ProjectCardProps {
   project: {
     id: number;
     projectName: string;
-    managerId: number;
+    managerId?: number;
     progress: number;
     deadline: string;
     manager: User;
@@ -28,7 +28,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
       <div className="text-sm text-gray-600 flex gap-1.5 items-center">
         담당자: {project?.manager?.name}
         <Avatar>
-          <AvatarImage src={project.profileImage ?? ""} />
+          <AvatarImage src={project?.manager?.profileImage ?? ""} />
           <AvatarFallback>
             <IoPersonCircle className="w-8 h-8" />
           </AvatarFallback>
