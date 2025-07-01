@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
+import { signJwt } from "@/lib/jwt";
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,8 +29,37 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 토큰 생성
+    const token = signJwt({
+      id: user.id,
+      userId: user.userId,
+      role: user.role,
+    });
+
+    // HTTPOnly 쿠키에 토큰 담기
+    const res = NextResponse.json({
+      token,
+      userId: user.userId,
+      name: user.name,
+      role: user.role,
+    });
+
+    res.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 1 * 24 * 60 * 60,
+      path: "/",
+    });
+    return res;
+
     // 3) 성공 시 유저 정보 반환 (비밀번호는 제외)
-    return NextResponse.json({ userId: user.userId, name: user.name });
+    // return NextResponse.json({
+    //   token,
+    //   userId: user.userId,
+    //   name: user.name,
+    //   role: user.role,
+    // });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
