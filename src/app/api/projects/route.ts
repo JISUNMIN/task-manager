@@ -48,3 +48,33 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export async function POST(req: NextRequest) {
+  try {
+    const { projectName, deadline, managerId } = await req.json();
+
+    // if (!projectName || !deadline || !managerId) {
+    if (!projectName || !deadline) {
+      return NextResponse.json(
+        { error: "필수 정보가 누락되었습니다." },
+        { status: 400 }
+      );
+    }
+
+    await prisma.project.create({
+      data: {
+        projectName,
+        deadline: new Date(deadline),
+        managerId: managerId ?? 1,
+        progress: 0,
+      },
+    });
+
+    return NextResponse.json({ success: true }, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "서버 오류로 프로젝트를 생성하지 못했습니다." },
+      { status: 500 }
+    );
+  }
+}

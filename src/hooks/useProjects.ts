@@ -12,7 +12,7 @@ type Project = {
   tasks: Task[];
 };
 
-type CreateParams = {
+type TaskCreateParams = {
   id?: number;
   title: string;
   desc?: string;
@@ -21,6 +21,13 @@ type CreateParams = {
   projectName?: number;
   userId?: number;
   managerId?: number;
+};
+
+type ProjectCreateParams = {
+  projectName: string;
+  deadline: string;
+  managerId: number;
+  progress?: number;
 };
 
 const PROJECT_API_PATH = "/api/projects";
@@ -58,8 +65,27 @@ const useProjects = (targetId?: string | number) => {
     enabled: !!targetId,
   });
 
-  //create
-  const { mutate: createMutate } = useMutation<void, Error, CreateParams>({
+  //project create
+  const { mutate: createProjectMutate } = useMutation<
+    void,
+    Error,
+    ProjectCreateParams
+  >({
+    mutationFn: async (data) => {
+      await axios.post(PROJECT_API_PATH, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
+    },
+    onError: () => {},
+  });
+
+  //task create
+  const { mutate: createTaskMutate } = useMutation<
+    void,
+    Error,
+    TaskCreateParams
+  >({
     mutationFn: async (data) => {
       await axios.post(TASK_PROJECT_API_PATH, data);
     },
@@ -70,7 +96,7 @@ const useProjects = (targetId?: string | number) => {
   });
 
   //update
-  const { mutate: updateMutate } = useMutation<void, Error, CreateParams>({
+  const { mutate: updateMutate } = useMutation<void, Error, TaskCreateParams>({
     mutationFn: async (data) => {
       const { id, title } = data;
       await axios.put(`${TASK_PROJECT_API_PATH}/${id}`, {
@@ -107,7 +133,8 @@ const useProjects = (targetId?: string | number) => {
     isDetailPending,
     isDetailFetching,
     //create
-    createMutate,
+    createProjectMutate,
+    createTaskMutate,
     //update
     updateMutate,
     //delete

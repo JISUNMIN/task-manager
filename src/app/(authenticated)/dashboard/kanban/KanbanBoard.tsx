@@ -33,7 +33,7 @@ const KanbanBoard = () => {
   const inputRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId") ?? undefined;
-  const { detailData, createMutate, deleteMutate, updateMutate } =
+  const { detailData, createTaskMutate, deleteMutate, updateMutate } =
     useProjects(projectId);
   const { user } = useAuthStore();
 
@@ -83,7 +83,7 @@ const KanbanBoard = () => {
   const handleCreateTask = (columnKey: Status, columnIndex: number) => {
     addTask(columnIndex);
 
-    createMutate({
+    createTaskMutate({
       title: "",
       desc: "",
       status: columnKey,
