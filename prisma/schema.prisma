@@ -8,51 +8,57 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum Role {
+  USER
+  ADMIN
+}
 
 model User {
-  id            Int     @id @default(autoincrement())
-  userId        String  @unique
-  password      String
-  name          String
+  id           Int     @id @default(autoincrement())
+  userId       String  @unique
+  password     String
+  name         String
+  profileImage String?
+  role         Role    @default(USER)
 
-  tasks         Task[]     @relation("AssignedUser")     // 내가 맡은 일
-  managedTasks  Task[]     @relation("ManagingUser")     // 내가 관리하는 일
-  comments      Comment[]
-  projects      Project[]  @relation("ProjectManager")   // 내가 담당하는 프로젝트들
+  tasks        Task[]    @relation("AssignedUser") // 내가 맡은 일
+  managedTasks Task[]    @relation("ManagingUser") // 내가 관리하는 일
+  comments     Comment[]
+  projects     Project[] @relation("ProjectManager") // 내가 담당하는 프로젝트들
 }
 
 model Project {
-  id         Int     @id @default(autoincrement())
-  projectName String  @unique
-  progress   Int
-  deadline   DateTime
-  managerId  Int
+  id          Int      @id @default(autoincrement())
+  projectName String   @unique
+  progress    Int
+  deadline    DateTime
+  managerId   Int
 
-  manager    User     @relation("ProjectManager", fields: [managerId], references: [id])
-  tasks      Task[]
+  manager User   @relation("ProjectManager", fields: [managerId], references: [id])
+  tasks   Task[]
 }
 
 model Task {
-  id         Int     @id @default(autoincrement())
-  title      String
-  desc       String
-  status     String
-  projectId  Int
-  userId     Int
-  managerId  Int
+  id        Int    @id @default(autoincrement())
+  title     String
+  desc      String
+  status    String
+  projectId Int
+  userId    Int
+  managerId Int
 
-  user       User     @relation("AssignedUser", fields: [userId], references: [id])
-  manager    User     @relation("ManagingUser", fields: [managerId], references: [id])
-  project    Project  @relation(fields: [projectId], references: [id])
-  comments   Comment[]
+  user     User      @relation("AssignedUser", fields: [userId], references: [id])
+  manager  User      @relation("ManagingUser", fields: [managerId], references: [id])
+  project  Project   @relation(fields: [projectId], references: [id])
+  comments Comment[]
 }
 
 model Comment {
-  id        Int     @id @default(autoincrement())
-  comment   String
-  userId    Int
-  taskId    Int
+  id      Int    @id @default(autoincrement())
+  comment String
+  userId  Int
+  taskId  Int
 
-  user      User    @relation(fields: [userId], references: [id])
-  task      Task    @relation(fields: [taskId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+  task Task @relation(fields: [taskId], references: [id])
 }
