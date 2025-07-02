@@ -69,7 +69,7 @@
 - **React Query (TanStack Query)**(데이터 fetching 및 캐싱)
 - **TipTap Editor** (Rich Text Editor)
 - **react-beautiful-dnd**(Drag & Drop 기능)
-- **Tailwind CSS**(CSS)
+- **Tailwind CSS**(반응형 UI 구현)
 - **인증 방식**: HTML-Only **쿠키 기반 인증 처리**
 ---
 
