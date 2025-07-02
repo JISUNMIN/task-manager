@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import useUser from "@/hooks/useUser";
 import { useUserStore } from "@/store/useUserStore";
+import { DatePicker } from "@/components/inputs/DatePicker";
 
 type Props = {
   onCancel: () => void;
@@ -28,6 +29,8 @@ type FormValues = {
   managerId: number;
 };
 
+const DEFAULT_DATE = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
 const NewProjectCard = ({ onCancel, onCreated }: Props) => {
   const { isListLoading, isListFetching } = useUser();
   const { users } = useUserStore();
@@ -41,6 +44,9 @@ const NewProjectCard = ({ onCancel, onCreated }: Props) => {
     formState: { isSubmitting, isValid },
   } = useForm<FormValues>({
     mode: "onChange",
+    defaultValues: {
+      deadline: DEFAULT_DATE.toISOString(),
+    },
   });
 
   const onSubmit = (data: FormValues) => {
@@ -62,11 +68,17 @@ const NewProjectCard = ({ onCancel, onCreated }: Props) => {
       </div>
 
       <div className="mb-3">
-        <label className="block text-sm font-medium">마감일</label>
-        <input
-          type="date"
-          className="w-full border p-2 rounded"
-          {...register("deadline", { required: true })}
+        <Controller
+          control={control}
+          name="deadline"
+          render={({ field }) => (
+            <DatePicker
+              label="마감일"
+              value={field.value}
+              onChange={field.onChange}
+              defaultDate={DEFAULT_DATE}
+            />
+          )}
         />
       </div>
 

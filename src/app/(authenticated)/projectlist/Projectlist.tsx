@@ -41,7 +41,7 @@ const ProjectList = () => {
         ) : (
           <div
             onClick={() => setIsCreating(true)}
-            className="flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6  mb-3 cursor-pointer hover:bg-gray-100"
+            className="h-50 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6  mb-3 cursor-pointer hover:bg-gray-100"
           >
             <span className="text-2xl text-gray-500">+</span>
           </div>
