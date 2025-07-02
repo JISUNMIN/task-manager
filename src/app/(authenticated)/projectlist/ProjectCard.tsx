@@ -1,9 +1,12 @@
 import React from "react";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User } from "@prisma/client";
+import { Project, User } from "@prisma/client";
 import { IoPersonCircle } from "react-icons/io5";
 import { convertDateToString } from "@/lib/utils/helpers";
+import { useAuthStore } from "@/store/useAuthStore";
+import { Button } from "@/components/ui/button";
+import useProjects from "@/hooks/useProjects";
 
 interface ProjectCardProps {
   project: {
@@ -18,10 +21,21 @@ interface ProjectCardProps {
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
+  const { user } = useAuthStore();
+  const userId = user?.id;
+  const role = user?.role;
+  const canDeleteProject = role === "ADMIN" || project.managerId === userId;
+  const { deleteProjectMutate } = useProjects();
+
+  const onClickDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    deleteProjectMutate({ id: project.id });
+  };
+
   return (
     <div
       onClick={onClick}
-      className="h-50 bg-gray-100 border border-gray-300 rounded-lg p-6 shadow-md cursor-pointer mb-3 hover:bg-gray-200 hover:border-gray-400 hover:scale-105 transition-all"
+      className="h-55 bg-gray-100 border border-gray-300 rounded-lg p-6 shadow-md cursor-pointer mb-3 hover:bg-gray-200 hover:border-gray-400 hover:scale-105 transition-all"
     >
       <h3 className="text-xl font-semibold text-gray-800">
         {project.projectName}
@@ -40,6 +54,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
         마감일: {convertDateToString(new Date(project.deadline), "-")}
       </p>
       <Progress value={project.progress} className="mt-4" />
+
+      <div className="flex justify-end mt-5">
+        {canDeleteProject && <Button onClick={onClickDelete}>삭제</Button>}
+      </div>
     </div>
   );
 };

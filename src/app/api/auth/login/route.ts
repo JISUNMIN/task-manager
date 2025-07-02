@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
     // HTTPOnly 쿠키에 토큰 담기
     const res = NextResponse.json({
       token,
+      id: user.id,
       userId: user.userId,
       name: user.name,
       role: user.role,

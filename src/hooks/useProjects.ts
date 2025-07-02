@@ -95,8 +95,12 @@ const useProjects = (targetId?: string | number) => {
     onError: () => {},
   });
 
-  //update
-  const { mutate: updateMutate } = useMutation<void, Error, TaskCreateParams>({
+  //task update
+  const { mutate: updateTaskMutate } = useMutation<
+    void,
+    Error,
+    TaskCreateParams
+  >({
     mutationFn: async (data) => {
       const { id, title } = data;
       await axios.put(`${TASK_PROJECT_API_PATH}/${id}`, {
@@ -111,17 +115,35 @@ const useProjects = (targetId?: string | number) => {
     onError: () => {},
   });
 
-  //delete
-  const { mutate: deleteMutate } = useMutation<void, Error, { id: number }>({
+  //project delete
+  const { mutate: deleteProjectMutate } = useMutation<
+    void,
+    Error,
+    { id: number }
+  >({
     mutationFn: async (data) => {
       const { id } = data;
-      await axios.delete(`${TASK_PROJECT_API_PATH}/${id}`);
+      await axios.delete(`${PROJECT_API_PATH}/${id}/kanban`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
     },
     onError: () => {},
   });
+
+  //task delete
+  const { mutate: deleteTaskMutate } = useMutation<void, Error, { id: number }>(
+    {
+      mutationFn: async (data) => {
+        const { id } = data;
+        await axios.delete(`${TASK_PROJECT_API_PATH}/${id}`);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
+      },
+      onError: () => {},
+    }
+  );
 
   return {
     //list
@@ -136,9 +158,10 @@ const useProjects = (targetId?: string | number) => {
     createProjectMutate,
     createTaskMutate,
     //update
-    updateMutate,
+    updateTaskMutate,
     //delete
-    deleteMutate,
+    deleteProjectMutate,
+    deleteTaskMutate,
   };
 };
 
