@@ -40,7 +40,17 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // 4) 성공 응답
+    // 4) 개인 프로젝트 생성
+    await prisma.project.create({
+      data: {
+        projectName: `${name}의 개인 프로젝트`,
+        progress: 0,
+        managerId: user.id,
+        isPersonal: true,
+      },
+    });
+
+    // 5) 성공 응답
     return NextResponse.json(
       { userId: user.userId, name: user.name },
       { status: 201 }
@@ -48,7 +58,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("회원가입 에러:", error);
     return NextResponse.json(
-      { error: "서버 오류가 발생했습니다." },
+      { error: "서버 오류로 회원가입에 실패했습니다.", detail: String(error) },
       { status: 500 }
     );
   }

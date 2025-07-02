@@ -16,6 +16,7 @@ interface ProjectCardProps {
     progress: number;
     deadline: string;
     manager: User;
+    isPersonal: boolean;
   };
   onClick: () => void;
 }
@@ -24,7 +25,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
   const { user } = useAuthStore();
   const userId = user?.id;
   const role = user?.role;
-  const canDeleteProject = role === "ADMIN" || project.managerId === userId;
+  const canDeleteProject =
+    !project.isPersonal && (role === "ADMIN" || project.managerId === userId);
   const { deleteProjectMutate } = useProjects();
 
   const onClickDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -50,9 +52,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
         </Avatar>
       </div>
       <p className="text-sm text-gray-600">진행률: {project.progress}%</p>
-      <p className="text-sm text-gray-600">
-        마감일: {convertDateToString(new Date(project.deadline), "-")}
-      </p>
+      {!project.isPersonal && (
+        <p className="text-sm text-gray-600">
+          마감일: {convertDateToString(new Date(project.deadline), "-")}
+        </p>
+      )}
+
       <Progress value={project.progress} className="mt-4" />
 
       <div className="flex justify-end mt-5">

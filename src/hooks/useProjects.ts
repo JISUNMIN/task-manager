@@ -10,6 +10,7 @@ type Project = {
   deadline: string;
   manager: User;
   tasks: Task[];
+  isPersonal: boolean;
 };
 
 type TaskCreateParams = {
