@@ -62,17 +62,15 @@
 
 ## 🛠️ 기술 스택
 
-- **Next.js 14 (App Router)**
-- **Prisma + PostgreSQL**
+- **Next.js 15 (App Router)**
+- **Prisma (ORM) + Supabase (DB)**
 - **React Hook Form**
-- **Zustand**
-- **React Query (TanStack Query)**
-- **TipTap Editor**
-- **react-beautiful-dnd**
-- **Tailwind CSS**
-- **HTML-Only Cookie 기반 인증 처리**
-  - `HttpOnly`, `Secure`, `SameSite` 설정 적용
-
+- **Zustand**(전역 상태 관리)
+- **React Query (TanStack Query)**(데이터 fetching 및 캐싱)
+- **TipTap Editor** (Rich Text Editor)
+- **react-beautiful-dnd**(Drag & Drop 기능)
+- **Tailwind CSS**(CSS)
+- **인증 방식**: HTML-Only **쿠키 기반 인증 처리**
 ---
 
 ## ✨ 향후 개선 아이디어
