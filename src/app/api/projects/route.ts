@@ -53,8 +53,7 @@ export async function POST(req: NextRequest) {
   try {
     const { projectName, deadline, managerId } = await req.json();
 
-    // if (!projectName || !deadline || !managerId) {
-    if (!projectName || !deadline) {
+    if (!projectName || !deadline || !managerId) {
       return NextResponse.json(
         { error: "필수 정보가 누락되었습니다." },
         { status: 400 }
@@ -65,7 +64,7 @@ export async function POST(req: NextRequest) {
       data: {
         projectName,
         deadline: new Date(deadline),
-        managerId: managerId ?? 1,
+        managerId: Number(managerId),
         progress: 0,
       },
     });
@@ -73,7 +72,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {
     return NextResponse.json(
-      { error: "서버 오류로 프로젝트를 생성하지 못했습니다." },
+      {
+        error: "서버 오류로 프로젝트를 생성하지 못했습니다.",
+        detail: String(error),
+      },
       { status: 500 }
     );
   }

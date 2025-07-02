@@ -1,7 +1,16 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import useProjects from "@/hooks/useProjects";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import useUser from "@/hooks/useUser";
+import { useUserStore } from "@/store/useUserStore";
 
 type Props = {
   onCancel: () => void;
@@ -20,20 +29,19 @@ type FormValues = {
 };
 
 const NewProjectCard = ({ onCancel, onCreated }: Props) => {
-  const [users, setUsers] = useState<User[]>([]);
+  const { isListLoading, isListFetching } = useUser();
+  const { users } = useUserStore();
+
   const { createProjectMutate, isListPending } = useProjects();
 
   const {
     register,
     handleSubmit,
-    setValue,
-    watch,
+    control,
     formState: { isSubmitting, isValid },
   } = useForm<FormValues>({
     mode: "onChange",
   });
-
-  const selectedManager = watch("managerId");
 
   const onSubmit = (data: FormValues) => {
     createProjectMutate(data);
@@ -43,7 +51,7 @@ const NewProjectCard = ({ onCancel, onCreated }: Props) => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="border rounded-lg p-4 bg-white shadow-md"
+      className="border rounded-lg p-6 mb-3 bg-white shadow-md"
     >
       <div className="mb-3">
         <label className="block text-sm font-medium">프로젝트명</label>
@@ -64,18 +72,24 @@ const NewProjectCard = ({ onCancel, onCreated }: Props) => {
 
       <div className="mb-3">
         <label className="block text-sm font-medium">담당자</label>
-        <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
-          {users.map((user) => (
-            <label key={user.id} className="inline-flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={selectedManager === user.id}
-                onChange={() => setValue("managerId", user.id)}
-              />
-              {user.name}
-            </label>
-          ))}
-        </div>
+        <Controller
+          name="managerId"
+          control={control}
+          render={({ field }) => (
+            <Select onValueChange={field.onChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="사용자 선택" />
+              </SelectTrigger>
+              <SelectContent>
+                {users.map((item) => (
+                  <SelectItem key={item.id} value={String(item.id)}>
+                    {item.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
       </div>
 
       <div className="flex justify-end gap-2">
