@@ -22,7 +22,7 @@ import { convertDateToString, formatDate } from "@/lib/utils/helpers";
 export function KanbanSidebar() {
   const router = useRouter();
   const { listData } = useProjects();
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
   const searchParams = useSearchParams();
   const handleNavigate = () => {
     router.push("/projectlist");
@@ -32,6 +32,14 @@ export function KanbanSidebar() {
     logout();
     router.replace("/auth/login");
   };
+
+  //  개인 프로젝트는 본인 것만 필터링
+  const filteredProjects = listData?.filter((project) => {
+    if (project.isPersonal) {
+      return project?.manager.id === user?.id;
+    }
+    return true;
+  });
 
   const handleSetProjectId = (newProjectId: number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -58,23 +66,23 @@ export function KanbanSidebar() {
             <SidebarMenu>
               <div>
                 <ul>
-                  {Array.isArray(listData) &&
-                    listData.map((project) => (
-                      <SidebarMenuItem
-                        key={project.id}
-                        onClick={() => handleSetProjectId(project.id)}
-                      >
-                        <SidebarMenuButton className="flex flex-col items-start mb-2 border-b border-gray-300 bg-gray-50 p-3 rounded-md shadow-sm h-full">
-                          <a href={"#"}>
-                            <p className="font-semibold text-gray-700">
-                              📌 프로젝트명: {project.projectName}
-                            </p>
-                            <p className="text-gray-600">
-                              👤 담당자: {project.manager.name}
-                            </p>
-                            <p className="text-gray-600">
-                              📊 진행률: {project.progress}%
-                            </p>
+                  {filteredProjects?.map((project) => (
+                    <SidebarMenuItem
+                      key={project.id}
+                      onClick={() => handleSetProjectId(project.id)}
+                    >
+                      <SidebarMenuButton className="flex flex-col items-start mb-2 border-b border-gray-300 bg-gray-50 p-3 rounded-md shadow-sm h-full">
+                        <a href={"#"}>
+                          <p className="font-semibold text-gray-700">
+                            📌 프로젝트명: {project.projectName}
+                          </p>
+                          <p className="text-gray-600">
+                            👤 담당자: {project.manager.name}
+                          </p>
+                          <p className="text-gray-600">
+                            📊 진행률: {project.progress}%
+                          </p>
+                          {!project.isPersonal && (
                             <p className="text-gray-600">
                               🗓 마감일:
                               {convertDateToString(
@@ -82,10 +90,11 @@ export function KanbanSidebar() {
                                 "-"
                               )}
                             </p>
-                          </a>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
+                          )}
+                        </a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
                 </ul>
               </div>
               <SidebarFooter>

@@ -33,9 +33,9 @@ const KanbanBoard = () => {
   const inputRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId") ?? undefined;
-  const { detailData, createTaskMutate, deleteMutate, updateMutate } =
+  const { detailData, createTaskMutate, deleteTaskMutate, updateTaskMutate } =
     useProjects(projectId);
-  const { user } = useAuthStore();
+  const isPersonal = detailData?.isPersonal;
 
   const {
     columns,
@@ -95,14 +95,14 @@ const KanbanBoard = () => {
 
   const handleDeleteTask = (columnKey: Status, itemIndex: number) => {
     const task = columns[columnKey][itemIndex];
-    deleteMutate({ id: task.id });
+    deleteTaskMutate({ id: task.id });
     removeColumn(columnKey, itemIndex);
   };
 
   const debouncedUpdate = useMemo(
     () =>
       debounce((taskId: number, newTitle: string) => {
-        updateMutate({ id: taskId, title: newTitle });
+        updateTaskMutate({ id: taskId, title: newTitle });
       }, 1500),
     []
   );
@@ -261,6 +261,7 @@ const KanbanBoard = () => {
           togglePanel={togglePanel}
           focusedInputKey={focusedInputKey}
           handleFocusedInputKey={handleFocusedInputKey}
+          isPersonal={isPersonal}
         />
       </ResizablePanelGroup>
     </SidebarProvider>

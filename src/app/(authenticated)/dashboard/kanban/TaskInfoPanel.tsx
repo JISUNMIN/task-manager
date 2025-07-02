@@ -25,6 +25,7 @@ interface TaskInfoPanelProps {
   togglePanel: () => void;
   focusedInputKey: string;
   handleFocusedInputKey: (columnKey: string, itemIndex: number) => void;
+  isPersonal?: boolean;
 }
 
 const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
@@ -32,9 +33,10 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   togglePanel,
   focusedInputKey,
   handleFocusedInputKey,
+  isPersonal,
 }) => {
   const { updateTask, columns, moveTask } = useKanbanStore();
-  const { updateMutate } = useProjects();
+  const { updateTaskMutate } = useProjects();
   const [columnKey, itemIndexStr] = focusedInputKey.split("-");
   const taskIndex = Number(itemIndexStr);
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -57,7 +59,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const debouncedUpdate = useMemo(
     () =>
       debounce((taskId: number, newTitle: string) => {
-        updateMutate({ id: taskId, title: newTitle });
+        updateTaskMutate({ id: taskId, title: newTitle });
       }, 1500),
     []
   );
@@ -120,28 +122,37 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
             </SelectContent>
           </Select>
 
-          <div className="flex items-center">
-            <FaPeopleGroup />
-            <span className="text-gray-700 ml-1"> 할당자</span>
-          </div>
-          <Select
-            value={columnKey}
-            onValueChange={(newStatus) => {
-              moveTask(columnKey as Status, newStatus as Status, taskIndex, 0);
-              handleFocusedInputKey(newStatus, taskIndex);
-            }}
-          >
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {ALL_STATUS.map((status) => (
-                <SelectItem key={status} value={status}>
-                  <KanbanColumnBadge columnKey={status} />
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {!isPersonal && (
+            <>
+              <div className="flex items-center">
+                <FaPeopleGroup />
+                <span className="text-gray-700 ml-1"> 할당자</span>
+              </div>
+              <Select
+                value={columnKey}
+                onValueChange={(newStatus) => {
+                  moveTask(
+                    columnKey as Status,
+                    newStatus as Status,
+                    taskIndex,
+                    0
+                  );
+                  handleFocusedInputKey(newStatus, taskIndex);
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ALL_STATUS.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      <KanbanColumnBadge columnKey={status} />
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
+          )}
         </Grid>
       </div>
       <div className=" p-4 h-full flex flex-col overflow-y-auto ">

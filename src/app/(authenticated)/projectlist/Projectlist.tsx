@@ -19,6 +19,14 @@ const ProjectList = () => {
     listData[0]?.isPersonal === true &&
     role !== "ADMIN";
 
+  //  개인 프로젝트는 자기 것만 보이도록 필터링
+  const filteredProjects = listData?.filter((project) => {
+    if (project.isPersonal) {
+      return project?.manager.id === user?.id;
+    }
+    return true;
+  });
+
   const onClickProject = (projectId: number) => {
     router.replace(`/dashboard/kanban?projectId=${projectId}`);
   };
@@ -42,7 +50,7 @@ const ProjectList = () => {
 
       {/* 프로젝트 카드 목록 (항상 렌더링) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {listData.map((project) => (
+        {filteredProjects?.map((project) => (
           <ProjectCard
             key={project.id}
             project={project}
