@@ -5,7 +5,7 @@ import React, { useCallback, useMemo } from "react";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
 import KanbanColumnBadge from "./KanbanColumnBadge";
-import Editor from "@/components/ui/editor/Editor";
+import Editor from "@/components/shared/editor/Editor";
 import {
   Select,
   SelectContent,
