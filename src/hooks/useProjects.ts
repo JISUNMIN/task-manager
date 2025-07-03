@@ -15,7 +15,7 @@ type Project = {
 
 type TaskCreateParams = {
   id?: number;
-  title: string;
+  title?: string;
   desc?: string;
   status?: string;
   projectId?: number;
@@ -103,11 +103,10 @@ const useProjects = (targetId?: string | number) => {
     TaskCreateParams
   >({
     mutationFn: async (data) => {
-      const { id, title } = data;
+      const { id, title, desc } = data;
       await axios.put(`${TASK_PROJECT_API_PATH}/${id}`, {
         title,
-        // desc,
-        // status,
+        desc,
       });
     },
     onSuccess: () => {

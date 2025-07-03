@@ -41,36 +41,32 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const taskIndex = Number(itemIndexStr);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-  const onChangeTitle = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const value = e.target.value;
-      updateTask(columnKey as Status, Number(itemIndexStr), { title: value });
-    },
-    [focusedInputKey]
-  );
-
-  const onChangeDesc = useCallback(
-    (value: string) => {
-      updateTask(columnKey as Status, Number(itemIndexStr), { desc: value });
-    },
-    [columnKey, itemIndexStr]
-  );
-
   const debouncedUpdate = useMemo(
     () =>
-      debounce((taskId: number, newTitle: string) => {
-        updateTaskMutate({ id: taskId, title: newTitle });
+      debounce((taskId: number, value: string, target: string) => {
+        if (target === "title") {
+          updateTaskMutate({ id: taskId, title: value });
+        } else if (target === "desc") {
+          updateTaskMutate({ id: taskId, desc: value });
+        }
       }, 1500),
     []
   );
-  const handleUpdateTask = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
+  const handleUpdateTask = (
+    e: React.ChangeEvent<HTMLTextAreaElement> | string,
+    target: string
+  ) => {
+    const value = typeof e === "string" ? e : e.target.value;
     const task = columns[columnKey as Status][taskIndex];
 
     // 로컬 상태
-    updateTask(columnKey as Status, taskIndex, { title: value });
+    if (target === "title") {
+      updateTask(columnKey as Status, taskIndex, { title: value });
+    } else if (target === "desc") {
+      updateTask(columnKey as Status, taskIndex, { desc: value });
+    }
     // API 요청 debounce 처리
-    debouncedUpdate(task.id, value);
+    debouncedUpdate(task.id, value, target);
   };
 
   return (
@@ -95,7 +91,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           maxRows={2}
           className="w-full p-2 resize-none"
           placeholder="제목을 입력하세요"
-          onChange={handleUpdateTask}
+          onChange={(e) => handleUpdateTask(e, "title")}
           value={columns[columnKey as Status][Number(itemIndexStr)]?.title}
         />
         <Grid className="grid grid-cols-[1fr_6fr] px-5">
@@ -158,7 +154,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       <div className=" p-4 h-full flex flex-col overflow-y-auto ">
         <div>
           <Editor
-            onChange={onChangeDesc}
+            onChange={(e) => handleUpdateTask(e, "desc")}
             content={columns[columnKey as Status][Number(itemIndexStr)]?.desc}
           />
         </div>
