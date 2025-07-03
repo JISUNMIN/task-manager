@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ResizablePanel } from "@/components/ui/resizable";
 import { ALL_STATUS, Status, useKanbanStore } from "@/store/useKanbanStore";
-import React, { useCallback, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
 import KanbanColumnBadge from "./KanbanColumnBadge";
@@ -19,6 +19,8 @@ import { FaPeopleGroup } from "react-icons/fa6";
 import { useMediaQuery } from "usehooks-ts";
 import { debounce } from "lodash";
 import useProjects from "@/hooks/useProjects";
+import { UserSelectInput } from "@/components/form/UserSelectInput";
+import { Controller, useForm } from "react-hook-form";
 
 interface TaskInfoPanelProps {
   isTaskInfoPanelOpen: boolean;
@@ -40,6 +42,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const [columnKey, itemIndexStr] = focusedInputKey.split("-");
   const taskIndex = Number(itemIndexStr);
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const { control } = useForm();
 
   const debouncedUpdate = useMemo(
     () =>
@@ -68,6 +71,8 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     // API 요청 debounce 처리
     debouncedUpdate(task.id, value, target);
   };
+
+  const [selectedUsers, setSelectedUsers] = useState([]);
 
   return (
     <ResizablePanel
@@ -124,29 +129,17 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
                 <FaPeopleGroup />
                 <span className="text-gray-700 ml-1"> 할당자</span>
               </div>
-              <Select
-                value={columnKey}
-                onValueChange={(newStatus) => {
-                  moveTask(
-                    columnKey as Status,
-                    newStatus as Status,
-                    taskIndex,
-                    0
-                  );
-                  handleFocusedInputKey(newStatus, taskIndex);
-                }}
-              >
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ALL_STATUS.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      <KanbanColumnBadge columnKey={status} />
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                name="users"
+                control={control}
+                render={({ field }) => (
+                  <UserSelectInput
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="사용자 검색"
+                  />
+                )}
+              />
             </>
           )}
         </Grid>
