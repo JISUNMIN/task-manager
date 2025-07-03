@@ -15,7 +15,7 @@ import {
 import Image from "next/image";
 import { logo } from "@/assets/images";
 import useSignup from "@/hooks/useSignup";
-import { PasswordInput } from "@/components/inputs/PasswordInput";
+import { PasswordInput } from "@/components/form/PasswordInput";
 
 interface SignupInputs {
   name: string;

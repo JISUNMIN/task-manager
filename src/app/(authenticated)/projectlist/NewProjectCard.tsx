@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import useUser from "@/hooks/useUser";
 import { useUserStore } from "@/store/useUserStore";
-import { DatePicker } from "@/components/inputs/DatePicker";
+import { DatePicker } from "@/components/form/DatePicker";
 
 type Props = {
   onCancel: () => void;

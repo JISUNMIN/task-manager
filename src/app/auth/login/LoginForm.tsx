@@ -10,7 +10,7 @@ import Image from "next/image";
 import { logo } from "@/assets/images";
 import useLogin from "../../../hooks/useLogin";
 import { useRouter } from "next/navigation";
-import { PasswordInput } from "@/components/inputs/PasswordInput";
+import { PasswordInput } from "@/components/form/PasswordInput";
 
 const schema = yup.object().shape({
   userId: yup
@@ -62,7 +62,7 @@ export default function LoginForm() {
         <p className="text-2xl font-extrabold text-center text-gray-800  drop-shadow-md">
           Squirrel Board
         </p>
-<Card className="w-full max-w-[20rem] sm:max-w-[24rem] sm:w-96 shadow-lg">
+        <Card className="w-full max-w-[20rem] sm:max-w-[24rem] sm:w-96 shadow-lg">
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="flex flex-col gap-1">
