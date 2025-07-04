@@ -13,7 +13,6 @@ export async function POST(req: NextRequest) {
         desc: "",
         status: body.status ?? "To Do",
         projectId: Number(body.projectId),
-        userId: Number(body.userId),
         managerId: Number(body.managerId),
       },
     });

@@ -1,3 +1,4 @@
+import { User } from "@prisma/client";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
@@ -20,6 +21,7 @@ export type Task = {
   id: number;
   title: string;
   desc: string;
+  assignees: number[];
 };
 
 type Columns = {
@@ -29,7 +31,13 @@ type Columns = {
 export const useKanbanStore = create<{
   columns: Columns;
   initializeColumns: (
-    tasks: { id: number; title: string; desc: string; status: Status }[]
+    tasks: {
+      id: number;
+      title: string;
+      desc: string;
+      status: Status;
+      assignees: number[];
+    }[]
   ) => void;
   addTask: (index: number) => void;
   updateTask: (columnName: Status, index: number, task: Partial<Task>) => void;
@@ -45,11 +53,11 @@ export const useKanbanStore = create<{
     persist(
       (set) => ({
         columns: {
-          "To Do": [{ id: 0, title: "", desc: "" }],
-          Ready: [{ id: 0, title: "", desc: "" }],
-          "In Progress": [{ id: 0, title: "", desc: "" }],
-          "On Hold": [{ id: 0, title: "", desc: "" }],
-          Completed: [{ id: 0, title: "", desc: "" }],
+          "To Do": [{ id: 0, title: "", desc: "", assignees: [] }],
+          Ready: [{ id: 0, title: "", desc: "", assignees: [] }],
+          "In Progress": [{ id: 0, title: "", desc: "", assignees: [] }],
+          "On Hold": [{ id: 0, title: "", desc: "", assignees: [] }],
+          Completed: [{ id: 0, title: "", desc: "", assignees: [] }],
         },
         initializeColumns: (tasks) => {
           const newColumns: Columns = {
@@ -66,6 +74,7 @@ export const useKanbanStore = create<{
                 id: task.id,
                 title: task.title,
                 desc: task.desc,
+                assignees: task.assignees || [],
               });
             }
           });
@@ -82,7 +91,7 @@ export const useKanbanStore = create<{
                 ...state.columns,
                 [columnKey]: [
                   ...state.columns[columnKey],
-                  { title: "", desc: "" },
+                  { title: "", desc: "", assignees: [] },
                 ],
               },
             };

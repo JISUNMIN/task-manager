@@ -20,7 +20,7 @@ import { useMediaQuery } from "usehooks-ts";
 import { debounce } from "lodash";
 import useProjects from "@/hooks/useProjects";
 import { UserSelectInput } from "@/components/form/UserSelectInput";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
 interface TaskInfoPanelProps {
   isTaskInfoPanelOpen: boolean;
@@ -42,19 +42,26 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const [columnKey, itemIndexStr] = focusedInputKey.split("-");
   const taskIndex = Number(itemIndexStr);
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const { control } = useForm();
+  const { control, watch } = useForm();
+  const assigneeIds = useWatch({
+    control: control,
+    name: "assignees",
+  });
 
   const debouncedUpdate = useMemo(
     () =>
-      debounce((taskId: number, value: string, target: string) => {
+      debounce((taskId: number, value: string | number[], target: string) => {
         if (target === "title") {
           updateTaskMutate({ id: taskId, title: value });
         } else if (target === "desc") {
+          updateTaskMutate({ id: taskId, assignees: value });
+        } else {
           updateTaskMutate({ id: taskId, desc: value });
         }
       }, 1500),
     []
   );
+
   const handleUpdateTask = (
     e: React.ChangeEvent<HTMLTextAreaElement> | string,
     target: string
@@ -67,12 +74,19 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       updateTask(columnKey as Status, taskIndex, { title: value });
     } else if (target === "desc") {
       updateTask(columnKey as Status, taskIndex, { desc: value });
+    } else if (target === "assignees") {
+      // 예: value가 number[]인 경우
+      updateTask(columnKey as Status, taskIndex, {
+        assignees: assigneeIds as number[],
+      });
     }
     // API 요청 debounce 처리
-    debouncedUpdate(task.id, value, target);
+    if (target === "assignees") {
+      debouncedUpdate(task.id, assigneeIds, target);
+    } else {
+      debouncedUpdate(task.id, value, target);
+    }
   };
-
-  const [selectedUsers, setSelectedUsers] = useState([]);
 
   return (
     <ResizablePanel
@@ -130,7 +144,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
                 <span className="text-gray-700 ml-1"> 할당자</span>
               </div>
               <Controller
-                name="users"
+                name="assignees"
                 control={control}
                 render={({ field }) => (
                   <UserSelectInput

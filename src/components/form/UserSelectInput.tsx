@@ -9,8 +9,8 @@ import { useUserStore } from "@/store/useUserStore";
 import { cn } from "@/lib/utils";
 
 interface UserSelectInputProps {
-  value: User[]; // react-hook-form value
-  onChange: (users: User[]) => void; // react-hook-form onChange
+  value: number[]; // user.id 배열로 관리
+  onChange: (users: number[]) => void; // react-hook-form onChange
   placeholder?: string;
 }
 
@@ -23,6 +23,7 @@ export function UserSelectInput({
   const [inputValue, setInputValue] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const selectedUsers = users.filter((user) => value.includes(user.id));
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -53,11 +54,14 @@ export function UserSelectInput({
   }, [inputValue]);
 
   const toggleUser = (user: User) => {
-    const isSelected = value.some((u) => u.id === user.id);
-    const newUsers = isSelected
-      ? value.filter((u) => u.id !== user.id)
-      : [...value, user];
-    onChange(newUsers);
+    // value: 현재값
+    // isAlreadySelected:해당 값이 선택 되어있는지 여부: 처음 선택 시 fasle ,한번더 선택시 true
+    const isAlreadySelected = value.includes(user.id);
+    const newUserIds = isAlreadySelected
+      ? value.filter((id) => id !== user.id)
+      : [...value, user.id];
+
+    onChange(newUserIds);
     setInputValue("");
     setDropdownOpen(true);
     inputRef.current?.focus();
@@ -97,7 +101,7 @@ export function UserSelectInput({
       onClick={() => inputRef.current?.focus()}
     >
       {/* 선택된 사용자들 */}
-      {value.map((user) => (
+      {selectedUsers.map((user) => (
         <div
           key={user.id}
           className="flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2 py-1 text-sm"
@@ -143,7 +147,7 @@ export function UserSelectInput({
             <li className="p-3 text-sm text-gray-500">사용자가 없습니다.</li>
           ) : (
             filteredUsers.map((user, index) => {
-              const isSelected = value.some((u) => u.id === user.id);
+              const isSelected = value.some((u) => u === user.id);
               const isHighlighted = selectedIndex === index;
 
               return (

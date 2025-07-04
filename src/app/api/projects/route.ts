@@ -1,8 +1,6 @@
 // app/api/projects/route.ts
 import { authenticate } from "@/lib/auth";
-import { verifyJwt } from "@/lib/jwt";
 import { prisma } from "@/lib/prisma";
-import { useAuthStore } from "@/store/useAuthStore";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -18,7 +16,7 @@ export async function GET(req: NextRequest) {
       projects = await prisma.project.findMany({
         include: {
           manager: true,
-          tasks: { include: { user: true } },
+          tasks: { include: { assignees: true } },
         },
       });
     } else {
@@ -28,14 +26,20 @@ export async function GET(req: NextRequest) {
             { managerId: id },
             {
               tasks: {
-                some: { userId: id },
+                some: {
+                  assignees: {
+                    some: {
+                      id: id,
+                    },
+                  },
+                },
               },
             },
           ],
         },
         include: {
           manager: true,
-          tasks: { include: { user: true } },
+          tasks: { include: { assignees: true } },
         },
       });
     }
@@ -43,7 +47,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(projects);
   } catch (error) {
     return NextResponse.json(
-      { error: "서버 오류가 발생했습니다." },
+      {
+        error: "프로젝트 목록을 불러오는데 오류가 발생했습니다.",
+        detail: String(error),
+      },
       { status: 500 }
     );
   }
