@@ -33,7 +33,7 @@ const ProjectList = () => {
 
   if (!listData) return <Loading />;
   return (
-    <div className="mx-auto max-w-screen-lg p-6">
+    <div className="mx-auto max-w-screen-xl p-6">
       <h1 className="text-3xl font-extrabold text-gray-800 mb-3">
         프로젝트 목록
       </h1>
@@ -49,7 +49,7 @@ const ProjectList = () => {
       )}
 
       {/* 프로젝트 카드 목록 (항상 렌더링) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {filteredProjects?.map((project) => (
           <ProjectCard
             key={project.id}
