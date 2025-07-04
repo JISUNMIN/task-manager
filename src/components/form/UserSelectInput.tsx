@@ -144,7 +144,6 @@ export function UserSelectInput({
       ))}
 
       {/* 검색 input */}
-
       <input
         ref={inputRef}
         type="text"

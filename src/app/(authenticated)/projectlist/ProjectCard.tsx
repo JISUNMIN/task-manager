@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import useProjects from "@/hooks/useProjects";
 import { Badge } from "@/components/ui/badge";
 import { GoVerified } from "react-icons/go";
+import { cn } from "@/lib/utils";
 
 interface ProjectCardProps {
   project: {
@@ -30,13 +31,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
   const canDeleteProject =
     !project.isPersonal && (role === "ADMIN" || project.managerId === userId);
   const { deleteProjectMutate } = useProjects();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
-
   const onClickDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     deleteProjectMutate({ id: project.id });
   };
+  const containerRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -48,20 +48,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
-      const rotateY = (-1 / 5) * x + 20;
-      const rotateX = (4 / 30) * y - 20;
-
-      // container.style.transform = `
-      //   perspective(350px)
-      //   rotateX(${rotateX}deg)
-      //   rotateY(${rotateY}deg)
-      // `;
-
       overlay.style.backgroundPosition = `${x / 5}% ${y / 5}%`;
     };
 
     const handleMouseLeave = () => {
-      container.style.transform = ""; 
       overlay.style.backgroundPosition = "";
     };
 
@@ -78,13 +68,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
     <div
       ref={containerRef}
       onClick={onClick}
-      className={`h-55 rounded-lg p-6 shadow-md cursor-pointer mb-3 border transition-all duration-100
-        ${
-          project.isPersonal
-            ? "bg-gray-100 border-gray-300 hover:bg-gray-200 hover:border-gray-400 hover:scale-105"
-            : "bg-white border-stone-300 hover:bg-gray-100 hover:border-stone-400 hover:scale-105"
-        }
-      `}
+      className={cn(
+        "relative h-55 rounded-lg p-6 shadow-md cursor-pointer mb-3 transition-all duration-100 bg-white hover:bg-gray-100 hover:scale-105",
+        project.isPersonal
+          ? "border-4 border-blue-400 hover:border-blue-500"
+          : "border border-stone-300 hover:border-stone-400"
+      )}
       style={{
         transformStyle: "preserve-3d",
         willChange: "transform",
@@ -94,14 +83,20 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
         ref={overlayRef}
         className="absolute inset-0 z-10 pointer-events-none mix-blend-color-dodge rounded-lg"
         style={{
-          background:
-            "linear-gradient(105deg, transparent 40%, rgba(255,219,112,0.8) 45%, rgba(132,50,255,0.6) 50%, transparent 54%)",
+          background: `
+      linear-gradient(
+        105deg,
+        transparent 40%,
+        rgba(255, 225, 130, 0.9) 45%,
+        rgba(100, 200, 255, 0.9) 50%,
+        transparent 54%
+      )`,
           filter: "brightness(1.2) opacity(0.8)",
           backgroundSize: "150% 150%",
           backgroundPosition: "100%",
         }}
       />
-      <div className="relative z-10 h-30">
+      <div className="relative z-10">
         <h3 className="text-xl font-semibold text-gray-800">
           {project.projectName}
         </h3>
