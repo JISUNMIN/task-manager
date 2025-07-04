@@ -9,24 +9,40 @@ import { useUserStore } from "@/store/useUserStore";
 import { cn } from "@/lib/utils";
 
 interface UserSelectInputProps {
-  value: number[]; // user.id 배열로 관리
-  onChange: (users: number[]) => void; // react-hook-form onChange
+  value: number[];
+  onChange: (users: number[]) => void;
   placeholder?: string;
+  maxSelectable?: number;
 }
 
 export function UserSelectInput({
   value = [],
   onChange,
   placeholder = "사용자 검색",
+  maxSelectable = 5,
 }: UserSelectInputProps) {
   const { users } = useUserStore();
   const [inputValue, setInputValue] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const selectedUsers = users.filter((user) => value.includes(user.id));
+  const [error, setError] = useState<boolean | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
+
+  const selectedUsers = users.filter((user) => value.includes(user.id));
+
+  const filteredUsers =
+    users?.filter(
+      (user) =>
+        user.name.toLowerCase().includes(inputValue.toLowerCase()) ||
+        user.userId.toLowerCase().includes(inputValue.toLowerCase())
+    ) ?? [];
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [inputValue]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -42,26 +58,27 @@ export function UserSelectInput({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const filteredUsers =
-    users?.filter(
-      (user) =>
-        user.name.toLowerCase().includes(inputValue.toLowerCase()) ||
-        user.userId.toLowerCase().includes(inputValue.toLowerCase())
-    ) ?? [];
-
   useEffect(() => {
-    setSelectedIndex(0);
-  }, [inputValue]);
+    const selectedEl = itemRefs.current[selectedIndex];
+    selectedEl?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selectedIndex]);
 
   const toggleUser = (user: User) => {
     // value: 현재값
     // isAlreadySelected:해당 값이 선택 되어있는지 여부: 처음 선택 시 fasle ,한번더 선택시 true
     const isAlreadySelected = value.includes(user.id);
-    const newUserIds = isAlreadySelected
-      ? value.filter((id) => id !== user.id)
-      : [...value, user.id];
 
-    onChange(newUserIds);
+    if (isAlreadySelected) {
+      onChange(value.filter((id) => id !== user.id));
+      setError(false);
+    } else if (value.length >= maxSelectable) {
+      setError(true);
+      return;
+    } else {
+      onChange([...value, user.id]);
+      setError(false);
+    }
+
     setInputValue("");
     setDropdownOpen(true);
     inputRef.current?.focus();
@@ -97,7 +114,7 @@ export function UserSelectInput({
   return (
     <div
       ref={containerRef}
-      className="relative w-full max-w-md border border-gray-300 rounded-md p-2 flex flex-wrap items-center gap-1"
+      className="relative w-full max-w-md border border-gray-300 rounded-md px-3 py-2 flex flex-wrap items-center gap-2 bg-white shadow-sm"
       onClick={() => inputRef.current?.focus()}
     >
       {/* 선택된 사용자들 */}
@@ -119,6 +136,7 @@ export function UserSelectInput({
               toggleUser(user);
             }}
             className="ml-1 text-xs hover:text-primary/70"
+            type="button"
           >
             ×
           </button>
@@ -126,6 +144,7 @@ export function UserSelectInput({
       ))}
 
       {/* 검색 input */}
+
       <input
         ref={inputRef}
         type="text"
@@ -142,22 +161,25 @@ export function UserSelectInput({
 
       {/* 드롭다운 */}
       {dropdownOpen && (
-        <ul className="absolute left-0 top-full mt-1 w-full max-h-60 overflow-auto rounded-md border bg-white shadow-lg z-50">
+        <ul className="absolute left-0 top-full mt-1 w-full max-h-60 overflow-auto rounded-md border bg-white shadow-md z-50">
           {filteredUsers.length === 0 ? (
             <li className="p-3 text-sm text-gray-500">사용자가 없습니다.</li>
           ) : (
             filteredUsers.map((user, index) => {
-              const isSelected = value.some((u) => u === user.id);
+              const isSelected = value.includes(user.id);
               const isHighlighted = selectedIndex === index;
 
               return (
                 <li
                   key={user.id}
+                  ref={(el) => {
+                    itemRefs.current[index] = el;
+                  }}
                   onClick={() => toggleUser(user)}
                   tabIndex={-1}
                   aria-selected={isHighlighted}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-2 cursor-pointer",
+                    "flex items-center gap-3 px-4 py-2 cursor-pointer transition-colors",
                     isHighlighted ? "bg-gray-100" : "",
                     isSelected
                       ? "bg-primary/10 font-medium"
@@ -185,6 +207,11 @@ export function UserSelectInput({
             })
           )}
         </ul>
+      )}
+      {error && (
+        <span className="text-sm text-red-500 mt-1">
+          최대 {maxSelectable}명까지 선택할 수 있어요.
+        </span>
       )}
     </div>
   );
