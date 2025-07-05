@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -23,20 +23,32 @@ import {
   DropdownMenuTrigger,
   DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
-import { Calendar, MoreVertical, Tags, Trash, User } from "lucide-react";
+import { MoreVertical, Tags } from "lucide-react";
+
+interface DropdownActionItem {
+  label: string;
+  icon?: React.ReactNode;
+  onSelect?: () => void;
+  className?: string;
+  shortcut?: string;
+}
 
 interface ActionDropdownMenuProps {
-  labels: string[];
-  selectedLabel: string;
-  setSelectedLabel: (label: string) => void;
+  items: DropdownActionItem[];
+  labels?: string[]; // optional: label 서브 메뉴 사용 시
+  selectedLabel?: string;
+  setSelectedLabel?: (label: string) => void;
 }
 
 export function ActionDropdownMenu({
+  items,
   labels,
   selectedLabel,
   setSelectedLabel,
 }: ActionDropdownMenuProps) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+
+  const showLabelMenu = labels && setSelectedLabel;
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -45,52 +57,68 @@ export function ActionDropdownMenu({
           <MoreVertical />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[200px]">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+      <DropdownMenuContent
+        onClick={(e) => e.stopPropagation()}
+        align="end"
+        className="w-[200px]"
+      >
+        <DropdownMenuLabel>페이지</DropdownMenuLabel>
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <User />
-            Assign to...
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Calendar />
-            Set due date...
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Tags />
-              Apply label
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="p-0">
-              <Command>
-                <CommandInput placeholder="Filter label..." autoFocus={true} />
-                <CommandList>
-                  <CommandEmpty>No label found.</CommandEmpty>
-                  <CommandGroup>
-                    {labels.map((label) => (
-                      <CommandItem
-                        key={label}
-                        value={label}
-                        onSelect={(value) => {
-                          setSelectedLabel(value);
-                          setOpen(false);
-                        }}
-                      >
-                        {label}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-red-600">
-            <Trash />
-            Delete
-            <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
-          </DropdownMenuItem>
+          {items.map((item) => (
+            <DropdownMenuItem
+              key={item.label}
+              onSelect={() => {
+                item.onSelect?.();
+                setOpen(false);
+              }}
+              className={item.className}
+            >
+              {/* React.cloneElement로 아이콘에 className 직접 전달 */}
+              {React.isValidElement(item.icon)
+                ? React.cloneElement(item.icon, { className: item.className })
+                : item.icon}
+              <span className="ml-2">{item.label}</span>
+              {item.shortcut && (
+                <DropdownMenuShortcut className={item.className}>
+                  {item.shortcut}
+                </DropdownMenuShortcut>
+              )}
+            </DropdownMenuItem>
+          ))}
+
+          {showLabelMenu && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <Tags />
+                  <span className="ml-2">라벨 적용</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="p-0">
+                  <Command>
+                    <CommandInput placeholder="라벨 검색" autoFocus={true} />
+                    <CommandList>
+                      <CommandEmpty>라벨을 찾을 수 없습니다.</CommandEmpty>
+                      <CommandGroup>
+                        {labels.map((label) => (
+                          <CommandItem
+                            key={label}
+                            value={label}
+                            onSelect={(value) => {
+                              setSelectedLabel(value);
+                              setOpen(false);
+                            }}
+                          >
+                            {label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+            </>
+          )}
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>

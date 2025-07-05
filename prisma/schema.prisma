@@ -13,6 +13,16 @@ enum Role {
   ADMIN
 }
 
+enum ProjectLabel {
+  feature
+  bug
+  design
+  refactor
+  client
+  internal
+  maintenance
+}
+
 model User {
   id           Int     @id @default(autoincrement())
   userId       String  @unique
@@ -34,6 +44,7 @@ model Project {
   deadline    DateTime?
   managerId   Int
   isPersonal  Boolean   @default(false) // 개인용 프로젝트 여부 구분용
+  label         ProjectLabel? 
 
   manager User   @relation("ProjectManager", fields: [managerId], references: [id])
   tasks   Task[]

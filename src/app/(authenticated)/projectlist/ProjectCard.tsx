@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "@prisma/client";
@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { GoVerified } from "react-icons/go";
 import { cn } from "@/lib/utils";
 import { ActionDropdownMenu } from "@/components/ui/extended/ActionDropdownMenu";
+import { Calendar, Trash, User as UserIcon } from "lucide-react";
+import { LABEL_COLOR_MAP, LABELS } from "@/app/constants/common";
 
 interface ProjectCardProps {
   project: {
@@ -24,16 +26,6 @@ interface ProjectCardProps {
   onClick: () => void;
 }
 
-const labels = [
-  "feature",
-  "bug",
-  "enhancement",
-  "documentation",
-  "design",
-  "question",
-  "maintenance",
-];
-
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
   const { user } = useAuthStore();
   const userId = user?.id;
@@ -41,9 +33,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
   const canDeleteProject =
     !project.isPersonal && (role === "ADMIN" || project.managerId === userId);
   const { deleteProjectMutate } = useProjects();
-  const [label, setLabel] = React.useState("feature");
+  const [label, setLabel] = useState("");
+  const labelClass = LABEL_COLOR_MAP[label] ?? "bg-gray-100 text-gray-800";
 
-  const onClickDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const onClickDelete = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     deleteProjectMutate({ id: project.id });
   };
@@ -81,7 +74,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
       ref={containerRef}
       onClick={onClick}
       className={cn(
-        "relative h-45 rounded-lg p-6 shadow-md cursor-pointer mb-3 transition-all duration-100 bg-white hover:bg-gray-100 hover:scale-105",
+        "relative h-55 rounded-lg p-6 shadow-md cursor-pointer mb-3 transition-all duration-100 bg-white hover:bg-gray-100 hover:scale-105",
         project.isPersonal
           ? "border-4 border-blue-400 hover:border-blue-500"
           : "border border-stone-300 hover:border-stone-400"
@@ -115,7 +108,26 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
           </h3>
           {canDeleteProject && (
             <ActionDropdownMenu
-              labels={labels}
+              items={[
+                {
+                  label: "담당자 지정",
+                  icon: <UserIcon />,
+                  onSelect: () => console.log("Assign"),
+                },
+                {
+                  label: "마감일 설정",
+                  icon: <Calendar />,
+                  onSelect: () => console.log("Set due date"),
+                },
+                {
+                  label: "삭제",
+                  icon: <Trash />,
+                  className: "text-red-600 ",
+                  onSelect: () => console.log("Delete"),
+                  shortcut: "⌘⌫",
+                },
+              ]}
+              labels={LABELS}
               selectedLabel={label}
               setSelectedLabel={setLabel}
             />
@@ -141,7 +153,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
 
       <div className="flex justify-end mt-5 relative z-10">
         {/* <Button onClick={onClickDelete}>삭제</Button> */}
-        {project.isPersonal && (
+        {project.isPersonal ? (
           <Badge
             variant="secondary"
             className="bg-blue-500 text-white dark:bg-blue-600"
@@ -149,6 +161,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
             <GoVerified />
             개인용
           </Badge>
+        ) : (
+          label && (
+            <Badge variant="secondary" className={labelClass}>
+              {label}
+            </Badge>
+          )
         )}
       </div>
     </div>
