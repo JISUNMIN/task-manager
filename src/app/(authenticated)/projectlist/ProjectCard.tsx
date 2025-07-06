@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { ActionDropdownMenu } from "@/components/ui/extended/ActionDropdownMenu";
 import { Calendar, Trash, User as UserIcon } from "lucide-react";
 import { LABEL_COLOR_MAP, LABELS } from "@/app/constants/common";
+import { DeleteProjectDialog } from "@/components/ui/extended/DeleteProjectDialog";
 
 interface ProjectCardProps {
   project: {
@@ -61,6 +62,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const { deleteProjectMutate, updateProjectLabel } = useProjects();
   const [label, setLabel] = useState(project?.label ?? "feature");
   const labelClass = LABEL_COLOR_MAP[label];
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const itmes = [
     ...(role === "ADMIN"
@@ -81,14 +83,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       label: "삭제",
       icon: <Trash />,
       variant: "destructive",
-      onSelect: () => console.log("Delete"),
+      onSelect: () => setIsDeleteDialogOpen(true),
     },
   ];
 
-  const onClickDelete = (e: MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
+  const onClickDelete = () => {
     deleteProjectMutate({ id: project.id });
   };
+
   const containerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -124,73 +126,79 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   };
 
   return (
-    <div
-      ref={containerRef}
-      onClick={onClick}
-      className={cn(
-        "relative h-55 rounded-lg p-6 shadow-md cursor-pointer mb-3 transition-all duration-100 bg-white hover:bg-gray-100 hover:scale-105",
-        project.isPersonal
-          ? "border-4 border-blue-400 hover:border-blue-500"
-          : "border border-stone-300 hover:border-stone-400"
-      )}
-      style={containerStyle}
-    >
+    <>
       <div
-        ref={overlayRef}
-        className="absolute inset-0 z-10 pointer-events-none mix-blend-color-dodge rounded-lg"
-        style={overlayStyle}
-      />
-      <div className="relative z-10">
-        <div className="flex justify-between">
-          <h3 className="text-xl font-semibold text-gray-800">
-            {project.projectName}
-          </h3>
-          {canDeleteProject && (
-            <ActionDropdownMenu
-              items={itmes}
-              labels={LABELS}
-              handleSelectedLabel={handleSelectedLabel}
-              project={project}
-            />
+        ref={containerRef}
+        onClick={onClick}
+        className={cn(
+          "relative h-55 rounded-lg p-6 shadow-md cursor-pointer mb-3 transition-all duration-100 bg-white hover:bg-gray-100 hover:scale-105",
+          project.isPersonal
+            ? "border-4 border-blue-400 hover:border-blue-500"
+            : "border border-stone-300 hover:border-stone-400"
+        )}
+        style={containerStyle}
+      >
+        <div
+          ref={overlayRef}
+          className="absolute inset-0 z-10 pointer-events-none mix-blend-color-dodge rounded-lg"
+          style={overlayStyle}
+        />
+        <div className="relative z-10">
+          <div className="flex justify-between">
+            <h3 className="text-xl font-semibold text-gray-800">
+              {project.projectName}
+            </h3>
+            {canDeleteProject && (
+              <ActionDropdownMenu
+                items={itmes}
+                labels={LABELS}
+                handleSelectedLabel={handleSelectedLabel}
+                project={project}
+              />
+            )}
+          </div>
+          <div className="text-sm text-gray-600 flex gap-1.5 items-center">
+            담당자: {project?.manager?.name}
+            <Avatar>
+              <AvatarImage src={project?.manager?.profileImage ?? ""} />
+              <AvatarFallback>
+                <IoPersonCircle className="w-8 h-8" />
+              </AvatarFallback>
+            </Avatar>
+          </div>
+          <p className="text-sm text-gray-600">진행률: {project.progress}%</p>
+          {!project.isPersonal && (
+            <p className="text-sm text-gray-600">
+              마감일: {convertDateToString(new Date(project.deadline), "-")}
+            </p>
+          )}
+          <Progress value={project.progress} className="mt-4" />
+        </div>
+
+        <div className="flex justify-end mt-5 relative z-10">
+          {project.isPersonal ? (
+            <Badge
+              variant="secondary"
+              className="bg-blue-500 text-white dark:bg-blue-600"
+            >
+              <GoVerified />
+              개인용
+            </Badge>
+          ) : (
+            label && (
+              <Badge variant="secondary" className={labelClass}>
+                {label}
+              </Badge>
+            )
           )}
         </div>
-        <div className="text-sm text-gray-600 flex gap-1.5 items-center">
-          담당자: {project?.manager?.name}
-          <Avatar>
-            <AvatarImage src={project?.manager?.profileImage ?? ""} />
-            <AvatarFallback>
-              <IoPersonCircle className="w-8 h-8" />
-            </AvatarFallback>
-          </Avatar>
-        </div>
-        <p className="text-sm text-gray-600">진행률: {project.progress}%</p>
-        {!project.isPersonal && (
-          <p className="text-sm text-gray-600">
-            마감일: {convertDateToString(new Date(project.deadline), "-")}
-          </p>
-        )}
-        <Progress value={project.progress} className="mt-4" />
       </div>
-
-      <div className="flex justify-end mt-5 relative z-10">
-        {/* <Button onClick={onClickDelete}>삭제</Button> */}
-        {project.isPersonal ? (
-          <Badge
-            variant="secondary"
-            className="bg-blue-500 text-white dark:bg-blue-600"
-          >
-            <GoVerified />
-            개인용
-          </Badge>
-        ) : (
-          label && (
-            <Badge variant="secondary" className={labelClass}>
-              {label}
-            </Badge>
-          )
-        )}
-      </div>
-    </div>
+      <DeleteProjectDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onDelete={onClickDelete}
+      />
+    </>
   );
 };
 

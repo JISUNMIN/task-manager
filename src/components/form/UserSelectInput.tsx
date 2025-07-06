@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { IoPersonCircle } from "react-icons/io5";
 import { User } from "@prisma/client";
 import { useUserStore } from "@/store/useUserStore";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 interface UserSelectInputProps {
   value: number[];

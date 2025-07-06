@@ -21,7 +21,6 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-  DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Tags } from "lucide-react";
 import { Project, ProjectLabel } from "@prisma/client";
