@@ -1,5 +1,5 @@
-import { showToast, ToastMode } from "@/lib/toast";
-import { Task, User } from "@prisma/client";
+import { ToastMode } from "@/lib/toast";
+import { ProjectLabel, Task, User } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -11,6 +11,7 @@ type Project = {
   manager: User;
   tasks: Task[];
   isPersonal: boolean;
+  label?: ProjectLabel;
 };
 
 type TaskCreateParams = {
@@ -58,9 +59,7 @@ const useProjects = (targetId?: string | number) => {
   } = useQuery<Project, Error>({
     queryKey: ["projects", "list", "detail", targetId],
     queryFn: async () => {
-      const res = await axios.get<Project>(
-        `${PROJECT_API_PATH}/${targetId}/kanban`
-      );
+      const res = await axios.get<Project>(`${PROJECT_API_PATH}/${targetId}`);
       return res.data;
     },
     enabled: !!targetId,
@@ -96,6 +95,22 @@ const useProjects = (targetId?: string | number) => {
     onError: () => {},
   });
 
+  // project label update
+  const { mutate: updateProjectLabel } = useMutation<
+    void,
+    Error,
+    { id: number; label: string }
+  >({
+    mutationFn: async (data) => {
+      const { id, label } = data;
+      await axios.patch(`${PROJECT_API_PATH}/${id}/label`, {
+        label,
+      });
+    },
+    onSuccess: () => {},
+    onError: () => {},
+  });
+
   //task update
   const { mutate: updateTaskMutate } = useMutation<
     void,
@@ -123,7 +138,7 @@ const useProjects = (targetId?: string | number) => {
   >({
     mutationFn: async (data) => {
       const { id } = data;
-      await axios.delete(`${PROJECT_API_PATH}/${id}/kanban`);
+      await axios.delete(`${PROJECT_API_PATH}/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
@@ -158,6 +173,7 @@ const useProjects = (targetId?: string | number) => {
     createProjectMutate,
     createTaskMutate,
     //update
+    updateProjectLabel,
     updateTaskMutate,
     //delete
     deleteProjectMutate,

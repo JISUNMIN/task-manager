@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User } from "@prisma/client";
+import { ProjectLabel, User } from "@prisma/client";
 import { IoPersonCircle } from "react-icons/io5";
 import { convertDateToString } from "@/lib/utils/helpers";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -22,6 +22,7 @@ interface ProjectCardProps {
     deadline: string;
     manager: User;
     isPersonal: boolean;
+    label?: ProjectLabel;
   };
   onClick: () => void;
 }
@@ -32,8 +33,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
   const role = user?.role;
   const canDeleteProject =
     !project.isPersonal && (role === "ADMIN" || project.managerId === userId);
-  const { deleteProjectMutate } = useProjects();
-  const [label, setLabel] = useState("");
+  const { deleteProjectMutate, updateProjectLabel } = useProjects();
+  const [label, setLabel] = useState(project?.label);
   const labelClass = LABEL_COLOR_MAP[label] ?? "bg-gray-100 text-gray-800";
 
   const onClickDelete = (e: MouseEvent<HTMLButtonElement>) => {
@@ -68,6 +69,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
       container.removeEventListener("mouseleave", handleMouseLeave);
     };
   }, []);
+
+  const handleSelectedLabel = (value: ProjectLabel) => {
+    setLabel(value);
+    updateProjectLabel({ id: project.id, label: value });
+  };
 
   return (
     <div
@@ -128,8 +134,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
                 },
               ]}
               labels={LABELS}
-              selectedLabel={label}
-              setSelectedLabel={setLabel}
+              handleSelectedLabel={handleSelectedLabel}
             />
           )}
         </div>

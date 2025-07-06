@@ -1,4 +1,4 @@
-// app/api/projects/[projectId]/kanban/route.ts
+// app/api/projects/[projectId]/route.ts
 // 특정 projectId로 조회
 import { authenticate } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";

@@ -24,6 +24,7 @@ import {
   DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Tags } from "lucide-react";
+import { ProjectLabel } from "@prisma/client";
 
 interface DropdownActionItem {
   label: string;
@@ -35,20 +36,18 @@ interface DropdownActionItem {
 
 interface ActionDropdownMenuProps {
   items: DropdownActionItem[];
-  labels?: string[]; // optional: label 서브 메뉴 사용 시
-  selectedLabel?: string;
-  setSelectedLabel?: (label: string) => void;
+  labels?: readonly string[]; // optional: label 서브 메뉴 사용 시
+  handleSelectedLabel?: (label: ProjectLabel) => void;
 }
 
 export function ActionDropdownMenu({
   items,
   labels,
-  selectedLabel,
-  setSelectedLabel,
+  handleSelectedLabel,
 }: ActionDropdownMenuProps) {
   const [open, setOpen] = useState(false);
 
-  const showLabelMenu = labels && setSelectedLabel;
+  const showLabelMenu = labels && handleSelectedLabel;
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -105,7 +104,7 @@ export function ActionDropdownMenu({
                             key={label}
                             value={label}
                             onSelect={(value) => {
-                              setSelectedLabel(value);
+                              handleSelectedLabel(value);
                               setOpen(false);
                             }}
                           >
