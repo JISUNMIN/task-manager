@@ -62,7 +62,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const [label, setLabel] = useState(project?.label ?? "feature");
   const labelClass = LABEL_COLOR_MAP[label];
 
-
   const itmes = [
     ...(role === "ADMIN"
       ? [
@@ -81,9 +80,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     {
       label: "삭제",
       icon: <Trash />,
-      className: "text-red-600 ",
+      variant: "destructive",
       onSelect: () => console.log("Delete"),
-      shortcut: "⌘⌫",
     },
   ];
 

@@ -41,7 +41,7 @@ interface DropdownActionItem {
   icon?: React.ReactNode;
   onSelect?: () => void;
   className?: string;
-  shortcut?: string;
+  variant?: "default" | "destructive" | undefined;
 }
 
 interface ActionDropdownMenuProps {
@@ -90,20 +90,10 @@ export function ActionDropdownMenu({
                 item.onSelect?.();
                 setOpen(false);
               }}
-              className={item.className}
+              variant={item.variant}
             >
-              {/* React.cloneElement로 아이콘에 className 직접 전달 */}
-              {React.isValidElement(item.icon)
-                ? React.cloneElement(item.icon, {
-                    className: item.className,
-                  } as any)
-                : item.icon}
+              {item.icon}
               <span className="ml-2">{item.label}</span>
-              {item.shortcut && (
-                <DropdownMenuShortcut className={item.className}>
-                  {item.shortcut}
-                </DropdownMenuShortcut>
-              )}
             </DropdownMenuItem>
           ))}
 
