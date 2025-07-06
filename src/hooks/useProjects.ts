@@ -1,5 +1,4 @@
-import { ToastMode } from "@/lib/toast";
-import { ProjectLabel, Task, User } from "@prisma/client";
+import { ProjectLabel, User, Task } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -14,17 +13,6 @@ type Project = {
   label?: ProjectLabel;
 };
 
-type TaskCreateParams = {
-  id?: number;
-  title?: string;
-  desc?: string;
-  status?: string;
-  projectId?: number;
-  projectName?: number;
-  userId?: number;
-  managerId?: number;
-};
-
 type ProjectCreateParams = {
   projectName: string;
   deadline: string;
@@ -33,8 +21,6 @@ type ProjectCreateParams = {
 };
 
 const PROJECT_API_PATH = "/api/projects";
-
-const TASK_PROJECT_API_PATH = "/api/tasks";
 
 const useProjects = (targetId?: string | number) => {
   const queryClient = useQueryClient();
@@ -65,7 +51,7 @@ const useProjects = (targetId?: string | number) => {
     enabled: !!targetId,
   });
 
-  //project create
+  // project create
   const { mutate: createProjectMutate } = useMutation<
     void,
     Error,
@@ -73,21 +59,6 @@ const useProjects = (targetId?: string | number) => {
   >({
     mutationFn: async (data) => {
       await axios.post(PROJECT_API_PATH, data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
-    },
-    onError: () => {},
-  });
-
-  //task create
-  const { mutate: createTaskMutate } = useMutation<
-    void,
-    Error,
-    TaskCreateParams
-  >({
-    mutationFn: async (data) => {
-      await axios.post(TASK_PROJECT_API_PATH, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
@@ -111,26 +82,7 @@ const useProjects = (targetId?: string | number) => {
     onError: () => {},
   });
 
-  //task update
-  const { mutate: updateTaskMutate } = useMutation<
-    void,
-    Error,
-    TaskCreateParams
-  >({
-    mutationFn: async (data) => {
-      const { id, title, desc } = data;
-      await axios.put(`${TASK_PROJECT_API_PATH}/${id}`, {
-        title,
-        desc,
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
-    },
-    onError: () => {},
-  });
-
-  //project delete
+  // project delete
   const { mutate: deleteProjectMutate } = useMutation<
     void,
     Error,
@@ -146,38 +98,21 @@ const useProjects = (targetId?: string | number) => {
     onError: () => {},
   });
 
-  //task delete
-  const { mutate: deleteTaskMutate } = useMutation<void, Error, { id: number }>(
-    {
-      mutationFn: async (data) => {
-        const { id } = data;
-        await axios.delete(`${TASK_PROJECT_API_PATH}/${id}`);
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
-      },
-      onError: () => {},
-    }
-  );
-
   return {
-    //list
+    // list
     listData,
     isListPending,
     isListFetching,
-    //detail
+    // detail
     detailData,
     isDetailPending,
     isDetailFetching,
-    //create
+    // create
     createProjectMutate,
-    createTaskMutate,
-    //update
+    // update
     updateProjectLabel,
-    updateTaskMutate,
-    //delete
+    // delete
     deleteProjectMutate,
-    deleteTaskMutate,
   };
 };
 

@@ -25,6 +25,7 @@ import useProjects from "@/hooks/useProjects";
 import { useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
 import { debounce } from "lodash";
+import useTasks from "@/hooks/useTasks";
 
 const KanbanBoard = () => {
   const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
@@ -33,8 +34,9 @@ const KanbanBoard = () => {
   const inputRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId") ?? undefined;
-  const { detailData, createTaskMutate, deleteTaskMutate, updateTaskMutate } =
-    useProjects(projectId);
+  const { detailData } = useProjects(projectId);
+
+  const { createTaskMutate, deleteTaskMutate, updateTaskMutate } = useTasks();
   const isPersonal = detailData?.isPersonal;
 
   const {
