@@ -34,8 +34,32 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
   const canDeleteProject =
     !project.isPersonal && (role === "ADMIN" || project.managerId === userId);
   const { deleteProjectMutate, updateProjectLabel } = useProjects();
-  const [label, setLabel] = useState(project?.label);
-  const labelClass = LABEL_COLOR_MAP[label] ?? "bg-gray-100 text-gray-800";
+  const [label, setLabel] = useState(project?.label ?? "feature");
+  const labelClass = LABEL_COLOR_MAP[label];
+
+  const itmes = [
+    ...(role === "ADMIN"
+      ? [
+          {
+            label: "담당자 지정",
+            icon: <UserIcon />,
+            onSelect: () => console.log("Assign"),
+          },
+        ]
+      : []),
+    {
+      label: "마감일 설정",
+      icon: <Calendar />,
+      onSelect: () => console.log("Set due date"),
+    },
+    {
+      label: "삭제",
+      icon: <Trash />,
+      className: "text-red-600 ",
+      onSelect: () => console.log("Delete"),
+      shortcut: "⌘⌫",
+    },
+  ];
 
   const onClickDelete = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -114,25 +138,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
           </h3>
           {canDeleteProject && (
             <ActionDropdownMenu
-              items={[
-                {
-                  label: "담당자 지정",
-                  icon: <UserIcon />,
-                  onSelect: () => console.log("Assign"),
-                },
-                {
-                  label: "마감일 설정",
-                  icon: <Calendar />,
-                  onSelect: () => console.log("Set due date"),
-                },
-                {
-                  label: "삭제",
-                  icon: <Trash />,
-                  className: "text-red-600 ",
-                  onSelect: () => console.log("Delete"),
-                  shortcut: "⌘⌫",
-                },
-              ]}
+              items={itmes}
               labels={LABELS}
               handleSelectedLabel={handleSelectedLabel}
             />
