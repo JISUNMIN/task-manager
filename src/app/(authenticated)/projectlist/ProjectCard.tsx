@@ -25,6 +25,7 @@ interface ProjectCardProps {
     label?: ProjectLabel;
   };
   onClick: () => void;
+  onUserSelectionModalChange: (open: boolean) => void;
 }
 
 const containerStyle: CSSProperties = {
@@ -47,7 +48,11 @@ const overlayStyle: CSSProperties = {
   backgroundPosition: "100%",
 };
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
+const ProjectCard: React.FC<ProjectCardProps> = ({
+  project,
+  onClick,
+  onUserSelectionModalChange,
+}) => {
   const { user } = useAuthStore();
   const userId = user?.id;
   const role = user?.role;
@@ -57,13 +62,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
   const [label, setLabel] = useState(project?.label ?? "feature");
   const labelClass = LABEL_COLOR_MAP[label];
 
+
   const itmes = [
     ...(role === "ADMIN"
       ? [
           {
             label: "담당자 지정",
             icon: <UserIcon />,
-            onSelect: () => console.log("Assign"),
+            onSelect: () => onUserSelectionModalChange(true),
           },
         ]
       : []),
@@ -146,6 +152,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
               items={itmes}
               labels={LABELS}
               handleSelectedLabel={handleSelectedLabel}
+              project={project}
             />
           )}
         </div>

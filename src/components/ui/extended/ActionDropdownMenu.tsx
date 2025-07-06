@@ -24,10 +24,20 @@ import {
   DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Tags } from "lucide-react";
-import { ProjectLabel } from "@prisma/client";
+import { Project, ProjectLabel } from "@prisma/client";
+import { useFormContext } from "react-hook-form";
+
+type ProjectWithStringDeadline = Omit<
+  Project,
+  "deadline" | "managerId" | "label"
+> & {
+  deadline: string;
+  managerId?: number;
+  label?: ProjectLabel | null;
+};
 
 interface DropdownActionItem {
-  label: string;
+  label?: string;
   icon?: React.ReactNode;
   onSelect?: () => void;
   className?: string;
@@ -38,16 +48,26 @@ interface ActionDropdownMenuProps {
   items: DropdownActionItem[];
   labels?: readonly string[]; // optional: label 서브 메뉴 사용 시
   handleSelectedLabel?: (label: ProjectLabel) => void;
+  project: ProjectWithStringDeadline;
 }
 
 export function ActionDropdownMenu({
   items,
   labels,
   handleSelectedLabel,
+  project,
 }: ActionDropdownMenuProps) {
+  const { setValue } = useFormContext();
   const [open, setOpen] = useState(false);
 
   const showLabelMenu = labels && handleSelectedLabel;
+
+  const onClickDropdownMenu = (
+    e: React.MouseEvent<HTMLButtonElement | HTMLDivElement, MouseEvent>
+  ) => {
+    setValue("projectId", project.id);
+    e.stopPropagation();
+  };
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -57,7 +77,7 @@ export function ActionDropdownMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        onClick={(e) => e.stopPropagation()}
+        onClick={onClickDropdownMenu}
         align="end"
         className="w-[200px]"
       >
@@ -74,7 +94,9 @@ export function ActionDropdownMenu({
             >
               {/* React.cloneElement로 아이콘에 className 직접 전달 */}
               {React.isValidElement(item.icon)
-                ? React.cloneElement(item.icon, { className: item.className })
+                ? React.cloneElement(item.icon, {
+                    className: item.className,
+                  } as any)
                 : item.icon}
               <span className="ml-2">{item.label}</span>
               {item.shortcut && (
@@ -104,7 +126,7 @@ export function ActionDropdownMenu({
                             key={label}
                             value={label}
                             onSelect={(value) => {
-                              handleSelectedLabel(value);
+                              handleSelectedLabel(value as ProjectLabel);
                               setOpen(false);
                             }}
                           >

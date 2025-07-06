@@ -1,3 +1,4 @@
+import { showToast, ToastMode } from "@/lib/toast";
 import { ProjectLabel, User, Task } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -82,6 +83,27 @@ const useProjects = (targetId?: string | number) => {
     onError: () => {},
   });
 
+  // project manager update
+  const { mutate: updateProjectManager } = useMutation<
+    void,
+    Error,
+    { id: number; managerId: number }
+  >({
+    mutationFn: async (data) => {
+      const { managerId } = data;
+      await axios.patch(`${PROJECT_API_PATH}/${targetId}/manager`, {
+        managerId,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
+      showToast({ type: ToastMode.SUCCESS, action: "CHANGE" });
+    },
+    onError: () => {
+      showToast({ type: ToastMode.ERROR, action: "CHANGE" });
+    },
+  });
+
   // project delete
   const { mutate: deleteProjectMutate } = useMutation<
     void,
@@ -111,6 +133,7 @@ const useProjects = (targetId?: string | number) => {
     createProjectMutate,
     // update
     updateProjectLabel,
+    updateProjectManager,
     // delete
     deleteProjectMutate,
   };

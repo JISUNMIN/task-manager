@@ -20,7 +20,8 @@ type SuccessAction =
   | "REGISTER"
   | "SESSION"
   | "COPY"
-  | "REJECT";
+  | "REJECT"
+  | "CHANGE";
 type ErrorAction =
   | "SAVE"
   | "UPDATE"
@@ -33,7 +34,8 @@ type ErrorAction =
   | "ISEXIST"
   | "SELECT"
   | "COPY"
-  | "REJECT";
+  | "REJECT"
+  | "CHANGE";
 type InfoAction =
   | "LOADING"
   | "WAIT"
@@ -71,6 +73,7 @@ const TOAST_MESSAGES: ToastMessages = {
     REGISTER: "회원가입이 완료되었습니다.",
     SESSION: "세션이 갱신되었습니다.",
     COPY: "복사 되었습니다.",
+    CHANGE: "변경이 완료되었습니다.",
   },
   [ToastMode.ERROR]: {
     SAVE: "저장 중 오류가 발생했습니다.",
@@ -85,6 +88,7 @@ const TOAST_MESSAGES: ToastMessages = {
     ISEXIST: "이미 가입된 회원입니다.",
     SELECT: "값을 선택해주세요.",
     COPY: "복사에 실패 하였습니다.",
+    CHANGE: "변경에 실패하였습니다.",
   },
   [ToastMode.INFO]: {
     LOADING: "데이터를 불러오는 중입니다.",
