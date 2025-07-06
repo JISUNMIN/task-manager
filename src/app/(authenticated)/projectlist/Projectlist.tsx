@@ -6,18 +6,14 @@ import { useRouter } from "next/navigation";
 import Loading from "@/app/loading";
 import NewProjectCard from "./NewProjectCard";
 import { useAuthStore } from "@/store/useAuthStore";
-import { UserSelectionModal } from "@/components/ui/extended/UserSelectionModal ";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 
 const ProjectList = () => {
   const formInstance = useForm();
-  const { control } = formInstance;
-  const { projectId, managerId } = useWatch({ control });
   const { user } = useAuthStore();
   const role = user?.role;
-  const { listData, updateProjectManager } = useProjects(projectId);
+  const { listData } = useProjects();
   const [isCreating, setIsCreating] = useState<boolean>(false);
-  const [userSelectionModalOpen, setUserSelectionModalOpen] = useState(false);
   const router = useRouter();
   // 관리자가 아니고 default 개인 프로젝트만 1개 있는 경우
   const showNoTeamProjectMessage =
@@ -35,10 +31,6 @@ const ProjectList = () => {
 
   const onClickProject = (projectId: number) => {
     router.replace(`/dashboard/kanban?projectId=${projectId}`);
-  };
-
-  const onConfirm = () => {
-    updateProjectManager({ id: projectId, managerId: managerId });
   };
 
   if (!listData) return <Loading />;
@@ -66,7 +58,6 @@ const ProjectList = () => {
               key={project.id}
               project={project}
               onClick={() => onClickProject(project.id)}
-              onUserSelectionModalChange={setUserSelectionModalOpen}
             />
           ))}
 
@@ -91,12 +82,6 @@ const ProjectList = () => {
             </div>
           )}
         </div>
-        <UserSelectionModal
-          name="managerId"
-          open={userSelectionModalOpen}
-          onOpenChange={setUserSelectionModalOpen}
-          onConfirm={onConfirm}
-        />
       </div>
     </FormProvider>
   );

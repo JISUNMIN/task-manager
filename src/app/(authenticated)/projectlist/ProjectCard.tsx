@@ -13,6 +13,8 @@ import { ActionDropdownMenu } from "@/components/ui/extended/ActionDropdownMenu"
 import { Calendar, Trash, User as UserIcon } from "lucide-react";
 import { LABEL_COLOR_MAP, LABELS } from "@/app/constants/common";
 import { DeleteProjectDialog } from "@/components/ui/extended/DeleteProjectDialog";
+import { UserSelectionModal } from "@/components/ui/extended/UserSelectionModal ";
+import { useFormContext, useWatch } from "react-hook-form";
 
 interface ProjectCardProps {
   project: {
@@ -26,7 +28,6 @@ interface ProjectCardProps {
     label?: ProjectLabel;
   };
   onClick: () => void;
-  onUserSelectionModalChange: (open: boolean) => void;
 }
 
 const containerStyle: CSSProperties = {
@@ -49,11 +50,8 @@ const overlayStyle: CSSProperties = {
   backgroundPosition: "100%",
 };
 
-const ProjectCard: React.FC<ProjectCardProps> = ({
-  project,
-  onClick,
-  onUserSelectionModalChange,
-}) => {
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
+  const { control } = useFormContext();
   const { user } = useAuthStore();
   const userId = user?.id;
   const role = user?.role;
@@ -63,6 +61,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const [label, setLabel] = useState(project?.label ?? "feature");
   const labelClass = LABEL_COLOR_MAP[label];
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [userSelectionModalOpen, setUserSelectionModalOpen] = useState(false);
+  const { projectId, managerId } = useWatch({ control });
+  const { updateProjectManager } = useProjects(project.id);
+
+  const onConfirm = () => {
+    updateProjectManager({ id: projectId, managerId: managerId });
+  };
 
   const itmes = [
     ...(role === "ADMIN"
@@ -70,7 +75,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           {
             label: "담당자 지정",
             icon: <UserIcon />,
-            onSelect: () => onUserSelectionModalChange(true),
+            onSelect: () => setUserSelectionModalOpen(true),
           },
         ]
       : []),
@@ -193,6 +198,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           )}
         </div>
       </div>
+
+      <UserSelectionModal
+        name="managerId"
+        open={userSelectionModalOpen}
+        onOpenChange={setUserSelectionModalOpen}
+        onConfirm={onConfirm}
+      />
       <DeleteProjectDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
