@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { CSSProperties, useEffect, useRef, useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ProjectLabel, User } from "@prisma/client";
@@ -26,6 +26,26 @@ interface ProjectCardProps {
   };
   onClick: () => void;
 }
+
+const containerStyle: CSSProperties = {
+  transformStyle: "preserve-3d",
+  willChange: "transform",
+};
+
+const overlayStyle: CSSProperties = {
+  background: `
+    linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255, 225, 130, 0.9) 45%,
+      rgba(100, 200, 255, 0.9) 50%,
+      transparent 54%
+    )
+  `,
+  filter: "brightness(1.2) opacity(0.8)",
+  backgroundSize: "150% 150%",
+  backgroundPosition: "100%",
+};
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
   const { user } = useAuthStore();
@@ -109,27 +129,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
           ? "border-4 border-blue-400 hover:border-blue-500"
           : "border border-stone-300 hover:border-stone-400"
       )}
-      style={{
-        transformStyle: "preserve-3d",
-        willChange: "transform",
-      }}
+      style={containerStyle}
     >
       <div
         ref={overlayRef}
         className="absolute inset-0 z-10 pointer-events-none mix-blend-color-dodge rounded-lg"
-        style={{
-          background: `
-      linear-gradient(
-        105deg,
-        transparent 40%,
-        rgba(255, 225, 130, 0.9) 45%,
-        rgba(100, 200, 255, 0.9) 50%,
-        transparent 54%
-      )`,
-          filter: "brightness(1.2) opacity(0.8)",
-          backgroundSize: "150% 150%",
-          backgroundPosition: "100%",
-        }}
+        style={overlayStyle}
       />
       <div className="relative z-10">
         <div className="flex justify-between">
