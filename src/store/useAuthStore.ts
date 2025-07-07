@@ -7,6 +7,7 @@ interface User {
   id: number;
   userId: string;
   role: Role;
+  name: string;
   profileImage?: string;
 }
 

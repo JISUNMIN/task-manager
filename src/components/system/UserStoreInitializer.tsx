@@ -4,7 +4,7 @@
 
 import { useEffect } from "react";
 import { useUserStore } from "@/store/useUserStore";
-import useUser from "@/hooks/useUser";
+import useUser from "@/hooks/react-query/useUser";
 
 const UserStoreInitializer = () => {
   const { listData } = useUser();

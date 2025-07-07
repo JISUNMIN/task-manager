@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
+import Navbar from "@/components/layout/navbar/Navbar";
 
 export default function AuthenticatedLayout({
   children,
@@ -19,5 +20,10 @@ export default function AuthenticatedLayout({
     }
   }, [hasHydrated, isAuthenticated]);
 
-  return <>{children}</>;
+  return (
+    <>
+      <Navbar />
+      <main className="pt-14">{children}</main>
+    </>
+  );
 }

@@ -49,7 +49,7 @@ export function KanbanSidebar() {
   };
 
   return (
-    <Sidebar>
+    <Sidebar className="pt-14">
       <SidebarContent className="bg-green-50">
         <SidebarGroup>
           <SidebarGroupLabel></SidebarGroupLabel>
