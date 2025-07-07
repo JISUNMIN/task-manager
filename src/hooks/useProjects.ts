@@ -71,11 +71,11 @@ const useProjects = (targetId?: string | number) => {
   const { mutate: updateProjectLabel } = useMutation<
     void,
     Error,
-    { id: number; label: string }
+    { label: string }
   >({
     mutationFn: async (data) => {
-      const { id, label } = data;
-      await axios.patch(`${PROJECT_API_PATH}/${id}/label`, {
+      const { label } = data;
+      await axios.patch(`${PROJECT_API_PATH}/${targetId}/label`, {
         label,
       });
     },
@@ -87,7 +87,7 @@ const useProjects = (targetId?: string | number) => {
   const { mutate: updateProjectManager } = useMutation<
     void,
     Error,
-    { id: number; managerId: number }
+    { managerId: number }
   >({
     mutationFn: async (data) => {
       const { managerId } = data;
@@ -104,15 +104,31 @@ const useProjects = (targetId?: string | number) => {
     },
   });
 
-  // project delete
-  const { mutate: deleteProjectMutate } = useMutation<
+  // project manager deadline
+  const { mutate: updateProjecDeadline } = useMutation<
     void,
     Error,
-    { id: number }
+    { deadline: Date }
   >({
     mutationFn: async (data) => {
-      const { id } = data;
-      await axios.delete(`${PROJECT_API_PATH}/${id}`);
+      const { deadline } = data;
+      await axios.patch(`${PROJECT_API_PATH}/${targetId}/deadline`, {
+        deadline,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
+      showToast({ type: ToastMode.SUCCESS, action: "CHANGE" });
+    },
+    onError: () => {
+      showToast({ type: ToastMode.ERROR, action: "CHANGE" });
+    },
+  });
+
+  // project delete
+  const { mutate: deleteProjectMutate } = useMutation<void, Error>({
+    mutationFn: async () => {
+      await axios.delete(`${PROJECT_API_PATH}/${targetId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
@@ -134,6 +150,7 @@ const useProjects = (targetId?: string | number) => {
     // update
     updateProjectLabel,
     updateProjectManager,
+    updateProjecDeadline,
     // delete
     deleteProjectMutate,
   };

@@ -15,6 +15,7 @@ import { LABEL_COLOR_MAP, LABELS } from "@/app/constants/common";
 import { DeleteProjectDialog } from "@/components/ui/extended/DeleteProjectDialog";
 import { UserSelectionModal } from "@/components/ui/extended/UserSelectionModal ";
 import { useFormContext, useWatch } from "react-hook-form";
+import { DeadlineModal } from "@/components/ui/extended/DeadlineModal";
 
 interface ProjectCardProps {
   project: {
@@ -57,17 +58,19 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
   const role = user?.role;
   const canDeleteProject =
     !project.isPersonal && (role === "ADMIN" || project.managerId === userId);
-  const { deleteProjectMutate, updateProjectLabel } = useProjects();
   const [label, setLabel] = useState(project?.label ?? "feature");
   const labelClass = LABEL_COLOR_MAP[label];
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [userSelectionModalOpen, setUserSelectionModalOpen] = useState(false);
-  const { projectId, managerId } = useWatch({ control });
-  const { updateProjectManager } = useProjects(project.id);
-
-  const onConfirm = () => {
-    updateProjectManager({ id: projectId, managerId: managerId });
-  };
+  const [isUserSelectionModalOpen, setIsUserSelectionModalOpen] =
+    useState(false);
+  const [isDeadlineModalOpen, setIsDeadlineModalOpen] = useState(false);
+  const { managerId, deadline } = useWatch({ control });
+  const {
+    deleteProjectMutate,
+    updateProjectLabel,
+    updateProjectManager,
+    updateProjecDeadline,
+  } = useProjects(project.id);
 
   const itmes = [
     ...(role === "ADMIN"
@@ -75,14 +78,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
           {
             label: "담당자 지정",
             icon: <UserIcon />,
-            onSelect: () => setUserSelectionModalOpen(true),
+            onSelect: () => setIsUserSelectionModalOpen(true),
           },
         ]
       : []),
     {
       label: "마감일 설정",
       icon: <Calendar />,
-      onSelect: () => console.log("Set due date"),
+      onSelect: () => setIsDeadlineModalOpen(true),
     },
     {
       label: "삭제",
@@ -92,8 +95,16 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
     },
   ];
 
+  const onClickConfirmManagerChange = () => {
+    updateProjectManager({ managerId });
+  };
+
   const onClickDelete = () => {
-    deleteProjectMutate({ id: project.id });
+    deleteProjectMutate();
+  };
+
+  const onClickConfirmDeadline = () => {
+    updateProjecDeadline({ deadline });
   };
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -127,7 +138,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
 
   const handleSelectedLabel = (value: ProjectLabel) => {
     setLabel(value);
-    updateProjectLabel({ id: project.id, label: value });
+    updateProjectLabel({ label: value });
   };
 
   return (
@@ -201,14 +212,20 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
 
       <UserSelectionModal
         name="managerId"
-        open={userSelectionModalOpen}
-        onOpenChange={setUserSelectionModalOpen}
-        onConfirm={onConfirm}
+        open={isUserSelectionModalOpen}
+        onOpenChange={setIsUserSelectionModalOpen}
+        onConfirm={onClickConfirmManagerChange}
       />
       <DeleteProjectDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onDelete={onClickDelete}
+      />
+      <DeadlineModal
+        name="deadline"
+        open={isDeadlineModalOpen}
+        onOpenChange={setIsDeadlineModalOpen}
+        onConfirm={onClickConfirmDeadline}
       />
     </>
   );
