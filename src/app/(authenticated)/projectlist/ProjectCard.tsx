@@ -72,7 +72,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
     updateProjecDeadline,
   } = useProjects(project.id);
 
-  const itmes = [
+  const items = [
     ...(role === "ADMIN"
       ? [
           {
@@ -90,10 +90,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
     {
       label: "삭제",
       icon: <Trash />,
-      variant: "destructive",
+      variant: "destructive" as const,
       onSelect: () => setIsDeleteDialogOpen(true),
     },
-  ];
+  ] ;
 
   const onClickConfirmManagerChange = () => {
     updateProjectManager({ managerId });
@@ -166,7 +166,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
             </h3>
             {canDeleteProject && (
               <ActionDropdownMenu
-                items={itmes}
+                items={items}
                 labels={LABELS}
                 handleSelectedLabel={handleSelectedLabel}
                 project={project}

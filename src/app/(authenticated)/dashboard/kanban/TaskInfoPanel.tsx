@@ -21,6 +21,7 @@ import { debounce } from "lodash";
 import useProjects from "@/hooks/react-query/useProjects";
 import { UserSelectInput } from "@/components/form/UserSelectInput";
 import { Controller, useForm, useWatch } from "react-hook-form";
+import useTasks from "@/hooks/react-query/useTasks";
 
 interface TaskInfoPanelProps {
   isTaskInfoPanelOpen: boolean;
@@ -38,7 +39,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   isPersonal,
 }) => {
   const { updateTask, columns, moveTask } = useKanbanStore();
-  const { updateTaskMutate } = useProjects();
+  const { updateTaskMutate } = useTasks();
   const [columnKey, itemIndexStr] = focusedInputKey.split("-");
   const taskIndex = Number(itemIndexStr);
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -50,13 +51,16 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
 
   const debouncedUpdate = useMemo(
     () =>
-      debounce((taskId: number, value: string | number[], target: string) => {
-        if (target === "title") {
-          updateTaskMutate({ id: taskId, title: value });
-        } else if (target === "desc") {
-          updateTaskMutate({ id: taskId, assignees: value });
+      debounce((taskId: number, value: string | string[], target: string) => {
+        if (target === "title" || target === "desc") {
+          if (typeof value === "string") {
+            updateTaskMutate({ id: taskId, [target]: value });
+          }
         } else {
-          updateTaskMutate({ id: taskId, desc: value });
+          updateTaskMutate({
+            id: taskId,
+            assignees: Array.isArray(value) ? value : [value],
+          });
         }
       }, 1500),
     []

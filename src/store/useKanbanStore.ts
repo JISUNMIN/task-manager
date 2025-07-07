@@ -21,7 +21,7 @@ export type Task = {
   id: number;
   title: string;
   desc: string;
-  assignees: number[];
+  assignees?: number[];
 };
 
 type Columns = {
@@ -36,7 +36,7 @@ export const useKanbanStore = create<{
       title: string;
       desc: string;
       status: Status;
-      assignees: number[];
+      assignees?: number[];
     }[]
   ) => void;
   addTask: (index: number) => void;

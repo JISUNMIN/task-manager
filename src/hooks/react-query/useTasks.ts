@@ -10,6 +10,7 @@ type TaskCreateParams = {
   projectName?: number;
   userId?: number;
   managerId?: number;
+  assignees?: string[];
 };
 
 const TASK_PROJECT_API_PATH = "/api/tasks";

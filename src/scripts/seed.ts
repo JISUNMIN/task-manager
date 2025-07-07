@@ -28,7 +28,6 @@ async function main() {
       desc: "테스트용 작업 설명",
       status: "To Do",
       projectId: project1.id,
-      userId: user1.id,
       managerId: user1.id,
     },
   });

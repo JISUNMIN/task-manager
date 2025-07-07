@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -37,7 +37,7 @@ type ProjectWithStringDeadline = Omit<
 
 interface DropdownActionItem {
   label?: string;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
   onSelect?: () => void;
   className?: string;
   variant?: "default" | "destructive" | undefined;

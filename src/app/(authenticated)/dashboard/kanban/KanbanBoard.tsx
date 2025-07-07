@@ -23,7 +23,6 @@ import {
 } from "@hello-pangea/dnd";
 import useProjects from "@/hooks/react-query/useProjects";
 import { useSearchParams } from "next/navigation";
-import { useAuthStore } from "@/store/useAuthStore";
 import { debounce } from "lodash";
 import useTasks from "@/hooks/react-query/useTasks";
 
