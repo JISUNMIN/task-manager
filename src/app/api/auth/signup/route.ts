@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
-import { CreateParams } from "@/hooks/useSignup";
+import { CreateParams } from "@/hooks/react-query/useSignup";
 
 export async function POST(req: NextRequest) {
   try {

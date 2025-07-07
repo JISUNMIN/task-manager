@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import ProjectCard from "./ProjectCard";
-import useProjects from "@/hooks/useProjects";
+import useProjects from "@/hooks/react-query/useProjects";
 import { useRouter } from "next/navigation";
 import Loading from "@/app/loading";
 import NewProjectCard from "./NewProjectCard";

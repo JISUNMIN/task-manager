@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
       userId: user.userId,
       name: user.name,
       role: user.role,
+      profileImage: user.profileImage,
     });
 
     res.cookies.set("token", token, {

@@ -18,7 +18,7 @@ import { TbCircleDotted } from "react-icons/tb";
 import { FaPeopleGroup } from "react-icons/fa6";
 import { useMediaQuery } from "usehooks-ts";
 import { debounce } from "lodash";
-import useProjects from "@/hooks/useProjects";
+import useProjects from "@/hooks/react-query/useProjects";
 import { UserSelectInput } from "@/components/form/UserSelectInput";
 import { Controller, useForm, useWatch } from "react-hook-form";
 

@@ -5,7 +5,7 @@ import { ProjectLabel, User } from "@prisma/client";
 import { IoPersonCircle } from "react-icons/io5";
 import { convertDateToString } from "@/lib/utils/helpers";
 import { useAuthStore } from "@/store/useAuthStore";
-import useProjects from "@/hooks/useProjects";
+import useProjects from "@/hooks/react-query/useProjects";
 import { Badge } from "@/components/ui/badge";
 import { GoVerified } from "react-icons/go";
 import { cn } from "@/lib/utils";

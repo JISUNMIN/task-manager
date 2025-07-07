@@ -14,7 +14,7 @@ import {
 } from "react-icons/fa";
 import Image from "next/image";
 import { logo } from "@/assets/images";
-import useSignup from "@/hooks/useSignup";
+import useSignup from "@/hooks/react-query/useSignup";
 import { PasswordInput } from "@/components/form/PasswordInput";
 
 interface SignupInputs {

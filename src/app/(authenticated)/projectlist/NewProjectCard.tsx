@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import useProjects from "@/hooks/useProjects";
+import useProjects from "@/hooks/react-query/useProjects";
 import {
   Select,
   SelectContent,
@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import useUser from "@/hooks/useUser";
+import useUser from "@/hooks/react-query/useUser";
 import { useUserStore } from "@/store/useUserStore";
 import { DatePicker } from "@/components/form/DatePicker";
 

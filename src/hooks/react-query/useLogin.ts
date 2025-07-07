@@ -13,8 +13,10 @@ type LoginParams = {
 type LoginResponse = {
   id: number;
   userId: string;
+  name: string;
   token: string;
   role: Role;
+  profileImage?: string;
 };
 
 const API_PATH = "/api/auth/login";
@@ -37,9 +39,10 @@ const useLogin = () => {
       // 예: 토큰 저장, 유저 정보 저장 등
       // localStorage.setItem("token", result.token); 등
 
-      const { id, userId, role } = result;
+      const { id, userId, role, name, profileImage } = result;
+      console.log("result", result);
 
-      login({ id, userId, role });
+      login({ id, userId, role, name, profileImage });
       router.replace("/projectlist");
     },
     onError: (error) => {

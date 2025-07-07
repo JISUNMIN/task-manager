@@ -16,7 +16,7 @@ import Image from "next/image";
 import { logo } from "@/assets/images";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
-import useProjects from "@/hooks/useProjects";
+import useProjects from "@/hooks/react-query/useProjects";
 import { convertDateToString, formatDate } from "@/lib/utils/helpers";
 
 export function KanbanSidebar() {

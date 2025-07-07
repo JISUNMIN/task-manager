@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { FaUser } from "react-icons/fa";
 import Image from "next/image";
 import { logo } from "@/assets/images";
-import useLogin from "../../../hooks/useLogin";
+import useLogin from "../../../hooks/react-query/useLogin";
 import { useRouter } from "next/navigation";
 import { PasswordInput } from "@/components/form/PasswordInput";
 
