@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
           manager: true,
           tasks: { include: { assignees: true } },
         },
+        orderBy: [{ order: "asc" }, { id: "asc" }],
       });
     } else {
       projects = await prisma.project.findMany({

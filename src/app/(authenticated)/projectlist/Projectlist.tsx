@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import ProjectCard from "./ProjectCard";
-import useProjects from "@/hooks/react-query/useProjects";
+import useProjects, { Project } from "@/hooks/react-query/useProjects";
 import { useRouter } from "next/navigation";
 import Loading from "@/app/loading";
 import NewProjectCard from "./NewProjectCard";
@@ -25,34 +25,34 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 const SortableItem = ({
-id,
-children,
+  id,
+  children,
 }: {
-id: number;
-children: React.ReactNode;
+  id: number;
+  children: React.ReactNode;
 }) => {
-const { attributes, listeners, setNodeRef, transform, transition } =
-  useSortable({ id });
-const style = {
-  transform: CSS.Transform.toString(transform),
-  transition,
-};
-return (
-  <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-    {children}
-  </div>
-);
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </div>
+  );
 };
 
 const ProjectList = () => {
   const formInstance = useForm();
   const { user } = useAuthStore();
   const role = user?.role;
-  const { listData } = useProjects();
+  const { listData, updateProjectOrder } = useProjects();
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editableProjects, setEditableProjects] = useState<any[]>([]);
-  const [originalProjects, setOriginalProjects] = useState<any[]>([]);
+  const [editableProjects, setEditableProjects] = useState<Project[]>([]);
+  const [originalProjects, setOriginalProjects] = useState<Project[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -83,7 +83,53 @@ const ProjectList = () => {
     }
   };
 
+  const onClickConfirmProjectOrder = () => {
+    setOriginalProjects(editableProjects);
+    setIsEditing(false);
+    updateProjectOrder({ projectIds: editableProjects.map((p) => p.id) });
+  };
+
   if (!listData) return <Loading />;
+
+  const renderProjects = () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {editableProjects.map((project) =>
+        isEditing ? (
+          <SortableItem key={project.id} id={project.id}>
+            <ProjectCard
+              project={project}
+              onClick={() => onClickProject(project.id)}
+            />
+          </SortableItem>
+        ) : (
+          <div key={project.id}>
+            <ProjectCard
+              project={project}
+              onClick={() => onClickProject(project.id)}
+            />
+          </div>
+        )
+      )}
+
+      {!isEditing && role === "ADMIN" && (
+        <div>
+          {isCreating ? (
+            <NewProjectCard
+              onCancel={() => setIsCreating(false)}
+              onCreated={() => setIsCreating(false)}
+            />
+          ) : (
+            <div
+              onClick={() => setIsCreating(true)}
+              className="h-55 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 mb-3 cursor-pointer hover:bg-gray-100"
+            >
+              <span className="text-2xl text-gray-500">+</span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <FormProvider {...formInstance}>
@@ -94,18 +140,7 @@ const ProjectList = () => {
           </h1>
           {isEditing ? (
             <div className="space-x-2">
-              <Button
-                onClick={() => {
-                  console.log(
-                    "정렬 저장됨:",
-                    editableProjects.map((p) => p.id)
-                  );
-                  setOriginalProjects(editableProjects);
-                  setIsEditing(false);
-                }}
-              >
-                확인
-              </Button>
+              <Button onClick={onClickConfirmProjectOrder}>확인</Button>
               <Button
                 variant="outline"
                 onClick={() => {
@@ -136,45 +171,22 @@ const ProjectList = () => {
           )}
 
         {/* 프로젝트 카드 목록 */}
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={editableProjects.map((p) => p.id)}
-            strategy={rectSortingStrategy}
+        {isEditing ? (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {editableProjects.map((project) => (
-                <SortableItem key={project.id} id={project.id}>
-                  <ProjectCard
-                    project={project}
-                    onClick={() => onClickProject(project.id)}
-                  />
-                </SortableItem>
-              ))}
-
-              {!isEditing && role === "ADMIN" && (
-                <div>
-                  {isCreating ? (
-                    <NewProjectCard
-                      onCancel={() => setIsCreating(false)}
-                      onCreated={() => setIsCreating(false)}
-                    />
-                  ) : (
-                    <div
-                      onClick={() => setIsCreating(true)}
-                      className="h-55 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 mb-3 cursor-pointer hover:bg-gray-100"
-                    >
-                      <span className="text-2xl text-gray-500">+</span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </SortableContext>
-        </DndContext>
+            <SortableContext
+              items={editableProjects.map((p) => p.id)}
+              strategy={rectSortingStrategy}
+            >
+              {renderProjects()}
+            </SortableContext>
+          </DndContext>
+        ) : (
+          renderProjects()
+        )}
       </div>
     </FormProvider>
   );

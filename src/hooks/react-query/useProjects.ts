@@ -3,7 +3,7 @@ import { ProjectLabel, User, Task } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
-type Project = {
+export type Project = {
   id: number;
   projectName: string;
   progress: number;
@@ -12,6 +12,7 @@ type Project = {
   tasks: Task[];
   isPersonal: boolean;
   label?: ProjectLabel;
+  order?: number[];
 };
 
 type ProjectCreateParams = {
@@ -65,6 +66,27 @@ const useProjects = (targetId?: string | number) => {
       queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
     },
     onError: () => {},
+  });
+
+  // project order update
+  const { mutate: updateProjectOrder } = useMutation<
+    void,
+    Error,
+    { projectIds: number[] }
+  >({
+    mutationFn: async (data) => {
+      const { projectIds } = data;
+      await axios.patch(`${PROJECT_API_PATH}/reorder`, {
+        projectIds,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
+      showToast({ type: ToastMode.SUCCESS, action: "CHANGE" });
+    },
+    onError: () => {
+      showToast({ type: ToastMode.ERROR, action: "CHANGE" });
+    },
   });
 
   // project label update
@@ -148,6 +170,7 @@ const useProjects = (targetId?: string | number) => {
     // create
     createProjectMutate,
     // update
+    updateProjectOrder,
     updateProjectLabel,
     updateProjectManager,
     updateProjecDeadline,
