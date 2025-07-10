@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ResizablePanel } from "@/components/ui/resizable";
 import { ALL_STATUS, Status, useKanbanStore } from "@/store/useKanbanStore";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
 import KanbanColumnBadge from "./KanbanColumnBadge";
@@ -52,44 +52,47 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     name: "assignees",
   });
 
-  const debouncedUpdate = useMemo(
+  const debouncedUpdateTitle = useMemo(
     () =>
-      debounce((taskId: number, value: string | string[], target: string) => {
-        if (target === "title" || target === "desc") {
-          if (typeof value === "string") {
-            updateTaskMutate({ id: taskId, [target]: value });
-          }
-        } else {
-          updateTaskMutate({
-            id: taskId,
-            assignees: Array.isArray(value) ? value : [value],
-          });
-        }
+      debounce((taskId: number, value: string) => {
+        updateTaskMutate({ id: taskId, title: value });
+      }, 1500),
+    [updateTaskMutate]
+  );
+
+  const debouncedUpdateDesc = useMemo(
+    () =>
+      debounce((taskId: number, value: string) => {
+        updateTaskMutate({ id: taskId, desc: value });
+      }, 1500),
+    [updateTaskMutate]
+  );
+
+  const debouncedUpdateAssignees = useMemo(
+    () =>
+      debounce((taskId: number, assignees: number[]) => {
+        updateTaskMutate({ id: taskId, assignees });
       }, 1500),
     [updateTaskMutate]
   );
 
   const handleUpdateTask = (
     e: React.ChangeEvent<HTMLTextAreaElement> | string,
-    target: "title" | "desc" | "assignees"
+    target: "title" | "desc"
   ) => {
     const value = typeof e === "string" ? e : e.target.value;
 
-    const updates: Partial<typeof task> = {};
-    if (target === "assignees") {
-      updates.assignees = assigneeIds as number[];
-    } else {
-      updates[target] = value;
-    }
+    const updates: Partial<typeof task> = {
+      [target]: value,
+    };
 
     updateTask(columnKey as Status, taskIndex, updates);
 
-    // API 요청
-    debouncedUpdate(
-      task.id,
-      target === "assignees" ? assigneeIds : value,
-      target
-    );
+    if (target === "title") {
+      debouncedUpdateTitle(task.id, value);
+    } else {
+      debouncedUpdateDesc(task.id, value);
+    }
   };
 
   const handleUpdateStatus = (newStatus: Status) => {
@@ -100,6 +103,16 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       status: newStatus,
     });
   };
+
+  useEffect(() => {
+    if (!task?.id) return;
+
+    debouncedUpdateAssignees(task.id, assigneeIds || []);
+
+    return () => {
+      debouncedUpdateAssignees.cancel();
+    };
+  }, [assigneeIds]);
 
   return (
     <ResizablePanel

@@ -11,7 +11,7 @@ type TaskCreateParams = {
   projectName?: number;
   userId?: number;
   managerId?: number;
-  assignees?: string[];
+  assignees?: number[];
 };
 
 const TASK_PROJECT_API_PATH = "/api/tasks";
@@ -41,10 +41,11 @@ const useTasks = () => {
     TaskCreateParams
   >({
     mutationFn: async (data) => {
-      const { id, title, desc } = data;
-      await axios.put(`${TASK_PROJECT_API_PATH}/${id}`, {
+      const { id, title, desc, assignees } = data;
+      await axios.patch(`${TASK_PROJECT_API_PATH}/${id}`, {
         title,
         desc,
+        assignees,
       });
     },
     onSuccess: () => {

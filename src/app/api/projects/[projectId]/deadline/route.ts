@@ -5,10 +5,10 @@ import { prisma } from "@/lib/prisma";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ projectId: string }> }
+  { params }: { params: { projectId: string } }
 ) {
   try {
-    const { projectId } = await params;
+    const { projectId } = params;
     const { deadline } = await req.json();
 
     const updatedTask = await prisma.project.update({

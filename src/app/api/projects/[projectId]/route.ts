@@ -6,10 +6,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ projectId: string }> }
+  { params }: { params: { projectId: string } }
 ) {
   try {
-    const { projectId } = await params;
+    const { projectId } = params;
     const project = await prisma.project.findUnique({
       include: {
         manager: true,
@@ -36,14 +36,14 @@ export async function GET(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ projectId: string }> }
+  { params }: { params: { projectId: string } }
 ) {
   try {
     const payload = authenticate(req);
     const userId = (payload as any).id;
     const role = (payload as any).role;
 
-    const { projectId } = await params;
+    const { projectId } = params;
 
     const project = await prisma.project.findUnique({
       where: { id: Number(projectId) },
