@@ -93,6 +93,23 @@ const ProjectList = () => {
 
   const renderProjects = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* 새 프로젝트 생성 박스 (편집 중이 아니고 관리자일 때만) */}
+      {!isEditing && role === "ADMIN" && (
+        <div
+          className="h-55 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 mb-3 cursor-pointer hover:bg-gray-100"
+          onClick={() => setIsCreating(true)}
+        >
+          {isCreating ? (
+            <NewProjectCard
+              onCancel={() => setIsCreating(false)}
+              onCreated={() => setIsCreating(false)}
+            />
+          ) : (
+            <span className="text-2xl text-gray-500">+</span>
+          )}
+        </div>
+      )}
+
       {editableProjects.map((project) =>
         isEditing ? (
           <SortableItem key={project.id} id={project.id}>
@@ -109,24 +126,6 @@ const ProjectList = () => {
             />
           </div>
         )
-      )}
-
-      {!isEditing && role === "ADMIN" && (
-        <div>
-          {isCreating ? (
-            <NewProjectCard
-              onCancel={() => setIsCreating(false)}
-              onCreated={() => setIsCreating(false)}
-            />
-          ) : (
-            <div
-              onClick={() => setIsCreating(true)}
-              className="h-55 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 mb-3 cursor-pointer hover:bg-gray-100"
-            >
-              <span className="text-2xl text-gray-500">+</span>
-            </div>
-          )}
-        </div>
       )}
     </div>
   );
