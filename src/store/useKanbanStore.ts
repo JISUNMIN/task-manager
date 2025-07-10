@@ -134,10 +134,7 @@ export const useKanbanStore = create<{
               return {
                 columns: {
                   ...state.columns,
-                  [fromColumn]:
-                    fromTasks.length === 0
-                      ? [{ title: "", desc: "" }]
-                      : fromTasks,
+                  [fromColumn]: fromTasks,
                   [toColumn]: toTasks,
                 },
               };
