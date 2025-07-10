@@ -1,5 +1,6 @@
 import { useRef } from "react";
-import { IoPersonCircle, IoExitOutline } from "react-icons/io5";
+import Link from "next/link";
+import { IoPersonCircle, IoExitOutline, IoGridOutline } from "react-icons/io5";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -50,27 +51,41 @@ const UserMenu = ({ open, onOpenChange }: UserMenuProps) => {
             </div>
 
             {/* 메뉴 항목 */}
-            <a
+            <Link
               href="/profile"
               className="flex items-center gap-2 px-4 py-2.5 hover:bg-gray-100"
+              onClick={() => onOpenChange(false)}
             >
               <IoPersonCircle className="w-5 h-5" />
               Profile
-            </a>
-            {/* <a
+            </Link>
+
+            <Link
+              href="/projectlist"
+              className="flex items-center gap-2 px-4 py-2.5 hover:bg-gray-100"
+              onClick={() => onOpenChange(false)}
+            >
+              <IoGridOutline className="w-5 h-5" />
+              프로젝트 현황
+            </Link>
+
+            {/* <Link
               href="/settings"
               className="flex items-center gap-2 px-4 py-2.5 hover:bg-gray-100"
+              onClick={() => onOpenChange(false)}
             >
               <IoSettingsSharp className="w-5 h-5" />
               Settings
-            </a> */}
-            {/* <a
+            </Link> */}
+
+            {/* <Link
               href="/faq"
               className="flex items-center gap-2 px-4 py-2.5 hover:bg-gray-100"
+              onClick={() => onOpenChange(false)}
             >
               <IoHelpCircleSharp className="w-5 h-5" />
               FAQ
-            </a> */}
+            </Link> */}
 
             <hr className="my-2" />
 

@@ -3,7 +3,6 @@
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -11,27 +10,18 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { logo } from "@/assets/images";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
 import useProjects from "@/hooks/react-query/useProjects";
-import { convertDateToString, formatDate } from "@/lib/utils/helpers";
+import { convertDateToString } from "@/lib/utils/helpers";
 
 export function KanbanSidebar() {
   const router = useRouter();
   const { listData } = useProjects();
-  const { logout, user } = useAuthStore();
+  const { user } = useAuthStore();
   const searchParams = useSearchParams();
-  const handleNavigate = () => {
-    router.push("/projectlist");
-  };
-
-  const handleLogout = () => {
-    logout();
-    router.replace("/auth/login");
-  };
 
   //  개인 프로젝트는 본인 것만 필터링
   const filteredProjects = listData?.filter((project) => {
@@ -97,24 +87,6 @@ export function KanbanSidebar() {
                   ))}
                 </ul>
               </div>
-              <SidebarFooter>
-                <div className="mt-auto flex flex-col gap-1">
-                  <Button
-                    variant="default"
-                    className="w-full"
-                    onClick={handleNavigate}
-                  >
-                    프로젝트 현황
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    className="w-full"
-                    onClick={handleLogout}
-                  >
-                    로그아웃
-                  </Button>
-                </div>
-              </SidebarFooter>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
