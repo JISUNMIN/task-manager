@@ -7,6 +7,7 @@ interface PasswordInputProps {
   errors: FieldErrors;
   name: string;
   placeholder?: string;
+  defaultValue?: string;
 }
 
 export function PasswordInput({
@@ -14,6 +15,7 @@ export function PasswordInput({
   errors,
   name,
   placeholder,
+  defaultValue,
 }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -29,6 +31,7 @@ export function PasswordInput({
           type={showPassword ? "text" : "password"}
           placeholder={placeholder}
           className="flex-1 border-none p-0 focus:outline-none focus:ring-0 bg-transparent"
+          defaultValue={defaultValue}
         />
         <button
           type="button"

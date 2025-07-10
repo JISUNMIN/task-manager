@@ -74,6 +74,7 @@ export default function LoginForm() {
                   <input
                     {...register("userId")}
                     placeholder="아이디"
+                    defaultValue="admin"
                     className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
                   />
                 </div>
@@ -87,6 +88,7 @@ export default function LoginForm() {
                 register={register}
                 name="password"
                 placeholder="비밀번호"
+                defaultValue="123123"
                 errors={errors}
               />
               <Button type="submit" className="w-full cursor-pointer">
