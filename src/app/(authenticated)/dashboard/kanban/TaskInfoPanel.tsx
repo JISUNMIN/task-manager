@@ -18,7 +18,6 @@ import { TbCircleDotted } from "react-icons/tb";
 import { FaPeopleGroup } from "react-icons/fa6";
 import { useMediaQuery } from "usehooks-ts";
 import { debounce } from "lodash";
-import useProjects from "@/hooks/react-query/useProjects";
 import { UserSelectInput } from "@/components/form/UserSelectInput";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import useTasks from "@/hooks/react-query/useTasks";
@@ -42,8 +41,12 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const { updateTaskMutate, updateTaskStatus } = useTasks();
   const [columnKey, itemIndexStr] = focusedInputKey.split("-");
   const taskIndex = Number(itemIndexStr);
+  const task = useMemo(
+    () => columns[columnKey as Status]?.[taskIndex],
+    [columns, columnKey, taskIndex]
+  );
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const { control, watch } = useForm();
+  const { control } = useForm();
   const assigneeIds = useWatch({
     control: control,
     name: "assignees",
@@ -63,40 +66,37 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           });
         }
       }, 1500),
-    []
+    [updateTaskMutate]
   );
 
   const handleUpdateTask = (
     e: React.ChangeEvent<HTMLTextAreaElement> | string,
-    target: string
+    target: "title" | "desc" | "assignees"
   ) => {
     const value = typeof e === "string" ? e : e.target.value;
-    const task = columns[columnKey as Status][taskIndex];
 
-    // 로컬 상태
-    if (target === "title") {
-      updateTask(columnKey as Status, taskIndex, { title: value });
-    } else if (target === "desc") {
-      updateTask(columnKey as Status, taskIndex, { desc: value });
-    } else if (target === "assignees") {
-      // 예: value가 number[]인 경우
-      updateTask(columnKey as Status, taskIndex, {
-        assignees: assigneeIds as number[],
-      });
-    }
-    // API 요청 debounce 처리
+    const updates: Partial<typeof task> = {};
     if (target === "assignees") {
-      debouncedUpdate(task.id, assigneeIds, target);
+      updates.assignees = assigneeIds as number[];
     } else {
-      debouncedUpdate(task.id, value, target);
+      updates[target] = value;
     }
+
+    updateTask(columnKey as Status, taskIndex, updates);
+
+    // API 요청
+    debouncedUpdate(
+      task.id,
+      target === "assignees" ? assigneeIds : value,
+      target
+    );
   };
 
-  const handleUpdateStatus = (newStatus) => {
+  const handleUpdateStatus = (newStatus: Status) => {
     moveTask(columnKey as Status, newStatus as Status, taskIndex, 0);
     handleFocusedInputKey(newStatus, taskIndex);
     updateTaskStatus({
-      id: columns[columnKey as Status][Number(itemIndexStr)].id,
+      id: task?.id,
       status: newStatus,
     });
   };
@@ -124,7 +124,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           className="w-full p-2 resize-none"
           placeholder="제목을 입력하세요"
           onChange={(e) => handleUpdateTask(e, "title")}
-          value={columns[columnKey as Status][Number(itemIndexStr)]?.title}
+          value={task?.title}
         />
         <Grid className="grid grid-cols-[1fr_6fr] px-5">
           <div className="flex items-center">
@@ -133,7 +133,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           </div>
           <Select
             value={columnKey}
-            onValueChange={(newStatus) => {
+            onValueChange={(newStatus: Status) => {
               handleUpdateStatus(newStatus);
             }}
           >
@@ -174,7 +174,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         <div>
           <Editor
             onChange={(e) => handleUpdateTask(e, "desc")}
-            content={columns[columnKey as Status][Number(itemIndexStr)]?.desc}
+            content={task?.desc}
           />
         </div>
       </div>
