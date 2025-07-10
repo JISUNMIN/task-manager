@@ -39,7 +39,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   isPersonal,
 }) => {
   const { updateTask, columns, moveTask } = useKanbanStore();
-  const { updateTaskMutate } = useTasks();
+  const { updateTaskMutate, updateTaskStatus } = useTasks();
   const [columnKey, itemIndexStr] = focusedInputKey.split("-");
   const taskIndex = Number(itemIndexStr);
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -92,6 +92,15 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     }
   };
 
+  const handleUpdateStatus = (newStatus) => {
+    moveTask(columnKey as Status, newStatus as Status, taskIndex, 0);
+    handleFocusedInputKey(newStatus, taskIndex);
+    updateTaskStatus({
+      id: columns[columnKey as Status][Number(itemIndexStr)].id,
+      status: newStatus,
+    });
+  };
+
   return (
     <ResizablePanel
       defaultSize={25}
@@ -125,8 +134,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           <Select
             value={columnKey}
             onValueChange={(newStatus) => {
-              moveTask(columnKey as Status, newStatus as Status, taskIndex, 0);
-              handleFocusedInputKey(newStatus, taskIndex);
+              handleUpdateStatus(newStatus);
             }}
           >
             <SelectTrigger className="w-full sm:w-[200px]">

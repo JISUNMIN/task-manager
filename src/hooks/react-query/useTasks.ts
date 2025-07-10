@@ -1,3 +1,4 @@
+import { Status } from "@/store/useKanbanStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -52,6 +53,24 @@ const useTasks = () => {
     onError: () => {},
   });
 
+  // task status update
+  const { mutate: updateTaskStatus } = useMutation<
+    void,
+    Error,
+    { id: number; status: Status }
+  >({
+    mutationFn: async (data) => {
+      const { id, status } = data;
+      await axios.patch(`${TASK_PROJECT_API_PATH}/${id}/status`, {
+        status,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
+    },
+    onError: () => {},
+  });
+
   // task delete
   const { mutate: deleteTaskMutate } = useMutation<void, Error, { id: number }>(
     {
@@ -69,6 +88,7 @@ const useTasks = () => {
   return {
     createTaskMutate,
     updateTaskMutate,
+    updateTaskStatus,
     deleteTaskMutate,
   };
 };

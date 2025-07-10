@@ -2,7 +2,6 @@
 // /api/tasks/[taskId]   → PUT (task 수정)
 
 import { prisma } from "@/lib/prisma";
-import { Status } from "@/store/useKanbanStore";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(
@@ -34,21 +33,18 @@ export async function PUT(
       taskId: string;
       title: string;
       desc?: string;
-      status?: Status;
     }>;
   }
 ) {
   try {
-    const { title, desc, status } = await req.json();
+    const { title, desc } = await req.json();
     const { taskId } = await params;
-    console.log("params선밍쓰", params);
 
     const newTask = await prisma.task.update({
       where: { id: Number(taskId) },
       data: {
         title: title,
         desc: desc,
-        status: status,
       },
     });
     return NextResponse.json(newTask, { status: 201 });
