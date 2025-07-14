@@ -6,10 +6,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { taskId: string } }
+  context: { params: Promise<{ taskId: string }> }
 ) {
   try {
-    const { taskId } = params;
+    const { taskId } = await context.params;
 
     const newTask = await prisma.task.delete({
       where: { id: Number(taskId) },
@@ -26,11 +26,11 @@ export async function DELETE(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { taskId: string } }
+  context: { params: { taskId: string } }
 ) {
   try {
     const { title, desc, assignees } = await req.json();
-    const { taskId } = params;
+    const { taskId } = context.params;
 
     const updateData: any = {};
 
