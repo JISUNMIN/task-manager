@@ -32,7 +32,6 @@ type FormValues = {
 const DEFAULT_DATE = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
 const NewProjectCard = ({ onCancel, onCreated }: Props) => {
-  const { isListLoading, isListFetching } = useUser();
   const { users } = useUserStore();
 
   const { createProjectMutate, isListPending } = useProjects();

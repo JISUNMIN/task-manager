@@ -30,6 +30,10 @@ interface TaskInfoPanelProps {
   isPersonal?: boolean;
 }
 
+type FormData = {
+  assignees: number[];
+};
+
 const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   isTaskInfoPanelOpen,
   togglePanel,
@@ -46,10 +50,11 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     [columns, columnKey, taskIndex]
   );
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const { control } = useForm();
-  const assigneeIds = useWatch({
-    control: control,
-    name: "assignees",
+
+  const { control, setValue } = useForm<FormData>({
+    defaultValues: {
+      assignees: [],
+    },
   });
 
   const debouncedUpdateTitle = useMemo(
@@ -105,14 +110,16 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   };
 
   useEffect(() => {
-    if (!task?.id) return;
-
-    debouncedUpdateAssignees(task.id, assigneeIds || []);
-
-    return () => {
-      debouncedUpdateAssignees.cancel();
-    };
-  }, [assigneeIds]);
+    if (task && task.assignees) {
+      // assignees가 객체 배열이면 ids로 변환
+      const ids = (task.assignees as any[]).map((a) =>
+        typeof a === "number" ? a : a.id
+      );
+      setValue("assignees", ids);
+    } else {
+      setValue("assignees", []);
+    }
+  }, [task, setValue]);
 
   return (
     <ResizablePanel
@@ -171,13 +178,21 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
               <Controller
                 name="assignees"
                 control={control}
-                render={({ field }) => (
-                  <UserSelectInput
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="사용자 검색"
-                  />
-                )}
+                render={({ field }) => {
+                  return (
+                    <UserSelectInput
+                      value={field.value ?? []}
+                      onChange={(newAssignees) => {
+                        field.onChange(newAssignees);
+                        updateTask(columnKey as Status, taskIndex, {
+                          assignees: newAssignees,
+                        });
+                        debouncedUpdateAssignees(task.id, newAssignees);
+                      }}
+                      placeholder="사용자 검색"
+                    />
+                  );
+                }}
               />
             </>
           )}

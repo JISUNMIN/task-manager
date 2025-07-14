@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { Task } from "@prisma/client";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
@@ -17,15 +17,16 @@ export const ALL_STATUS: Status[] = [
   "Completed",
 ];
 
-export type Task = {
-  id: number;
-  title: string;
-  desc: string;
+export type ClientTask = Omit<
+  Task,
+  "status" | "projectId" | "assignees" | "project" | "managerId"
+> & {
   assignees?: number[];
+  managerId?: number;
 };
 
 type Columns = {
-  [key in Status]: Task[];
+  [key in Status]: ClientTask[];
 };
 
 export const useKanbanStore = create<{
@@ -40,7 +41,11 @@ export const useKanbanStore = create<{
     }[]
   ) => void;
   addTask: (index: number) => void;
-  updateTask: (columnName: Status, index: number, task: Partial<Task>) => void;
+  updateTask: (
+    columnName: Status,
+    index: number,
+    task: Partial<ClientTask>
+  ) => void;
   moveTask: (
     fromColumn: Status,
     toColumn: Status,
@@ -53,11 +58,11 @@ export const useKanbanStore = create<{
     persist(
       (set) => ({
         columns: {
-          "To Do": [{ id: 0, title: "", desc: "", assignees: [] }],
-          Ready: [{ id: 0, title: "", desc: "", assignees: [] }],
-          "In Progress": [{ id: 0, title: "", desc: "", assignees: [] }],
-          "On Hold": [{ id: 0, title: "", desc: "", assignees: [] }],
-          Completed: [{ id: 0, title: "", desc: "", assignees: [] }],
+          "To Do": [],
+          Ready: [],
+          "In Progress": [],
+          "On Hold": [],
+          Completed: [],
         },
         initializeColumns: (tasks) => {
           const newColumns: Columns = {

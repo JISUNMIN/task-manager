@@ -13,7 +13,11 @@ export async function GET(
     const project = await prisma.project.findUnique({
       include: {
         manager: true,
-        tasks: true,
+        tasks: {
+          include: {
+            assignees: true,
+          },
+        },
       },
       where: { id: Number(projectId) },
     });
