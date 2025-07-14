@@ -145,7 +145,7 @@ const ProjectList = () => {
   return (
     <FormProvider {...formInstance}>
       <div className="mx-auto max-w-screen-xl p-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-2 mb-4">
           <h1 className="text-3xl font-extrabold text-gray-800">
             프로젝트 목록
           </h1>
