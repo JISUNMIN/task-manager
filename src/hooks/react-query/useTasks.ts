@@ -1,6 +1,6 @@
 import { Status } from "@/store/useKanbanStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import axios from "@/lib/axios";
 
 type TaskCreateParams = {
   id?: number;
@@ -14,7 +14,7 @@ type TaskCreateParams = {
   assignees?: number[];
 };
 
-const TASK_PROJECT_API_PATH = "/api/tasks";
+const TASK_PROJECT_API_PATH = "/tasks";
 
 const useTasks = () => {
   const queryClient = useQueryClient();

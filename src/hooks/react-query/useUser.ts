@@ -1,8 +1,8 @@
 import { User } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import axios from "@/lib/axios";
 
-const API_PATH = "api/users";
+const API_PATH = "/users";
 
 const useUser = () => {
   const {

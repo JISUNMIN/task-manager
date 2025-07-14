@@ -1,7 +1,7 @@
 import { showToast, ToastMode } from "@/lib/toast";
-import { ProjectLabel, User, Task, Project } from "@prisma/client";
+import { User, Task, Project } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import axios from "@/lib/axios";
 
 export type ClientProject = Omit<Project, "deadline" | "managerId"> & {
   deadline: string;
@@ -17,7 +17,7 @@ type ProjectCreateParams = {
   progress?: number;
 };
 
-const PROJECT_API_PATH = "/api/projects";
+const PROJECT_API_PATH = "/projects";
 
 const useProjects = (targetId?: string | number) => {
   const queryClient = useQueryClient();

@@ -1,6 +1,7 @@
 import { showToast, ToastMode } from "@/lib/toast";
 import { useMutation } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
+import axios from "@/lib/axios";
 import { useRouter } from "next/navigation";
 
 export type CreateParams = {
@@ -10,7 +11,7 @@ export type CreateParams = {
   confirmPassword: string;
 };
 
-const API_PATH = "/api/auth/signup";
+const API_PATH = "/auth/signup";
 
 const useSignup = () => {
   const router = useRouter();

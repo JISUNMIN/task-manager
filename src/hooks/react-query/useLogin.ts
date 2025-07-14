@@ -2,8 +2,9 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 import { showToast, ToastMode } from "@/lib/toast";
-import axios, { AxiosError } from "axios";
+import  { AxiosError } from "axios";
 import { Role, useAuthStore } from "@/store/useAuthStore";
+import axios from "@/lib/axios";
 
 type LoginParams = {
   userId: string;
@@ -19,7 +20,7 @@ type LoginResponse = {
   profileImage?: string;
 };
 
-const API_PATH = "/api/auth/login";
+const API_PATH = "/auth/login";
 
 const useLogin = () => {
   const router = useRouter();
