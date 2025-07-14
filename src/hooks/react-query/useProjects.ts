@@ -1,18 +1,12 @@
 import { showToast, ToastMode } from "@/lib/toast";
-import { ProjectLabel, User, Task } from "@prisma/client";
+import { ProjectLabel, User, Task, Project } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
-export type Project = {
-  id: number;
-  projectName: string;
-  progress: number;
+export type ClientProject = Omit<Project, "deadline" | "managerId" > & {
   deadline: string;
   manager: User;
-  tasks: Task[];
-  isPersonal: boolean;
-  label?: ProjectLabel;
-  order?: number[];
+  managerId?: number;
 };
 
 type ProjectCreateParams = {
@@ -31,10 +25,10 @@ const useProjects = (targetId?: string | number) => {
     data: listData,
     isPending: isListPending,
     isFetching: isListFetching,
-  } = useQuery<Project[], Error>({
+  } = useQuery<ClientProject[], Error>({
     queryKey: ["projects", "list"],
     queryFn: async () => {
-      const res = await axios.get<Project[]>(PROJECT_API_PATH);
+      const res = await axios.get<ClientProject[]>(PROJECT_API_PATH);
       return res.data;
     },
     enabled: !targetId,
@@ -44,10 +38,10 @@ const useProjects = (targetId?: string | number) => {
     data: detailData,
     isPending: isDetailPending,
     isFetching: isDetailFetching,
-  } = useQuery<Project, Error>({
+  } = useQuery<ClientProject, Error>({
     queryKey: ["projects", "list", "detail", targetId],
     queryFn: async () => {
-      const res = await axios.get<Project>(`${PROJECT_API_PATH}/${targetId}`);
+      const res = await axios.get<ClientProject>(`${PROJECT_API_PATH}/${targetId}`);
       return res.data;
     },
     enabled: !!targetId,

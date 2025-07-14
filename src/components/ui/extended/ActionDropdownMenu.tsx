@@ -23,17 +23,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Tags } from "lucide-react";
-import { Project, ProjectLabel } from "@prisma/client";
+import { ProjectLabel } from "@prisma/client";
 import { useFormContext } from "react-hook-form";
-
-type ProjectWithStringDeadline = Omit<
-  Project,
-  "deadline" | "managerId" | "label"
-> & {
-  deadline: string;
-  managerId?: number;
-  label?: ProjectLabel | null;
-};
+import { ClientProject } from "@/hooks/react-query/useProjects";
 
 interface DropdownActionItem {
   label?: string;
@@ -47,7 +39,7 @@ interface ActionDropdownMenuProps {
   items: DropdownActionItem[];
   labels?: readonly string[]; // optional: label 서브 메뉴 사용 시
   handleSelectedLabel?: (label: ProjectLabel) => void;
-  project: ProjectWithStringDeadline;
+  project: ClientProject;
 }
 
 export function ActionDropdownMenu({

@@ -1,7 +1,7 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
 import ProjectCard from "./ProjectCard";
-import useProjects, { Project } from "@/hooks/react-query/useProjects";
+import useProjects, { ClientProject } from "@/hooks/react-query/useProjects";
 import { useRouter } from "next/navigation";
 import Loading from "@/app/loading";
 import NewProjectCard from "./NewProjectCard";
@@ -27,18 +27,25 @@ import { CSS } from "@dnd-kit/utilities";
 const SortableItem = ({
   id,
   children,
+  disabled = false,
 }: {
   id: number;
-  children: React.ReactNode;
+  children: ReactNode;
+  disabled?: boolean;
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
+    useSortable({ id, disabled });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...(disabled ? {} : listeners)}
+    >
       {children}
     </div>
   );
@@ -51,8 +58,8 @@ const ProjectList = () => {
   const { listData, updateProjectOrder } = useProjects();
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editableProjects, setEditableProjects] = useState<Project[]>([]);
-  const [originalProjects, setOriginalProjects] = useState<Project[]>([]);
+  const [editableProjects, setEditableProjects] = useState<ClientProject[]>([]);
+  const [originalProjects, setOriginalProjects] = useState<ClientProject[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -112,9 +119,14 @@ const ProjectList = () => {
 
       {editableProjects.map((project) =>
         isEditing ? (
-          <SortableItem key={project.id} id={project.id}>
+          <SortableItem
+            key={project.id}
+            id={project.id}
+            disabled={project.isPersonal}
+          >
             <ProjectCard
               project={project}
+              disabled={project.isPersonal}
               onClick={() => onClickProject(project.id)}
             />
           </SortableItem>
