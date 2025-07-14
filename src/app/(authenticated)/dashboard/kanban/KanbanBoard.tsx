@@ -25,6 +25,7 @@ import useProjects from "@/hooks/react-query/useProjects";
 import { useSearchParams } from "next/navigation";
 import { debounce } from "lodash";
 import useTasks from "@/hooks/react-query/useTasks";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const KanbanBoard = () => {
   const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
@@ -34,9 +35,14 @@ const KanbanBoard = () => {
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId") ?? undefined;
   const { detailData } = useProjects(projectId);
-
-  const { createTaskMutate, deleteTaskMutate, updateTaskMutate } = useTasks();
+  const {
+    createTaskMutate,
+    deleteTaskMutate,
+    updateTaskMutate,
+    updateTaskStatus,
+  } = useTasks();
   const isPersonal = detailData?.isPersonal;
+  const { user } = useAuthStore();
 
   const {
     columns,
@@ -47,34 +53,30 @@ const KanbanBoard = () => {
     removeColumn,
   } = useKanbanStore();
 
-  // 칸반 열에 추가할 작업을 저장
-  const handleInputChange = (
-    columnKey: Status,
-    value: string,
-    itemIndex: number
-  ) => {
-    updateTask(columnKey, itemIndex, { title: value });
-  };
+  const debouncedUpdate = useMemo(
+    () =>
+      debounce((taskId: number, newTitle: string) => {
+        updateTaskMutate({ id: taskId, title: newTitle });
+      }, 1500),
+    [updateTaskMutate]
+  );
 
-  // 드래그 앤 드롭 종료 시 호출
   const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result;
-
     if (!destination) return;
-    // 같은 위치에서 놓으면 처리 안함
     if (
       source.droppableId === destination.droppableId &&
       source.index === destination.index
     )
       return;
 
-    moveTask(
-      source.droppableId as Status,
-      destination.droppableId as Status,
-      source.index,
-      destination.index
-    );
-    setFocusedInputKey(`${destination.droppableId}-${destination.index}`);
+    const sourceStatus = source.droppableId as Status;
+    const destinationStatus = destination.droppableId as Status;
+    const task = columns[sourceStatus][source.index];
+
+    moveTask(sourceStatus, destinationStatus, source.index, destination.index);
+    updateTaskStatus({ id: task.id, status: destinationStatus });
+    setFocusedInputKey(`${destinationStatus}-${destination.index}`);
   };
 
   const handleFocusedInputKey = (columnKey: string, itemIndex: number) => {
@@ -83,14 +85,13 @@ const KanbanBoard = () => {
 
   const handleCreateTask = (columnKey: Status, columnIndex: number) => {
     addTask(columnIndex);
-
     createTaskMutate({
       title: "",
       desc: "",
       status: columnKey,
       projectId: Number(projectId),
-      userId: 1, // 실제 로그인 유저 ID로 대체
-      managerId: 1, // 실제 매니저 ID로 대체
+      userId: user?.id ?? 1,
+      managerId: user?.id ?? 1,
     });
   };
 
@@ -100,13 +101,6 @@ const KanbanBoard = () => {
     removeColumn(columnKey, itemIndex);
   };
 
-  const debouncedUpdate = useMemo(
-    () =>
-      debounce((taskId: number, newTitle: string) => {
-        updateTaskMutate({ id: taskId, title: newTitle });
-      }, 1500),
-    []
-  );
   const handleUpdateTask = (
     columnKey: Status,
     value: string,
@@ -178,7 +172,7 @@ const KanbanBoard = () => {
                             {...provided.droppableProps}
                           >
                             {columns[columnKey as Status].map(
-                              (item, itemIndex) => (
+                              (task, itemIndex) => (
                                 <Draggable
                                   key={`${columnKey}-${itemIndex}`}
                                   draggableId={`${columnKey}-${itemIndex}`}
@@ -195,18 +189,13 @@ const KanbanBoard = () => {
                                       <div className="text-gray-800 text-right">
                                         ⠿
                                       </div>
-
                                       <TextareaAutosize
                                         ref={(el) => {
                                           inputRefs.current[
                                             `${columnKey}-${itemIndex}`
                                           ] = el;
                                         }}
-                                        value={
-                                          columns[columnKey as Status][
-                                            itemIndex
-                                          ].title
-                                        }
+                                        value={task.title}
                                         onChange={(e) =>
                                           handleUpdateTask(
                                             columnKey as Status,
@@ -225,7 +214,6 @@ const KanbanBoard = () => {
                                         placeholder="Enter new task"
                                         className="w-full p-2 border rounded"
                                       />
-
                                       <button
                                         onClick={() =>
                                           handleDeleteTask(
@@ -233,8 +221,7 @@ const KanbanBoard = () => {
                                             itemIndex
                                           )
                                         }
-                                        className="flex items-center mt-1
-                                         hover:text-red-600"
+                                        className="flex items-center mt-1 hover:text-red-600"
                                       >
                                         <FaTrash className="mr-1" />
                                         Delete

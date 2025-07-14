@@ -3,10 +3,11 @@ import { ProjectLabel, User, Task, Project } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
-export type ClientProject = Omit<Project, "deadline" | "managerId" > & {
+export type ClientProject = Omit<Project, "deadline" | "managerId"> & {
   deadline: string;
   manager: User;
   managerId?: number;
+  tasks?: Task[];
 };
 
 type ProjectCreateParams = {
@@ -41,7 +42,9 @@ const useProjects = (targetId?: string | number) => {
   } = useQuery<ClientProject, Error>({
     queryKey: ["projects", "list", "detail", targetId],
     queryFn: async () => {
-      const res = await axios.get<ClientProject>(`${PROJECT_API_PATH}/${targetId}`);
+      const res = await axios.get<ClientProject>(
+        `${PROJECT_API_PATH}/${targetId}`
+      );
       return res.data;
     },
     enabled: !!targetId,
