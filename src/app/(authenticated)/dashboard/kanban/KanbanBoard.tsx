@@ -26,6 +26,7 @@ import { useSearchParams } from "next/navigation";
 import { debounce } from "lodash";
 import useTasks from "@/hooks/react-query/useTasks";
 import { useAuthStore } from "@/store/useAuthStore";
+import { getStatusColors } from "@/lib/utils/colors";
 
 const KanbanBoard = () => {
   const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
@@ -142,21 +143,24 @@ const KanbanBoard = () => {
             <h1 className="text-3xl font-semibold mb-6">작업 보드</h1>
 
             <DragDropContext onDragEnd={handleDragEnd}>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
                 {Object.keys(columns).map((columnKey) => {
+                  const status = columnKey as Status;
                   const keys = Object.keys(columns);
-                  const columnIndex = keys.indexOf(columnKey);
+                  const columnIndex = keys.indexOf(status);
+                  const { kanbanBoardBg } = getStatusColors(status);
 
                   return (
-                    <div key={columnKey} className="flex flex-col">
+                    <div
+                      key={columnKey}
+                      className={`flex flex-col ${kanbanBoardBg} rounded p-4`}
+                    >
                       <div className="flex justify-between items-center mb-4">
-                        <KanbanColumnBadge columnKey={columnKey as Status} />
+                        <KanbanColumnBadge columnKey={status} />
                         <Button
                           variant="outline"
                           size="icon"
-                          onClick={() =>
-                            handleCreateTask(columnKey as Status, columnIndex)
-                          }
+                          onClick={() => handleCreateTask(status, columnIndex)}
                           className="bg-gray-400 text-white rounded"
                         >
                           <FaPlus />
@@ -167,70 +171,64 @@ const KanbanBoard = () => {
                       <Droppable droppableId={columnKey}>
                         {(provided) => (
                           <div
-                            className="flex flex-col"
+                            className={`flex flex-col min-h-full max-h-[500px] lg:max-h-[80vh] p-1 overflow-y-auto`}
                             ref={provided.innerRef}
                             {...provided.droppableProps}
                           >
-                            {columns[columnKey as Status].map(
-                              (task, itemIndex) => (
-                                <Draggable
-                                  key={`${columnKey}-${itemIndex}`}
-                                  draggableId={`${columnKey}-${itemIndex}`}
-                                  index={itemIndex}
-                                >
-                                  {(provided) => (
-                                    <div
-                                      className="mb-4 border rounded p-2 bg-white"
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                    >
-                                      {/* 드래그 핸들 */}
-                                      <div className="text-gray-800 text-right">
-                                        ⠿
-                                      </div>
-                                      <TextareaAutosize
-                                        ref={(el) => {
-                                          inputRefs.current[
-                                            `${columnKey}-${itemIndex}`
-                                          ] = el;
-                                        }}
-                                        value={task.title}
-                                        onChange={(e) =>
-                                          handleUpdateTask(
-                                            columnKey as Status,
-                                            e.target.value,
-                                            itemIndex
-                                          )
-                                        }
-                                        onFocus={() =>
-                                          setFocusedInputKey(
-                                            `${columnKey}-${itemIndex}`
-                                          )
-                                        }
-                                        onClick={() =>
-                                          setTaskInfoPanelrOpen(true)
-                                        }
-                                        placeholder="Enter new task"
-                                        className="w-full p-2 border rounded"
-                                      />
-                                      <button
-                                        onClick={() =>
-                                          handleDeleteTask(
-                                            columnKey as Status,
-                                            itemIndex
-                                          )
-                                        }
-                                        className="flex items-center mt-1 hover:text-red-600"
-                                      >
-                                        <FaTrash className="mr-1" />
-                                        Delete
-                                      </button>
+                            {columns[status].map((task, itemIndex) => (
+                              <Draggable
+                                key={`${columnKey}-${itemIndex}`}
+                                draggableId={`${columnKey}-${itemIndex}`}
+                                index={itemIndex}
+                              >
+                                {(provided) => (
+                                  <div
+                                    className="mb-4 border rounded p-4 bg-white"
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                  >
+                                    <div className="text-gray-800 text-right">
+                                      ⠿
                                     </div>
-                                  )}
-                                </Draggable>
-                              )
-                            )}
+                                    <TextareaAutosize
+                                      ref={(el) => {
+                                        inputRefs.current[
+                                          `${columnKey}-${itemIndex}`
+                                        ] = el;
+                                      }}
+                                      value={task.title}
+                                      onChange={(e) =>
+                                        handleUpdateTask(
+                                          status,
+                                          e.target.value,
+                                          itemIndex
+                                        )
+                                      }
+                                      onFocus={() =>
+                                        setFocusedInputKey(
+                                          `${columnKey}-${itemIndex}`
+                                        )
+                                      }
+                                      onClick={() =>
+                                        setTaskInfoPanelrOpen(true)
+                                      }
+                                      placeholder="Enter new task"
+                                      className="w-full p-2 border rounded"
+                                    />
+                                    <button
+                                      onClick={() =>
+                                        handleDeleteTask(status, itemIndex)
+                                      }
+                                      className="flex items-center mt-1 hover:text-red-600"
+                                    >
+                                      <FaTrash className="mr-1" />
+                                      Delete
+                                    </button>
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
                             {provided.placeholder}
                           </div>
                         )}

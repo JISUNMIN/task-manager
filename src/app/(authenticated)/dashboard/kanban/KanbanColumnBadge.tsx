@@ -1,46 +1,22 @@
 "use client";
+
 import { Badge } from "@/components/ui/badge";
 import { Status } from "@/store/useKanbanStore";
 import React from "react";
+import { getStatusColors } from "@/lib/utils/colors/index";
 
 const KanbanColumnBadge = ({ columnKey }: { columnKey: Status }) => {
-  let bgColor, dotColor;
-
-  switch (columnKey) {
-    case "To Do":
-      bgColor = "bg-gray-400";
-      dotColor = "bg-gray-500";
-      break;
-    case "Ready":
-      bgColor = "bg-blue-500";
-      dotColor = "bg-blue-600";
-      break;
-    case "In Progress":
-      bgColor = "bg-yellow-500";
-      dotColor = "bg-yellow-600";
-      break;
-    case "On Hold":
-      bgColor = "bg-orange-500";
-      dotColor = "bg-orange-600";
-      break;
-    case "Completed":
-      bgColor = "bg-green-500";
-      dotColor = "bg-green-600";
-      break;
-    default:
-      bgColor = "bg-gray-400";
-      dotColor = "bg-gray-500";
-  }
+  const { statusBgColor, dotColor } = getStatusColors(columnKey);
 
   return (
-    <Badge 
-      className={`${bgColor} rounded-2xl pr-3 pl-3 `}
+    <Badge
+      className={`${statusBgColor} rounded-2xl pr-3 pl-3 flex items-center gap-2`}
     >
       <div
         className={`w-3 h-3 ${dotColor} rounded-full border-2 border-solid ${dotColor}`}
       ></div>
       <span className="text-xl font-semibold text-gray-100">{columnKey}</span>
-    </Badge >
+    </Badge>
   );
 };
 
