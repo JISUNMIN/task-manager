@@ -19,8 +19,9 @@ import { FaPeopleGroup } from "react-icons/fa6";
 import { useMediaQuery } from "usehooks-ts";
 import { debounce } from "lodash";
 import { UserSelectInput } from "@/components/form/UserSelectInput";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import useTasks from "@/hooks/react-query/useTasks";
+import { TaskComments } from "./TaskComments";
 
 interface TaskInfoPanelProps {
   isTaskInfoPanelOpen: boolean;
@@ -199,6 +200,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         </Grid>
       </div>
       <div className=" p-4 h-full flex flex-col overflow-y-auto ">
+        <TaskComments />
         <Editor
           onChange={(e) => handleUpdateTask(e, "desc")}
           content={task?.desc}
