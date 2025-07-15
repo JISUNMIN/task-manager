@@ -1,5 +1,10 @@
 // style.module.scss
 .editorContent {
+  :global(.ProseMirror) {
+    border: none !important;
+    outline: none;
+  }
+
   h1 {
     font-size: 2rem;
     font-weight: bold;
@@ -21,9 +26,4 @@
   li {
     margin-bottom: 0.25rem;
   }
-}
-
-:global(.ProseMirror) {
-  border: none !important;
-  outline: none;
 }

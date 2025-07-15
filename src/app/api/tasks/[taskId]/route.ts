@@ -26,11 +26,11 @@ export async function DELETE(
 
 export async function PATCH(
   req: NextRequest,
-  context: { params: { taskId: string } }
+  context: { params: Promise<{ taskId: string }> }
 ) {
   try {
     const { title, desc, assignees } = await req.json();
-    const { taskId } = context.params;
+    const { taskId } = await context.params;
 
     const updateData: any = {};
 

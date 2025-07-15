@@ -40,14 +40,14 @@ export async function GET(
 
 export async function DELETE(
   req: NextRequest,
-  context: { params: { projectId: string } }
+  context: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const payload = authenticate(req);
     const userId = (payload as any).id;
     const role = (payload as any).role;
 
-    const { projectId } = context.params;
+    const { projectId } = await context.params;
 
     const project = await prisma.project.findUnique({
       where: { id: Number(projectId) },
