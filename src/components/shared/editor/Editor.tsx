@@ -206,11 +206,11 @@ export default function Editor({
   }, [content]);
 
   return (
-    <div className="relative border p-4 rounded">
+    <div className="relative p-4">
       {editor && <SlashCommands editor={editor} />}
       <EditorContent
         editor={editor}
-        className={`min-h-[150px] focus:outline-none ${styles.editorContent}`}
+        className={`h-full ${styles.editorContent}`}
       />
     </div>
   );

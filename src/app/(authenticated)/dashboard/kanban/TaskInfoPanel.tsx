@@ -157,7 +157,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
               handleUpdateStatus(newStatus);
             }}
           >
-            <SelectTrigger className="w-full sm:w-[200px]">
+            <SelectTrigger className="w-full py-6">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -199,12 +199,10 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         </Grid>
       </div>
       <div className=" p-4 h-full flex flex-col overflow-y-auto ">
-        <div>
-          <Editor
-            onChange={(e) => handleUpdateTask(e, "desc")}
-            content={task?.desc}
-          />
-        </div>
+        <Editor
+          onChange={(e) => handleUpdateTask(e, "desc")}
+          content={task?.desc}
+        />
       </div>
     </ResizablePanel>
   );

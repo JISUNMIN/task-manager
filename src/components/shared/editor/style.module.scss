@@ -22,3 +22,8 @@
     margin-bottom: 0.25rem;
   }
 }
+
+:global(.ProseMirror) {
+  border: none !important;
+  outline: none;
+}
