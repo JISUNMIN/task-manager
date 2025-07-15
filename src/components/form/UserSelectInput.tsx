@@ -2,11 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
-import { IoPersonCircle } from "react-icons/io5";
 import { User } from "@prisma/client";
 import { useUserStore } from "@/store/useUserStore";
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { UserAvatar } from "../ui/extended/UserAvatar";
 
 interface UserSelectInputProps {
   value: number[];
@@ -123,12 +122,12 @@ export function UserSelectInput({
           key={user.id}
           className="flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2 py-1 text-sm"
         >
-          <Avatar className="w-5 h-5">
-            <AvatarImage src={user.profileImage ?? ""} alt={user.name} />
-            <AvatarFallback>
-              <IoPersonCircle className="w-5 h-5" />
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            src={user.profileImage ?? ""}
+            alt={user.name}
+            size="sm"
+            className="mt-1"
+          />
           <span>{user.name}</span>
           <button
             onClick={(e) => {
@@ -185,15 +184,11 @@ export function UserSelectInput({
                       : "hover:bg-gray-100"
                   )}
                 >
-                  <Avatar className="w-6 h-6">
-                    <AvatarImage
-                      src={user.profileImage ?? ""}
-                      alt={user.name}
-                    />
-                    <AvatarFallback>
-                      <IoPersonCircle className="w-6 h-6" />
-                    </AvatarFallback>
-                  </Avatar>
+                  <UserAvatar
+                    src={user.profileImage ?? ""}
+                    alt={user.name}
+                    className="mt-1"
+                  />
                   <div className="flex flex-col text-sm">
                     <span>{user.name}</span>
                     <span className="text-xs text-gray-500">{user.userId}</span>

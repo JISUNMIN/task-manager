@@ -16,6 +16,7 @@ import { DeleteProjectDialog } from "@/components/ui/extended/DeleteProjectDialo
 import { UserSelectionModal } from "@/components/ui/extended/UserSelectionModal ";
 import { DeadlineModal } from "@/components/ui/extended/DeadlineModal";
 import { useFormContext, useWatch } from "react-hook-form";
+import { UserAvatar } from "@/components/ui/extended/UserAvatar";
 
 interface ProjectCardProps {
   project: ClientProject;
@@ -178,12 +179,12 @@ const ProjectCard: FC<ProjectCardProps> = ({ project, onClick, disabled }) => {
 
           <div className="text-sm text-gray-600 flex gap-1.5 items-center">
             담당자: {project?.manager?.name}
-            <Avatar>
-              <AvatarImage src={project?.manager?.profileImage ?? ""} />
-              <AvatarFallback>
-                <IoPersonCircle className="w-8 h-8" />
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar
+              src={project?.manager?.profileImage ?? ""}
+              alt={project?.manager?.userId}
+              size="lg"
+              className="mt-1"
+            />
           </div>
 
           <p className="text-sm text-gray-600">진행률: {project.progress}%</p>

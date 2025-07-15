@@ -1,10 +1,10 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { IoPersonCircle, IoExitOutline, IoGridOutline } from "react-icons/io5";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
+import { UserAvatar } from "@/components/ui/extended/UserAvatar";
 
 interface UserMenuProps {
   open: boolean;
@@ -36,12 +36,12 @@ const UserMenu = ({ open, onOpenChange }: UserMenuProps) => {
           <div className="py-2">
             {/* 사용자 정보 */}
             <div className="flex items-center px-4 py-3 gap-3 border-b">
-              <Avatar className="w-12 h-12">
-                <AvatarImage src={user?.profileImage ?? ""} />
-                <AvatarFallback>
-                  <IoPersonCircle className="w-12 h-12 text-gray-400" />
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar
+                src={user?.profileImage ?? ""}
+                alt={user?.name}
+                size="xl"
+              />
+
               <div>
                 <p className="font-semibold">{user?.name}</p>
                 <p className="text-sm text-gray-500 capitalize">
@@ -56,7 +56,7 @@ const UserMenu = ({ open, onOpenChange }: UserMenuProps) => {
               className="flex items-center gap-2 px-4 py-2.5 hover:bg-gray-100"
               onClick={() => onOpenChange(false)}
             >
-              <IoPersonCircle className="w-5 h-5" />
+              <IoPersonCircle className="w-5 h-5 text-gray-500" />
               Profile
             </Link>
 

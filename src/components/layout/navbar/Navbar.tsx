@@ -1,16 +1,8 @@
 import { useState } from "react";
-import {
-  Menu2,
-  Search,
-  Language,
-  SunHigh,
-  LayoutGridAdd,
-  Bell,
-} from "tabler-icons-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { IoPersonCircle } from "react-icons/io5";
+import { Menu2, Search, SunHigh, Bell } from "tabler-icons-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import UserMenu from "./UserMenu";
+import { UserAvatar } from "@/components/ui/extended/UserAvatar";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -74,12 +66,12 @@ const Navbar = () => {
         className="relative cursor-pointer w-9 h-9 rounded-full overflow-hidden"
         onClick={() => setAvatarMenuOpen(!avatarMenuOpen)}
       >
-        <Avatar>
-          <AvatarImage src={user?.profileImage ?? ""} />
-          <AvatarFallback>
-            <IoPersonCircle className="w-8 h-8" />
-          </AvatarFallback>
-        </Avatar>
+        <UserAvatar
+          src={user?.profileImage ?? ""}
+          alt={user?.userId}
+          size="lg"
+          className="mt-1"
+        />
         <span className="absolute bottom-2 right-1 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white" />
       </div>
       {avatarMenuOpen && (

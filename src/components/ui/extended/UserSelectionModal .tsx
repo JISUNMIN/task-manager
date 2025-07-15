@@ -26,6 +26,7 @@ import { User } from "@prisma/client";
 import { useUserStore } from "@/store/useUserStore";
 import { IoPersonCircle } from "react-icons/io5";
 import { useFormContext } from "react-hook-form";
+import { UserAvatar } from "./UserAvatar";
 
 interface UserSelectionModalProps {
   open: boolean;
@@ -88,6 +89,7 @@ export function UserSelectionModal({
                         <IoPersonCircle style={{ width: 24, height: 24 }} />
                       </AvatarFallback>
                     </Avatar>
+
                     <div className="ml-2">
                       <p className="text-sm font-medium leading-none">
                         {user.name}
@@ -106,17 +108,12 @@ export function UserSelectionModal({
           </Command>
           <DialogFooter className="flex items-center border-t p-4 sm:justify-between">
             {selectedUser ? (
-              <div className="flex -space-x-2 overflow-hidden gap-2 items-center">
-                <Avatar className="w-5 h-5" key={selectedUser.userId}>
-                  <AvatarImage
-                    src={selectedUser?.profileImage ?? ""}
-                    alt={selectedUser?.name}
-                  />
-                  <AvatarFallback>
-                    <IoPersonCircle className="w-5 h-5" />
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm">{selectedUser.name}</span>
+              <div className="flex -space-x-2 overflow-hidden gap-3 items-center">
+                <UserAvatar
+                  src={selectedUser?.profileImage ?? ""}
+                  alt={selectedUser?.name}
+                />
+                <div className="text-sm">{selectedUser.name}</div>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
