@@ -8,7 +8,6 @@ import {
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Image from "next/image";
 import { logo } from "@/assets/images";
@@ -18,15 +17,17 @@ import useProjects from "@/hooks/react-query/useProjects";
 import { convertDateToString } from "@/lib/utils/helpers";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import React, { useEffect, useRef } from "react";
 
 export function KanbanSidebar() {
   const router = useRouter();
+
   const { listData } = useProjects();
   const { user } = useAuthStore();
   const searchParams = useSearchParams();
   const selectedProjectId = searchParams.get("projectId");
 
-  //  개인 프로젝트는 본인 것만 필터링
+  // 개인 프로젝트는 본인 것만 필터링
   const filteredProjects = listData?.filter((project) => {
     if (project.isPersonal) {
       return project?.manager.id === user?.id;
@@ -34,12 +35,54 @@ export function KanbanSidebar() {
     return true;
   });
 
+  // ref 배열
+  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // 키보드 탐색 핸들러
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLButtonElement>,
+    index: number
+  ) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const nextIndex = (index + 1) % (filteredProjects?.length ?? 1);
+      buttonRefs.current[nextIndex]?.focus();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const prevIndex =
+        (index - 1 + (filteredProjects?.length ?? 1)) %
+        (filteredProjects?.length ?? 1);
+      buttonRefs.current[prevIndex]?.focus();
+    }
+  };
+
   const handleSetProjectId = (newProjectId: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("projectId", String(newProjectId));
 
     router.replace(`?${params.toString()}`, { scroll: false });
   };
+
+  // 페이지 진입 시 선택된 아이템 포커스 및 스크롤
+  useEffect(() => {
+    if (!filteredProjects || !selectedProjectId) return;
+
+    const selectedIndex = filteredProjects.findIndex(
+      (p) => String(p.id) === selectedProjectId
+    );
+
+    if (selectedIndex !== -1) {
+      const element = buttonRefs.current[selectedIndex];
+      if (element) {
+        element.focus({ preventScroll: true }); // 포커스 이동
+        // 스크롤 이동 (가장 가까운 스크롤 가능 영역에 맞게)
+        element.scrollIntoView({
+          behavior: "auto",
+          block: "nearest",
+        });
+      }
+    }
+  }, [filteredProjects, selectedProjectId]);
 
   return (
     <Sidebar className="pt-14">
@@ -65,43 +108,41 @@ export function KanbanSidebar() {
             </div>
             <SidebarMenu>
               <div>
-                {filteredProjects?.map((project) => {
+                {filteredProjects?.map((project, index) => {
                   const isSelected = selectedProjectId === String(project.id);
                   return (
-                    <SidebarMenuItem
+                    <SidebarMenuButton
                       key={project.id}
+                      role="button"
+                      ref={(el) => {
+                        buttonRefs.current[index] = el;
+                      }}
                       onClick={() => handleSetProjectId(project.id)}
+                      onKeyDown={(e) => handleKeyDown(e, index)}
+                      className={cn(
+                        "flex flex-col items-start mb-2 border-b p-3 rounded-md shadow-sm h-full",
+                        isSelected
+                          ? "bg-gray-200 border-gray-400 shadow-md"
+                          : "bg-gray-50 hover:bg-gray-100 hover:border-gray-400",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-gray-300"
+                      )}
                     >
-                      <SidebarMenuButton
-                        className={cn(
-                          "flex flex-col items-start mb-2 border-b border-gray-300 bg-gray-50 p-3 rounded-md shadow-sm h-full",
-                          isSelected
-                            ? "bg-gray-200 opacity-95 border-gray-400 shadow-md"
-                            : "hover:bg-gray-100 hover:border-gray-400"
-                        )}
-                      >
-                        <div className="flex flex-col gap-y-1">
-                          <p className="font-semibold text-gray-700 text-xs sm:text-sm lg:text-base">
-                            📌 프로젝트명: {project.projectName}
-                          </p>
-                          <p className="text-gray-600 text-xs sm:text-sm lg:text-base">
-                            👤 담당자: {project.manager.name}
-                          </p>
-                          <p className="text-gray-600 text-xs sm:text-sm lg:text-base">
-                            📊 진행률: {project.progress}%
-                          </p>
-                          {!project.isPersonal && (
-                            <p className="text-gray-600 text-xs sm:text-sm lg:text-base">
-                              🗓 마감일:
-                              {convertDateToString(
-                                new Date(project.deadline),
-                                "-"
-                              )}
-                            </p>
-                          )}
-                        </div>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                      <p className="font-medium text-gray-800">
+                        📌 프로젝트명: {project.projectName}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        👤 담당자: {project.manager.name}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        📊 진행률: {project.progress}%
+                      </p>
+                      {!project.isPersonal && (
+                        <p className="text-gray-600 text-xs sm:text-sm lg:text-base">
+                          🗓 마감일:
+                          {convertDateToString(new Date(project.deadline), "-")}
+                        </p>
+                      )}
+                    </SidebarMenuButton>
                   );
                 })}
               </div>
