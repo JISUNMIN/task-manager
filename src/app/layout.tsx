@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <QueryProvider>
       <UserStoreInitializer />
-      <html lang="en">
+      <html lang="en" className="dark">
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >

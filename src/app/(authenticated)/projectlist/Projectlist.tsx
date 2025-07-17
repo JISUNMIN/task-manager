@@ -60,6 +60,7 @@ const ProjectList = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editableProjects, setEditableProjects] = useState<ClientProject[]>([]);
   const [originalProjects, setOriginalProjects] = useState<ClientProject[]>([]);
+  const [isNavigating, setIsNavigating] = useState<boolean>(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -74,6 +75,7 @@ const ProjectList = () => {
 
   const onClickProject = (projectId: number) => {
     if (isEditing) return;
+    setIsNavigating(true);
     router.push(`/dashboard/kanban?projectId=${projectId}`);
   };
 
@@ -96,7 +98,7 @@ const ProjectList = () => {
     updateProjectOrder({ projectIds: editableProjects.map((p) => p.id) });
   };
 
-  if (!listData) return <Loading />;
+  if (!listData || isNavigating) return <Loading />;
 
   const renderProjects = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
