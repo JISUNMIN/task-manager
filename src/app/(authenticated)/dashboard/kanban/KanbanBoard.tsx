@@ -27,6 +27,8 @@ import { debounce } from "lodash";
 import useTasks from "@/hooks/react-query/useTasks";
 import { useAuthStore } from "@/store/useAuthStore";
 import { getStatusColors } from "@/lib/utils/colors";
+import { Trash } from "lucide-react";
+import { ActionDropdownMenu } from "@/components/ui/extended/ActionDropdownMenu";
 
 const KanbanBoard = () => {
   const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
@@ -175,60 +177,65 @@ const KanbanBoard = () => {
                             ref={provided.innerRef}
                             {...provided.droppableProps}
                           >
-                            {columns[status].map((task, itemIndex) => (
-                              <Draggable
-                                key={`${columnKey}-${itemIndex}`}
-                                draggableId={`${columnKey}-${itemIndex}`}
-                                index={itemIndex}
-                              >
-                                {(provided) => (
-                                  <div
-                                    className="mb-4 border rounded p-4 bg-white"
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
-                                  >
-                                    <div className="text-gray-800 text-right">
-                                      ⠿
-                                    </div>
-                                    <TextareaAutosize
-                                      ref={(el) => {
-                                        inputRefs.current[
-                                          `${columnKey}-${itemIndex}`
-                                        ] = el;
-                                      }}
-                                      value={task.title}
-                                      onChange={(e) =>
-                                        handleUpdateTask(
-                                          status,
-                                          e.target.value,
-                                          itemIndex
-                                        )
-                                      }
-                                      onFocus={() =>
-                                        setFocusedInputKey(
-                                          `${columnKey}-${itemIndex}`
-                                        )
-                                      }
-                                      onClick={() =>
-                                        setTaskInfoPanelrOpen(true)
-                                      }
-                                      placeholder="Enter new task"
-                                      className="w-full p-2 border rounded"
-                                    />
-                                    <button
-                                      onClick={() =>
-                                        handleDeleteTask(status, itemIndex)
-                                      }
-                                      className="flex items-center mt-1 hover:text-red-600"
+                            {columns[status].map((task, itemIndex) => {
+                              const items = [
+                                {
+                                  label: "삭제",
+                                  icon: <Trash />,
+                                  variant: "destructive" as const,
+                                  onSelect: () =>
+                                    handleDeleteTask(status, itemIndex),
+                                },
+                              ];
+
+                              return (
+                                <Draggable
+                                  key={`${columnKey}-${itemIndex}`}
+                                  draggableId={`${columnKey}-${itemIndex}`}
+                                  index={itemIndex}
+                                >
+                                  {(provided) => (
+                                    <div
+                                      className="mb-4 border rounded p-4 bg-white"
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
                                     >
-                                      <FaTrash className="mr-1" />
-                                      Delete
-                                    </button>
-                                  </div>
-                                )}
-                              </Draggable>
-                            ))}
+                                      <div className="text-right">
+                                        <ActionDropdownMenu items={items} />
+                                      </div>
+
+                                      <TextareaAutosize
+                                        ref={(el) => {
+                                          inputRefs.current[
+                                            `${columnKey}-${itemIndex}`
+                                          ] = el;
+                                        }}
+                                        value={task.title}
+                                        onChange={(e) =>
+                                          handleUpdateTask(
+                                            status,
+                                            e.target.value,
+                                            itemIndex
+                                          )
+                                        }
+                                        onFocus={() =>
+                                          setFocusedInputKey(
+                                            `${columnKey}-${itemIndex}`
+                                          )
+                                        }
+                                        onClick={() =>
+                                          setTaskInfoPanelrOpen(true)
+                                        }
+                                        placeholder="Enter new task"
+                                        className="w-full p-2 border rounded"
+                                      />
+                                    </div>
+                                  )}
+                                </Draggable>
+                              );
+                            })}
+
                             {provided.placeholder}
                           </div>
                         )}

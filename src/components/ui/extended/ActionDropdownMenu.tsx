@@ -24,8 +24,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Tags } from "lucide-react";
 import { ProjectLabel } from "@prisma/client";
-import { useFormContext } from "react-hook-form";
 import { ClientProject } from "@/hooks/react-query/useProjects";
+import { useOptionalFormContext } from "@/hooks/useOptionalFormContext"; 
 
 interface DropdownActionItem {
   label?: string;
@@ -37,33 +37,38 @@ interface DropdownActionItem {
 
 interface ActionDropdownMenuProps {
   items: DropdownActionItem[];
-  labels?: readonly string[]; // optional: label 서브 메뉴 사용 시
+  title?: string;
+  labels?: readonly string[];
   handleSelectedLabel?: (label: ProjectLabel) => void;
-  project: ClientProject;
+  project?: ClientProject;
 }
 
 export function ActionDropdownMenu({
   items,
+  title,
   labels,
   handleSelectedLabel,
   project,
 }: ActionDropdownMenuProps) {
-  const { setValue } = useFormContext();
-  const [open, setOpen] = useState(false);
+  const formContext = useOptionalFormContext();
+  const setValue = formContext?.setValue;
 
+  const [open, setOpen] = useState(false);
   const showLabelMenu = labels && handleSelectedLabel;
 
   const onClickDropdownMenu = (
     e: React.MouseEvent<HTMLButtonElement | HTMLDivElement, MouseEvent>
   ) => {
-    setValue("projectId", project.id);
+    if (project && setValue) {
+      setValue("projectId", project.id);
+    }
     e.stopPropagation();
   };
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm">
+        <Button variant="ghost" size="sm" className="hover:bg-gray-200">
           <MoreVertical />
         </Button>
       </DropdownMenuTrigger>
@@ -72,7 +77,7 @@ export function ActionDropdownMenu({
         align="end"
         className="w-[200px]"
       >
-        <DropdownMenuLabel>페이지</DropdownMenuLabel>
+        <DropdownMenuLabel>{title ?? "페이지"}</DropdownMenuLabel>
         <DropdownMenuGroup>
           {items.map((item) => (
             <DropdownMenuItem

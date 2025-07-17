@@ -1,20 +1,16 @@
 import { useState } from "react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { IoPersonCircle } from "react-icons/io5";
 import { HiOutlinePaperClip } from "react-icons/hi";
 import { IoMdSend } from "react-icons/io";
-import { BsThreeDotsVertical } from "react-icons/bs";
 import { UserAvatar } from "@/components/ui/extended/UserAvatar";
+import { MoreVertical } from "lucide-react";
 
 // 가상 유저 및 댓글
 const user = {
@@ -69,8 +65,8 @@ export const TaskComments = () => {
                   </span>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="w-5 h-5">
-                        <BsThreeDotsVertical className="w-4 h-4" />
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
