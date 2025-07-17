@@ -38,24 +38,6 @@ export function KanbanSidebar() {
   // ref 배열
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  // 키보드 탐색 핸들러
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLButtonElement>,
-    index: number
-  ) => {
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      const nextIndex = (index + 1) % (filteredProjects?.length ?? 1);
-      buttonRefs.current[nextIndex]?.focus();
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      const prevIndex =
-        (index - 1 + (filteredProjects?.length ?? 1)) %
-        (filteredProjects?.length ?? 1);
-      buttonRefs.current[prevIndex]?.focus();
-    }
-  };
-
   const handleSetProjectId = (newProjectId: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("projectId", String(newProjectId));
@@ -82,7 +64,7 @@ export function KanbanSidebar() {
         });
       }
     }
-  }, [filteredProjects, selectedProjectId]);
+  }, []);
 
   return (
     <Sidebar className="pt-14">
@@ -118,13 +100,11 @@ export function KanbanSidebar() {
                         buttonRefs.current[index] = el;
                       }}
                       onClick={() => handleSetProjectId(project.id)}
-                      onKeyDown={(e) => handleKeyDown(e, index)}
                       className={cn(
                         "flex flex-col items-start mb-2 border-b p-3 rounded-md shadow-sm h-full",
                         isSelected
                           ? "bg-gray-200 border-gray-400 shadow-md"
-                          : "bg-gray-50 hover:bg-gray-100 hover:border-gray-400",
-                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-gray-300"
+                          : "bg-gray-50 hover:bg-gray-100 hover:border-gray-400"
                       )}
                     >
                       <p className="font-medium text-gray-800">

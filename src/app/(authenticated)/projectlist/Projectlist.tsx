@@ -74,7 +74,7 @@ const ProjectList = () => {
 
   const onClickProject = (projectId: number) => {
     if (isEditing) return;
-    router.replace(`/dashboard/kanban?projectId=${projectId}`);
+    router.push(`/dashboard/kanban?projectId=${projectId}`);
   };
 
   const sensors = useSensors(

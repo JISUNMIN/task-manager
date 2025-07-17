@@ -62,7 +62,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     () =>
       debounce((taskId: number, value: string) => {
         updateTaskMutate({ id: taskId, title: value });
-      }, 1500),
+      }, 500),
     [updateTaskMutate]
   );
 
@@ -70,7 +70,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     () =>
       debounce((taskId: number, value: string) => {
         updateTaskMutate({ id: taskId, desc: value });
-      }, 1500),
+      }, 500),
     [updateTaskMutate]
   );
 
@@ -78,7 +78,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     () =>
       debounce((taskId: number, assignees: number[]) => {
         updateTaskMutate({ id: taskId, assignees });
-      }, 1500),
+      }, 500),
     [updateTaskMutate]
   );
 

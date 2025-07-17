@@ -58,7 +58,7 @@ const KanbanBoard = () => {
     () =>
       debounce((taskId: number, newTitle: string) => {
         updateTaskMutate({ id: taskId, title: newTitle });
-      }, 1500),
+      }, 500),
     [updateTaskMutate]
   );
 
