@@ -105,7 +105,7 @@ const ProjectList = () => {
       {/* 새 프로젝트 생성 박스 (편집 중이 아니고 관리자일 때만) */}
       {!isEditing && role === "ADMIN" && (
         <div
-          className="h-55 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 mb-3 cursor-pointer hover:bg-gray-100"
+          className="h-55 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 mb-3 cursor-pointer bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
           onClick={() => setIsCreating(true)}
         >
           {isCreating ? (
@@ -114,11 +114,12 @@ const ProjectList = () => {
               onCreated={() => setIsCreating(false)}
             />
           ) : (
-            <span className="text-2xl text-gray-500">+</span>
+            <span className="text-2xl text-gray-500 dark:text-gray-300">+</span>
           )}
         </div>
       )}
 
+      {/* 프로젝트 목록 */}
       {editableProjects.map((project) =>
         isEditing ? (
           <SortableItem
@@ -148,9 +149,7 @@ const ProjectList = () => {
     <FormProvider {...formInstance}>
       <div className="mx-auto max-w-screen-xl p-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-2 mb-4">
-          <h1 className="text-3xl font-extrabold text-gray-800">
-            프로젝트 목록
-          </h1>
+          <h1 className="text-3xl font-extrabold">프로젝트 목록</h1>
           {isEditing ? (
             <div className="space-x-2">
               <Button onClick={onClickConfirmProjectOrder}>확인</Button>
@@ -175,7 +174,7 @@ const ProjectList = () => {
         {listData?.length === 1 &&
           listData[0].isPersonal &&
           role !== "ADMIN" && (
-            <div className="text-gray-600 border rounded p-4 text-center mb-6">
+            <div className="text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded p-4 text-center mb-6">
               현재 할당된 팀 프로젝트가 없습니다.
               <br />
               개인 프로젝트를 이용하시거나, 관리자에게 프로젝트 할당을 요청해

@@ -13,7 +13,7 @@ const Navbar = () => {
   const { theme, toggleTheme } = useThemeStore();
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 w-full flex h-14 items-center p-6 shadow-sm bg-white gap-2 mx-auto">
+    <div className="fixed top-0 left-0 right-0 z-50 w-full flex h-14 items-center p-6 shadow-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 gap-2 mx-auto transition-colors duration-300">
       {/* 메뉴 토글 버튼 (모바일) */}
       <button
         id="vertical-nav-toggle-btn"
@@ -28,9 +28,9 @@ const Navbar = () => {
         <button className="btn-icon">
           <Search />
         </button>
-        <span className="hidden md:flex items-center text-gray-500 ms-2">
+        <span className="hidden md:flex items-center text-gray-500 dark:text-gray-300 ms-2">
           <span className="me-2">Search</span>
-          <span className="meta-key px-1 py-0.5 text-xs rounded bg-gray-100 border text-gray-700">
+          <span className="meta-key px-1 py-0.5 text-xs rounded bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">
             ⌘K
           </span>
         </span>
@@ -43,7 +43,7 @@ const Navbar = () => {
         <Language />
       </button> */}
 
-      {/* 다크모드 */}
+      {/* 다크모드 토글 */}
       <button className="btn-icon" onClick={toggleTheme}>
         {theme === "light" ? <SunHigh /> : <Moon />}
       </button>
@@ -74,8 +74,9 @@ const Navbar = () => {
           size="lg"
           className="mt-1"
         />
-        <span className="absolute bottom-2 right-1 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white" />
+        <span className="absolute bottom-2 right-1 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white dark:border-gray-800" />
       </div>
+
       {avatarMenuOpen && (
         <UserMenu
           // user={user}

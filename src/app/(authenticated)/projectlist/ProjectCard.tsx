@@ -1,8 +1,13 @@
-import React, { CSSProperties, FC, useEffect, useRef, useState } from "react";
+import React, {
+  CSSProperties,
+  FC,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Progress } from "@/components/ui/progress";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Project, ProjectLabel, User } from "@prisma/client";
-import { IoPersonCircle } from "react-icons/io5";
+import {  ProjectLabel } from "@prisma/client";
 import { convertDateToString } from "@/lib/utils/helpers";
 import { useAuthStore } from "@/store/useAuthStore";
 import useProjects, { ClientProject } from "@/hooks/react-query/useProjects";
@@ -17,6 +22,7 @@ import { UserSelectionModal } from "@/components/ui/extended/UserSelectionModal 
 import { DeadlineModal } from "@/components/ui/extended/DeadlineModal";
 import { useFormContext, useWatch } from "react-hook-form";
 import { UserAvatar } from "@/components/ui/extended/UserAvatar";
+import { useThemeStore } from "@/store/useThemeStore";
 
 interface ProjectCardProps {
   project: ClientProject;
@@ -29,10 +35,10 @@ const containerStyle: CSSProperties = {
   willChange: "transform",
 };
 
-const overlayStyle: CSSProperties = {
-  background: `
+const lightOverlayStyle: CSSProperties = {
+  backgroundImage: `
     linear-gradient(
-      105deg,
+     105deg,
       transparent 40%,
       rgba(255, 225, 130, 0.9) 45%,
       rgba(100, 200, 255, 0.9) 50%,
@@ -44,11 +50,27 @@ const overlayStyle: CSSProperties = {
   backgroundPosition: "100%",
 };
 
+const darkOverlayStyle: CSSProperties = {
+  backgroundImage: `
+    linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255, 180, 90, 0.25) 45%, 
+      rgba(30, 60, 100, 0.3) 55%, 
+      transparent 54%
+    )
+  `,
+  backgroundSize: "150% 150%",
+  backgroundPosition: "100%",
+  backgroundRepeat: "no-repeat",
+  filter: "brightness(0.5) opacity(0.5)", 
+};
 const ProjectCard: FC<ProjectCardProps> = ({ project, onClick, disabled }) => {
   const { control } = useFormContext();
   const { user } = useAuthStore();
   const userId = user?.id;
   const role = user?.role;
+  const { theme } = useThemeStore();
 
   const canDeleteProject =
     !project.isPersonal && (role === "ADMIN" || project.managerId === userId);
@@ -113,6 +135,11 @@ const ProjectCard: FC<ProjectCardProps> = ({ project, onClick, disabled }) => {
     updateProjecDeadline({ deadline });
   };
 
+  const overlayStyle = useMemo(
+    () => (theme === "light" ? lightOverlayStyle : darkOverlayStyle),
+    [theme]
+  );
+
   // 마우스 배경 애니메이션
   useEffect(() => {
     if (disabled) return;
@@ -145,11 +172,12 @@ const ProjectCard: FC<ProjectCardProps> = ({ project, onClick, disabled }) => {
         ref={containerRef}
         onClick={disabled ? undefined : onClick}
         className={cn(
-          "relative h-55 rounded-lg p-6 shadow-md mb-3 transition-all duration-100 bg-white",
+          "relative h-55 rounded-lg p-6 shadow-md mb-3 transition-all duration-100 bg-white dark:bg-gray-800",
           project.isPersonal
             ? "border-4 border-blue-400"
-            : "border border-stone-300",
-          !disabled && "hover:bg-gray-100 hover:scale-105 cursor-pointer",
+            : "border border-stone-300 dark:border-gray-600",
+          !disabled &&
+            "hover:bg-gray-100 dark:hover:bg-gray-700 hover:scale-105 cursor-pointer",
           disabled && "cursor-not-allowed opacity-80"
         )}
         style={containerStyle}
@@ -164,7 +192,7 @@ const ProjectCard: FC<ProjectCardProps> = ({ project, onClick, disabled }) => {
 
         <div className="relative z-10">
           <div className="flex justify-between">
-            <h3 className="text-xl font-semibold text-gray-800">
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
               {project.projectName}
             </h3>
             {canDeleteProject && (
@@ -177,7 +205,7 @@ const ProjectCard: FC<ProjectCardProps> = ({ project, onClick, disabled }) => {
             )}
           </div>
 
-          <div className="text-sm text-gray-600 flex gap-1.5 items-center">
+          <div className="text-sm text-gray-600 dark:text-gray-200 flex gap-1.5 items-center">
             담당자: {project?.manager?.name}
             <UserAvatar
               src={project?.manager?.profileImage ?? ""}
@@ -187,10 +215,12 @@ const ProjectCard: FC<ProjectCardProps> = ({ project, onClick, disabled }) => {
             />
           </div>
 
-          <p className="text-sm text-gray-600">진행률: {project.progress}%</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            진행률: {project.progress}%
+          </p>
 
           {!project.isPersonal && (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               마감일: {convertDateToString(new Date(project.deadline), "-")}
             </p>
           )}
