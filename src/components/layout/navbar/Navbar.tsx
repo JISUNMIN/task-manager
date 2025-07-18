@@ -1,14 +1,16 @@
 import { useState } from "react";
-import { Menu2, Search, SunHigh, Bell } from "tabler-icons-react";
+import { Menu2, Search, SunHigh, Bell, Moon } from "tabler-icons-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import UserMenu from "./UserMenu";
 import { UserAvatar } from "@/components/ui/extended/UserAvatar";
+import { useThemeStore } from "@/store/useThemeStore";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
   const { user } = useAuthStore();
+  const { theme, toggleTheme } = useThemeStore();
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 w-full flex h-14 items-center p-6 shadow-sm bg-white gap-2 mx-auto">
@@ -37,17 +39,17 @@ const Navbar = () => {
       <div className="flex-1" />
 
       {/* 언어 */}
-      {/* <button className="btn-icon" aria-haspopup="menu">
+      {/* <button className="btn-icon" >
         <Language />
       </button> */}
 
       {/* 다크모드 */}
-      <button className="btn-icon" aria-haspopup="menu">
-        <SunHigh />
+      <button className="btn-icon" onClick={toggleTheme}>
+        {theme === "light" ? <SunHigh /> : <Moon />}
       </button>
 
       {/* Shortcut */}
-      {/* <button className="btn-icon" aria-haspopup="menu">
+      {/* <button className="btn-icon" >
         <LayoutGridAdd />
       </button> */}
 
