@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import { Progress } from "@/components/ui/progress";
-import {  ProjectLabel } from "@prisma/client";
+import { ProjectLabel } from "@prisma/client";
 import { convertDateToString } from "@/lib/utils/helpers";
 import { useAuthStore } from "@/store/useAuthStore";
 import useProjects, { ClientProject } from "@/hooks/react-query/useProjects";
@@ -63,7 +63,7 @@ const darkOverlayStyle: CSSProperties = {
   backgroundSize: "150% 150%",
   backgroundPosition: "100%",
   backgroundRepeat: "no-repeat",
-  filter: "brightness(0.5) opacity(0.5)", 
+  filter: "brightness(0.5) opacity(0.5)",
 };
 const ProjectCard: FC<ProjectCardProps> = ({ project, onClick, disabled }) => {
   const { control } = useFormContext();
@@ -71,18 +71,22 @@ const ProjectCard: FC<ProjectCardProps> = ({ project, onClick, disabled }) => {
   const userId = user?.id;
   const role = user?.role;
   const { theme } = useThemeStore();
-
-  const canDeleteProject =
-    !project.isPersonal && (role === "ADMIN" || project.managerId === userId);
-
   const [label, setLabel] = useState(project?.label ?? "feature");
   const labelClass = LABEL_COLOR_MAP[label];
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUserSelectionModalOpen, setIsUserSelectionModalOpen] =
     useState(false);
   const [isDeadlineModalOpen, setIsDeadlineModalOpen] = useState(false);
-
   const { managerId, deadline } = useWatch({ control });
+
+  const canDeleteProject =
+    !project.isPersonal && (role === "ADMIN" || project.managerId === userId);
+
+  const overlayStyle = useMemo(
+    () => (theme === "light" ? lightOverlayStyle : darkOverlayStyle),
+    [theme]
+  );
+
   const {
     deleteProjectMutate,
     updateProjectLabel,
@@ -134,11 +138,6 @@ const ProjectCard: FC<ProjectCardProps> = ({ project, onClick, disabled }) => {
   const onClickConfirmDeadline = () => {
     updateProjecDeadline({ deadline });
   };
-
-  const overlayStyle = useMemo(
-    () => (theme === "light" ? lightOverlayStyle : darkOverlayStyle),
-    [theme]
-  );
 
   // 마우스 배경 애니메이션
   useEffect(() => {

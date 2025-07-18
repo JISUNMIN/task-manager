@@ -1,5 +1,3 @@
-"use client";
-
 import React, { ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +23,7 @@ import {
 import { MoreVertical, Tags } from "lucide-react";
 import { ProjectLabel } from "@prisma/client";
 import { ClientProject } from "@/hooks/react-query/useProjects";
-import { useOptionalFormContext } from "@/hooks/useOptionalFormContext"; 
+import { useOptionalFormContext } from "@/hooks/useOptionalFormContext";
 
 interface DropdownActionItem {
   label?: string;
@@ -68,16 +66,22 @@ export function ActionDropdownMenu({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="hover:bg-gray-200">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="hover:bg-gray-200 dark:hover:bg-gray-600"
+        >
           <MoreVertical />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         onClick={onClickDropdownMenu}
         align="end"
-        className="w-[200px]"
+        className="w-[200px] bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-200"
       >
-        <DropdownMenuLabel>{title ?? "페이지"}</DropdownMenuLabel>
+        <DropdownMenuLabel className="dark:text-gray-400">
+          {title ?? "페이지"}
+        </DropdownMenuLabel>
         <DropdownMenuGroup>
           {items.map((item) => (
             <DropdownMenuItem
@@ -87,6 +91,7 @@ export function ActionDropdownMenu({
                 setOpen(false);
               }}
               variant={item.variant}
+              className="dark:hover:bg-gray-700 dark:text-gray-200"
             >
               {item.icon}
               <span className="ml-2">{item.label}</span>
@@ -95,17 +100,23 @@ export function ActionDropdownMenu({
 
           {showLabelMenu && (
             <>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="dark:border-gray-700" />
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
+                <DropdownMenuSubTrigger className="dark:text-gray-200 dark:hover:bg-gray-700 flex items-center">
                   <Tags />
                   <span className="ml-2">라벨 적용</span>
                 </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent className="p-0">
+                <DropdownMenuSubContent className="p-0 bg-white dark:bg-gray-800 dark:text-gray-200">
                   <Command>
-                    <CommandInput placeholder="라벨 검색" autoFocus={true} />
-                    <CommandList>
-                      <CommandEmpty>라벨을 찾을 수 없습니다.</CommandEmpty>
+                    <CommandInput
+                      placeholder="라벨 검색"
+                      autoFocus={true}
+                      className="bg-white dark:bg-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
+                    />
+                    <CommandList className="bg-white dark:bg-gray-800 dark:text-gray-200">
+                      <CommandEmpty className="dark:text-gray-400">
+                        라벨을 찾을 수 없습니다.
+                      </CommandEmpty>
                       <CommandGroup>
                         {labels.map((label) => (
                           <CommandItem
@@ -115,6 +126,7 @@ export function ActionDropdownMenu({
                               handleSelectedLabel(value as ProjectLabel);
                               setOpen(false);
                             }}
+                            className="dark:hover:bg-gray-700 dark:text-gray-200"
                           >
                             {label}
                           </CommandItem>
