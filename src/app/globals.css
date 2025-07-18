@@ -123,12 +123,10 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-green-50 text-foreground;
-  }
-  button {
-    @apply cursor-pointer;
-  }
+}
+
+body {
+  background-color: var(--background);
 }
 
 .ProseMirror p.is-editor-empty::before {

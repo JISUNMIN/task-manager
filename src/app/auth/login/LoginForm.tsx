@@ -54,28 +54,31 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center antiquewhite dark:bg-gray-900 transition-colors duration-300">
       <div>
         <div className="flex justify-center mt-8">
           <Image src={logo} alt="Logo" width={150} height={300} />
         </div>
-        <p className="text-2xl font-extrabold text-center text-gray-800  drop-shadow-md">
+        <p className="text-2xl font-extrabold text-center text-gray-800 dark:text-gray-200 drop-shadow-md">
           Squirrel Board
         </p>
-        <Card className="w-full max-w-[20rem] sm:max-w-[24rem] sm:w-96 shadow-lg">
+        <Card className="w-full max-w-[20rem] sm:max-w-[24rem] sm:w-96 shadow-lg bg-white dark:bg-gray-800 transition-colors duration-300">
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="flex flex-col gap-1">
-                <label htmlFor="userId" className="text-sm text-gray-600">
+                <label
+                  htmlFor="userId"
+                  className="text-sm text-gray-600 dark:text-gray-400"
+                >
                   아이디
                 </label>
-                <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
+                <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700 dark:focus-within:border-blue-500">
                   <FaUser className="mr-2 w-4 h-4" />
                   <input
                     {...register("userId")}
                     placeholder="아이디"
                     defaultValue="admin"
-                    className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
+                    className="flex-1 border-none bg-transparent p-0 focus:outline-none focus:ring-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   />
                 </div>
                 {errors.userId && (
@@ -94,11 +97,11 @@ export default function LoginForm() {
               <Button type="submit" className="w-full cursor-pointer">
                 로그인
               </Button>
-              <p className="text-sm text-center mt-4 text-gray-600">
+              <p className="text-sm text-center mt-4 text-gray-600 dark:text-gray-400">
                 계정이 없으신가요?{" "}
                 <span
                   onClick={onClickSignup}
-                  className="text-blue-600 font-semibold cursor-pointer hover:underline"
+                  className="text-blue-600 font-semibold cursor-pointer hover:underline dark:text-blue-400"
                 >
                   회원가입
                 </span>
