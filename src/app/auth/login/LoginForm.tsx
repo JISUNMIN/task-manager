@@ -54,7 +54,7 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center antiquewhite dark:bg-gray-900 transition-colors duration-300">
+    <div className="flex min-h-screen items-center justify-center transition-colors duration-300">
       <div>
         <div className="flex justify-center mt-8">
           <Image src={logo} alt="Logo" width={150} height={300} />
@@ -62,7 +62,7 @@ export default function LoginForm() {
         <p className="text-2xl font-extrabold text-center text-gray-800 dark:text-gray-200 drop-shadow-md">
           Squirrel Board
         </p>
-        <Card className="w-full max-w-[20rem] sm:max-w-[24rem] sm:w-96 shadow-lg bg-white dark:bg-gray-800 transition-colors duration-300">
+        <Card className="w-full max-w-[20rem] sm:max-w-[24rem] sm:w-96 shadow-lg bg-[var(--item-bg)] transition-colors duration-300">
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="flex flex-col gap-1">

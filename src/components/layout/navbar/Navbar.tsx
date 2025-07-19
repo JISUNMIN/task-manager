@@ -13,7 +13,7 @@ const Navbar = () => {
   const { theme, toggleTheme } = useThemeStore();
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 w-full flex h-14 items-center p-6 shadow-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 gap-2 mx-auto transition-colors duration-300">
+    <div className="fixed top-0 left-0 right-0 z-50 w-full flex h-14 items-center p-6 shadow-sm bg-[var(--item-bg)] text-[var(--foreground)] gap-2 mx-auto transition-colors duration-300">
       {/* 메뉴 토글 버튼 (모바일) */}
       <button
         id="vertical-nav-toggle-btn"
