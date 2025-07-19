@@ -109,10 +109,12 @@ const ProjectList = () => {
           onClick={() => setIsCreating(true)}
         >
           {isCreating ? (
-            <NewProjectCard
-              onCancel={() => setIsCreating(false)}
-              onCreated={() => setIsCreating(false)}
-            />
+            <div onClick={(e) => e.stopPropagation()}>
+              <NewProjectCard
+                onCancel={() => setIsCreating(false)}
+                onCreated={() => setIsCreating(false)}
+              />
+            </div>
           ) : (
             <span className="text-2xl text-gray-500 dark:text-gray-300">+</span>
           )}
@@ -149,7 +151,9 @@ const ProjectList = () => {
     <FormProvider {...formInstance}>
       <div className="mx-auto max-w-screen-xl p-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-2 mb-4">
-          <h1 className="text-3xl font-extrabold  text-[var(--foreground)]">프로젝트 목록</h1>
+          <h1 className="text-3xl font-extrabold  text-[var(--foreground)]">
+            프로젝트 목록
+          </h1>
           {isEditing ? (
             <div className="space-x-2">
               <Button onClick={onClickConfirmProjectOrder}>확인</Button>

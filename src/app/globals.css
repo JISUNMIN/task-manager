@@ -141,3 +141,48 @@ body {
   pointer-events: none;
   user-select: none;
 }
+
+@layer utilities {
+  @keyframes fillGradient {
+    0% {
+      transform: translateX(-100%);
+      opacity: 0.4;
+    }
+    50% {
+      transform: translateX(0%);
+      opacity: 0.9;
+    }
+    100% {
+      transform: translateX(100%);
+      opacity: 0.4;
+    }
+  }
+
+  .btn-fill-loading {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-fill-loading::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+
+    background: linear-gradient(
+      to right,
+      rgba(29, 78, 216, 0.05) 0%,
+      rgba(29, 78, 216, 0.9) 45%,
+      rgba(29, 78, 216, 0.9) 55%,
+      rgba(29, 78, 216, 0.05) 100%
+    );
+
+    transform: translateX(-100%);
+    animation: fillGradient 4.5s ease-in-out infinite;
+    z-index: 0;
+  }
+
+  .btn-fill-loading > * {
+    position: relative;
+    z-index: 10;
+  }
+}

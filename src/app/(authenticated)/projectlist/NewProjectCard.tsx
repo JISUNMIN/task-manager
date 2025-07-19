@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import useProjects from "@/hooks/react-query/useProjects";
 import {
@@ -12,6 +12,8 @@ import {
 import useUser from "@/hooks/react-query/useUser";
 import { useUserStore } from "@/store/useUserStore";
 import { DatePicker } from "@/components/form/DatePicker";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type Props = {
   onCancel: () => void;
@@ -34,13 +36,13 @@ const DEFAULT_DATE = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 const NewProjectCard = ({ onCancel, onCreated }: Props) => {
   const { users } = useUserStore();
 
-  const { createProjectMutate, isListPending } = useProjects();
+  const { createProjectMutate, isCreatePending, isListPending } = useProjects();
 
   const {
     register,
     handleSubmit,
     control,
-    formState: { isSubmitting, isValid },
+    formState: { isValid },
   } = useForm<FormValues>({
     mode: "onChange",
     defaultValues: {
@@ -49,8 +51,11 @@ const NewProjectCard = ({ onCancel, onCreated }: Props) => {
   });
 
   const onSubmit = (data: FormValues) => {
-    createProjectMutate(data);
-    onCreated();
+    createProjectMutate(data, {
+      onSuccess: () => {
+        onCreated();
+      },
+    });
   };
 
   return (
@@ -104,20 +109,19 @@ const NewProjectCard = ({ onCancel, onCreated }: Props) => {
       </div>
 
       <div className="flex justify-end gap-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-3 py-1 border rounded text-gray-600"
-        >
+        <Button type="button" onClick={onCancel}>
           취소
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
-          className="px-4 py-1 bg-blue-600 text-white rounded disabled:opacity-50"
-          disabled={isListPending || !isValid}
+          className={cn(
+            "bg-blue-600 text-white hover:bg-blue-700",
+            isCreatePending && "btn-fill-loading"
+          )}
+          disabled={isListPending || isCreatePending || !isValid}
         >
-          {isListPending || isSubmitting ? "생성 중..." : "확인"}
-        </button>
+          {isCreatePending ? "생성 중..." : "확인"}
+        </Button>
       </div>
     </form>
   );

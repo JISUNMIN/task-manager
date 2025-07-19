@@ -51,11 +51,10 @@ const useProjects = (targetId?: string | number) => {
   });
 
   // project create
-  const { mutate: createProjectMutate } = useMutation<
-    void,
-    Error,
-    ProjectCreateParams
-  >({
+  const {
+    mutate: createProjectMutate,
+    isPending: isCreatePending,
+  } = useMutation<void, Error, ProjectCreateParams>({
     mutationFn: async (data) => {
       await axios.post(PROJECT_API_PATH, data);
     },
@@ -166,6 +165,7 @@ const useProjects = (targetId?: string | number) => {
     isDetailFetching,
     // create
     createProjectMutate,
+    isCreatePending,
     // update
     updateProjectOrder,
     updateProjectLabel,
