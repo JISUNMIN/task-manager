@@ -91,7 +91,7 @@ export default function LoginForm() {
                 defaultValue="123123"
                 errors={errors}
               />
-              <Button type="submit" className="w-full cursor-pointer">
+              <Button type="submit" className="w-full">
                 로그인
               </Button>
               <p className="text-sm text-center mt-4 text-gray-600 dark:text-gray-400">

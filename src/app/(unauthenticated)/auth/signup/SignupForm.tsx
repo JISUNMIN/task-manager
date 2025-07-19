@@ -148,8 +148,7 @@ export default function SignupForm() {
           <h1 className="text-center text-3xl font-bold mb-6 text-brown-800 drop-shadow">
             회원 가입
           </h1>
-
-          <Card className="bg-[var(--item-bg)] w-full shadow-xl transition-colors duration-300 border border-gray-300 dark:border-gray-600">
+          <Card className="bg-[var(--item-bg)] w-full border border-gray-300 shadow-xl transition-colors duration-300 rounded-lg dark:bg-[#1f2937] dark:border-gray-700 dark:shadow-[0_-1px_4px_rgba(0,0,0,0.3),_0_4px_6px_rgba(0,0,0,0.7)]">
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <div className="flex flex-col gap-4">
