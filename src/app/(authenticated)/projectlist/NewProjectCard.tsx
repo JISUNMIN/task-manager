@@ -14,6 +14,7 @@ import { useUserStore } from "@/store/useUserStore";
 import { DatePicker } from "@/components/form/DatePicker";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import useProjectMutations from "@/hooks/react-query/useProjectMutations";
 
 type Props = {
   onCancel: () => void;
@@ -35,8 +36,8 @@ const DEFAULT_DATE = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
 const NewProjectCard = ({ onCancel, onCreated }: Props) => {
   const { users } = useUserStore();
-
-  const { createProjectMutate, isCreatePending, isListPending } = useProjects();
+  const { isListPending } = useProjects();
+  const { createProjectMutate, isCreatePending } = useProjectMutations();
 
   const {
     register,

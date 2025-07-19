@@ -23,6 +23,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import useProjectMutations from "@/hooks/react-query/useProjectMutations";
 
 const SortableItem = ({
   id,
@@ -53,9 +54,11 @@ const SortableItem = ({
 
 const ProjectList = () => {
   const formInstance = useForm();
+
   const { user } = useAuthStore();
   const role = user?.role;
-  const { listData, updateProjectOrder } = useProjects();
+  const { listData } = useProjects();
+  const { updateProjectOrder } = useProjectMutations();
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editableProjects, setEditableProjects] = useState<ClientProject[]>([]);
