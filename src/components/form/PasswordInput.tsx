@@ -20,7 +20,7 @@ export function PasswordInput({
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1 ">
       <label
         htmlFor={name}
         className="text-sm text-gray-600 dark:text-gray-300"

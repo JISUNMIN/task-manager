@@ -80,7 +80,7 @@ function FeatureBoxes() {
       {features.map(({ icon, title, description }, idx) => (
         <div
           key={idx}
-          className="shadow-xl  bg-white flex flex-col items-center text-center p-6 border rounded-lg hover:shadow-xl transition"
+          className="shadow-xl bg-[var(--item-bg)] flex flex-col items-center text-center p-6 border rounded-lg hover:shadow-xl transition"
         >
           <div className="mb-4">{icon}</div>
           <h3 className="font-semibold text-lg mb-2 text-brown-700">{title}</h3>
@@ -107,17 +107,14 @@ export default function SignupForm() {
 
   const onSubmit = (data: SignupInputs) => {
     createMutate(data);
-    console.log("회원가입 데이터:", data);
   };
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
       {/* 왼쪽 섹션: 로고 및 소개 + FeatureBoxes */}
-      <div className="md:w-1/2 bg-brown-50 flex flex-col items-center justify-start p-8 space-y-8">
+      <div className="md:w-1/2 bg-brown-50 flex flex-col items-center justify-start pt-40 space-y-8">
         {/* 로고 및 말풍선 박스 */}
-        <h2 className="text-3xl font-extrabold  mb-6 tracking-wide text-center">
-          Squireal Dashboard
-        </h2>
+        <h2 className="text-3xl font-extrabold">Squireal Dashboard</h2>
         <div className="flex flex-col items-center relative">
           <Image
             src={logo}
@@ -128,9 +125,11 @@ export default function SignupForm() {
           />
 
           {/* 말풍선 */}
-          <div className="relative bg-white px-6 py-3 rounded-xl max-w-xs text-center text-sm font-medium leading-snug shadow-md">
-            Squireal Dashboard에 <br />
-            오신 것을 환영합니다!
+          <div className="bg-[var(--item-bg)]  relative px-6 py-3 rounded-xl max-w-xs text-center text-sm font-medium leading-snug shadow-md">
+            <p>
+              Squireal Dashboard에 <br />
+              오신 것을 환영합니다!
+            </p>
             <span
               className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-full
       border-8 border-b-brown-200 border-l-transparent border-r-transparent border-t-transparent"
@@ -144,26 +143,27 @@ export default function SignupForm() {
       </div>
 
       {/* 오른쪽 섹션: 회원가입 폼 */}
-      <div className="md:w-1/2 flex items-center justify-center p-8 bg-white">
+      <div className="md:w-1/2 flex items-center justify-center p-8 bg-[var(--item-bg)] ">
         <div className="w-full max-w-md">
           <h1 className="text-center text-3xl font-bold mb-6 text-brown-800 drop-shadow">
             회원 가입
           </h1>
 
-          <Card className="shadow-xl border-2 border-brown-200">
+          <Card className="bg-[var(--item-bg)] w-full shadow-xl transition-colors duration-300 border border-gray-300 dark:border-gray-600">
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <div className="flex flex-col gap-4">
+                  {/* 아이디 */}
                   <div className="flex flex-col gap-1">
-                    <label htmlFor="userId" className="text-sm text-gray-600">
+                    <label htmlFor="userId" className="text-sm">
                       아이디
                     </label>
-                    <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
+                    <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700 dark:focus-within:border-blue-500">
                       <FaUser className="mr-2 w-4 h-4" />
                       <input
                         {...register("userId")}
                         placeholder="아이디"
-                        className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
+                        className="flex-1 border-none bg-transparent p-0 focus:outline-none focus:ring-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                       />
                     </div>
                     {errors.userId && (
@@ -172,6 +172,8 @@ export default function SignupForm() {
                       </p>
                     )}
                   </div>
+
+                  {/* 비밀번호 */}
                   <PasswordInput
                     register={register}
                     name="password"
@@ -179,21 +181,24 @@ export default function SignupForm() {
                     errors={errors}
                   />
 
+                  {/* 비밀번호 확인 */}
                   <PasswordInput
                     register={register}
                     name="confirmPassword"
                     placeholder="비밀번호 확인"
                     errors={errors}
                   />
+
+                  {/* 이름 */}
                   <div className="flex flex-col gap-1">
-                    <label htmlFor="name" className="text-sm text-gray-600">
+                    <label htmlFor="name" className="text-sm">
                       이름
                     </label>
-                    <div className="flex items-center rounded-md px-3 py-2 text-sm  border transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700">
+                    <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700 dark:focus-within:border-blue-500">
                       <input
                         {...register("name")}
                         placeholder="이름"
-                        className="flex-1 border-none p-0 focus:outline-none focus:ring-0"
+                        className="flex-1 border-none bg-transparent p-0 focus:outline-none focus:ring-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                       />
                     </div>
                     {errors.name && (
@@ -204,6 +209,7 @@ export default function SignupForm() {
                   </div>
                 </div>
 
+                {/* 제출 버튼 */}
                 <Button type="submit" className="w-full">
                   가입하기
                 </Button>

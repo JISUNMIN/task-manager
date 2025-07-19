@@ -10,9 +10,12 @@
 }
 
 :root {
+  /* #ECEFF1 */
   --background: antiquewhite;
+  --color-bg-primary: white;
   --foreground: oklch(0.145 0 0);
   --item-bg: oklch(1 0 0);
+  --text-base: #4b5563;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -48,9 +51,11 @@
 
 .dark {
   --background: #111827;
+  --color-bg-primary: black;
   --foreground: oklch(0.985 0 0);
   --item-bg: #1f2937;
-  --card: oklch(0.145 0 0);
+  --text-base: #d1d5db;
+  --card: #111827;
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.145 0 0);
   --popover-foreground: oklch(0.985 0 0);
@@ -125,6 +130,17 @@
   * {
     @apply border-border outline-ring/50;
   }
+
+  p,
+  h2,
+  h3,
+  div {
+    color: var(--foreground);
+  }
+
+  label {
+    color: var(--text-base);
+  }
 }
 
 body {
@@ -166,7 +182,10 @@ body {
   .btn-fill-loading::after {
     content: "";
     position: absolute;
-    top: 0; left: 0; bottom: 0; right: 0;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
 
     background: linear-gradient(
       to right,

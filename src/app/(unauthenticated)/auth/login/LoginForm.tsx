@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { FaUser } from "react-icons/fa";
 import Image from "next/image";
 import { logo } from "@/assets/images";
-import useLogin from "../../../hooks/react-query/useLogin";
+import useLogin from "../../../../hooks/react-query/useLogin";
 import { useRouter } from "next/navigation";
 import { PasswordInput } from "@/components/form/PasswordInput";
 
@@ -66,10 +66,7 @@ export default function LoginForm() {
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="flex flex-col gap-1">
-                <label
-                  htmlFor="userId"
-                  className="text-sm text-gray-600 dark:text-gray-400"
-                >
+                <label htmlFor="userId" className="text-sm">
                   아이디
                 </label>
                 <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700 dark:focus-within:border-blue-500">
