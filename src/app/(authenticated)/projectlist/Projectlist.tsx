@@ -161,7 +161,7 @@ const ProjectList = () => {
             <div className="space-x-2">
               <Button onClick={onClickConfirmProjectOrder}>확인</Button>
               <Button
-                variant="outline"
+              variant="secondary"
                 onClick={() => {
                   setEditableProjects(originalProjects);
                   setIsEditing(false);

@@ -27,18 +27,13 @@ export function PasswordInput({
       >
         {placeholder}
       </label>
-      <div
-        className="flex items-center rounded-md px-3 py-2 text-sm border transition-colors duration-300
-                      focus-within:border-2 focus-within:border-gray-700
-                      dark:bg-gray-800 dark:border-gray-600 dark:focus-within:border-blue-500"
-      >
+      <div className="inputDivStyle">
         <FaLock className="text-brown-400 dark:text-yellow-400 mr-2" />
         <input
           {...register(name)}
           type={showPassword ? "text" : "password"}
           placeholder={placeholder}
-          className="flex-1 border-none p-0 focus:outline-none focus:ring-0 bg-transparent
-                     text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+          className="flex-1 border-none p-0 focus:outline-none focus:ring-0 bg-transparent"
           defaultValue={defaultValue}
         />
         <button

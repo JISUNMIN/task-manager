@@ -62,20 +62,20 @@ export default function LoginForm() {
         <p className="text-2xl font-extrabold text-center text-gray-800 dark:text-gray-200 drop-shadow-md">
           Squirrel Board
         </p>
-        <Card className="w-full max-w-[20rem] sm:max-w-[24rem] sm:w-96 shadow-lg bg-[var(--item-bg)] transition-colors duration-300">
+        <Card className="w-full max-w-[20rem] sm:max-w-[24rem] sm:w-96 cardStyle">
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="flex flex-col gap-1">
                 <label htmlFor="userId" className="text-sm">
                   아이디
                 </label>
-                <div className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 transition-colors duration-300 focus-within:border-2 focus-within:border-gray-700 dark:focus-within:border-blue-500">
+                <div className="inputDivStyle">
                   <FaUser className="mr-2 w-4 h-4" />
                   <input
                     {...register("userId")}
                     placeholder="아이디"
                     defaultValue="admin"
-                    className="flex-1 border-none bg-transparent p-0 focus:outline-none focus:ring-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                    className=""
                   />
                 </div>
                 {errors.userId && (
