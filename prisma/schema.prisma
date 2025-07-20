@@ -73,6 +73,10 @@ model Comment {
   comment String
   userId  Int
   taskId  Int
+  parentCommentId Int?     // 부모 댓글 ID (nullable)
+
+  parentComment   Comment?  @relation("CommentToReplies", fields: [parentCommentId], references: [id])
+  replies         Comment[] @relation("CommentToReplies")
 
   user User @relation(fields: [userId], references: [id])
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)

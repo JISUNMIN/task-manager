@@ -1,14 +1,30 @@
 // app/api/comments/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
-const comments: { [key: string]: string[] } = {}; // project-task 기준으로 저장
+interface Comment {
+  id: number;
+  text: string;
+  parentId: number | null;
+}
+
+const comments: { [key: string]: Comment[] } = {}; // project-task 기준 저장
+let idCounter = 1;
 
 export async function POST(req: NextRequest) {
-  const { projectId, taskTitle, comment } = await req.json();
+  const { projectId, taskTitle, text, parentId } = await req.json();
   const key = `${projectId}:${taskTitle}`;
+
   if (!comments[key]) comments[key] = [];
-  comments[key].push(comment);
-  return NextResponse.json({ success: true });
+
+  const newComment: Comment = {
+    id: idCounter++,
+    text,
+    parentId: parentId ?? null,
+  };
+
+  comments[key].push(newComment);
+
+  return NextResponse.json({ success: true, comment: newComment });
 }
 
 export async function GET(req: NextRequest) {
@@ -16,5 +32,8 @@ export async function GET(req: NextRequest) {
   const projectId = searchParams.get("projectId");
   const taskTitle = searchParams.get("taskTitle");
   const key = `${projectId}:${taskTitle}`;
-  return NextResponse.json({ comments: comments[key] || [] });
+
+  const allComments = comments[key] || [];
+
+  return NextResponse.json({ comments: allComments });
 }
