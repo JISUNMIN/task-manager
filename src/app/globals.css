@@ -9,6 +9,19 @@
   --font-mono: var(--font-geist-mono);
 }
 
+body {
+  background-color: var(--background);
+}
+
+.ProseMirror p.is-editor-empty::before {
+  content: attr(data-placeholder);
+  color: #aaa;
+  float: left;
+  height: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
 :root {
   /* --background: #eceff1; */
   --background: #ecf1ef;
@@ -155,19 +168,27 @@
   }
 }
 
-body {
-  background-color: var(--background);
-}
+@layer components {
+  .inputDivStyle {
+    @apply flex items-center rounded-md px-3 py-2 text-sm text-gray-700 dark:text-gray-300 transition-colors duration-300 border border-gray-300 dark:border-gray-600 focus-within:border-2 focus-within:border-gray-700 dark:focus-within:border-blue-500;
+    background-color: var(--input);
+  }
 
-.ProseMirror p.is-editor-empty::before {
-  content: attr(data-placeholder);
-  color: #aaa;
-  float: left;
-  height: 0;
-  pointer-events: none;
-  user-select: none;
-  pointer-events: none;
-  user-select: none;
+  .cardStyle {
+    @apply shadow-2xl rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-300;
+    background-color: var(--item-bg);
+    box-shadow:
+      0 -1px 4px rgba(0, 0, 0, 0.3),
+      0 4px 6px rgba(0, 0, 0, 0.7);
+
+    /* 커스텀 애니메이션 */
+    animation: shadowColorChangeLight 6s ease-in-out infinite;
+  }
+
+  .dark .cardStyle {
+    border-color: #3b82f6;
+    animation: shadowColorChangeDark 6s ease-in-out infinite;
+  }
 }
 
 @layer utilities {
@@ -183,6 +204,44 @@ body {
     100% {
       transform: translateX(100%);
       opacity: 0.4;
+    }
+  }
+
+  @keyframes shadowColorChangeLight {
+    0%,
+    100% {
+      box-shadow:
+        0 0 12px 3px rgba(250, 235, 215, 0.8),
+        /* antiquewhite */ 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    33% {
+      box-shadow:
+        0 0 12px 3px rgba(255, 182, 193, 0.8),
+        /* lightpink */ 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    66% {
+      box-shadow:
+        0 0 12px 3px rgba(255, 222, 173, 0.8),
+        /* navajowhite */ 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  @keyframes shadowColorChangeDark {
+    0%,
+    100% {
+      box-shadow:
+        0 0 12px 3px rgba(59, 130, 246, 0.8),
+        /* blue */ 0 4px 8px rgba(0, 0, 0, 0.9);
+    }
+    33% {
+      box-shadow:
+        0 0 12px 3px rgba(139, 92, 246, 0.8),
+        /* purple */ 0 4px 8px rgba(0, 0, 0, 0.9);
+    }
+    66% {
+      box-shadow:
+        0 0 12px 3px rgba(14, 203, 203, 0.8),
+        /* teal */ 0 4px 8px rgba(0, 0, 0, 0.9);
     }
   }
 
@@ -221,80 +280,4 @@ body {
     @apply font-extrabold tracking-wide bg-clip-text text-transparent drop-shadow-sm mb-2 text-center;
     background-image: var(--logo-name-gradient);
   }
-}
-
-@layer components {
-  .inputDivStyle {
-    @apply flex items-center rounded-md px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border transition-colors duration-300 focus-within:border-2;
-    background-color: var(--input);
-    border-color: theme("colors.gray.300"); /* light mode */
-  }
-
-  .dark .inputDivStyle {
-    border-color: theme("colors.gray.600"); /* dark mode */
-  }
-
-  .inputDivStyle:focus-within {
-    border-color: theme("colors.gray.700");
-  }
-
-  .dark .inputDivStyle:focus-within {
-    border-color: theme("colors.blue.500");
-  }
-
-  .cardStyle {
-    @apply shadow-2xl rounded-lg border transition-colors duration-300 dark:border-gray-700;
-    background-color: var(--item-bg);
-    box-shadow:
-      0 -1px 4px rgba(0, 0, 0, 0.3),
-      0 4px 6px rgba(0, 0, 0, 0.7);
-  }
-}
-
-@keyframes shadowColorChangeLight {
-  0%,
-  100% {
-    box-shadow:
-      0 0 12px 3px rgba(250, 235, 215, 0.8),
-      /* antiquewhite */ 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  33% {
-    box-shadow:
-      0 0 12px 3px rgba(255, 182, 193, 0.8),
-      /* lightpink */ 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  66% {
-    box-shadow:
-      0 0 12px 3px rgba(255, 222, 173, 0.8),
-      /* navajowhite */ 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-}
-
-@keyframes shadowColorChangeDark {
-  0%,
-  100% {
-    box-shadow:
-      0 0 12px 3px rgba(59, 130, 246, 0.8),
-      /* blue */ 0 4px 8px rgba(0, 0, 0, 0.9);
-  }
-  33% {
-    box-shadow:
-      0 0 12px 3px rgba(139, 92, 246, 0.8),
-      /* purple */ 0 4px 8px rgba(0, 0, 0, 0.9);
-  }
-  66% {
-    box-shadow:
-      0 0 12px 3px rgba(14, 203, 203, 0.8),
-      /* teal */ 0 4px 8px rgba(0, 0, 0, 0.9);
-  }
-}
-
-.cardStyle {
-  border-color: antiquewhite;
-  animation: shadowColorChangeLight 6s ease-in-out infinite;
-}
-
-.dark .cardStyle {
-  border-color: #3b82f6;
-  animation: shadowColorChangeDark 6s ease-in-out infinite;
 }
