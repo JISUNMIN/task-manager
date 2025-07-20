@@ -76,7 +76,7 @@ function FeatureBoxes() {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-md mx-auto mt-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-md mx-auto mt-3">
       {features.map(({ icon, title, description }, idx) => (
         <div
           key={idx}
@@ -112,16 +112,16 @@ export default function SignupForm() {
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
       {/* 왼쪽 섹션: 로고 및 소개 + FeatureBoxes */}
-      <div className="md:w-1/2 bg-brown-50 flex flex-col items-center justify-start pt-40 space-y-8">
+      <div className="md:w-1/2 bg-brown-50 flex flex-col items-center justify-start pt-0 md:pt-4 space-y-8 scale-80 md:scale-85 ">
         {/* 로고 및 말풍선 박스 */}
-        <h2 className="text-3xl font-extrabold">Squireal Dashboard</h2>
+        <h2 className="logo-name text-3xl">Squireal Dashboard</h2>
         <div className="flex flex-col items-center relative">
           <Image
             src={logo}
             alt="Logo"
-            width={220}
-            height={220}
-            className="mb-4"
+            width={180}
+            height={180}
+            className="mb-2"
           />
 
           {/* 말풍선 */}
@@ -144,8 +144,8 @@ export default function SignupForm() {
 
       {/* 오른쪽 섹션: 회원가입 폼 */}
       <div className="md:w-1/2 flex items-center justify-center p-8 bg-[var(--item-bg)] ">
-        <div className="w-full max-w-md">
-          <h1 className="text-center text-3xl font-bold mb-6 text-brown-800 drop-shadow">
+        <div className="w-full max-w-md scale-95">
+          <h1 className="text-center text-2xl font-bold mb-6 text-brown-800 drop-shadow">
             회원 가입
           </h1>
           <Card className="w-full cardStyle">

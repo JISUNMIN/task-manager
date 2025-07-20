@@ -59,10 +59,8 @@ export default function LoginForm() {
         <div className="flex justify-center mt-8">
           <Image src={logo} alt="Logo" width={150} height={300} />
         </div>
-        <p className="text-2xl font-extrabold text-center text-gray-800 dark:text-gray-200 drop-shadow-md">
-          Squirrel Board
-        </p>
-        <Card className="w-full max-w-[20rem] sm:max-w-[24rem] sm:w-96 cardStyle">
+        <p className="logo-name text-2xl">Squirrel Board</p>
+        <Card className="w-full max-w-[20rem] sm:max-w-[24rem] sm:w-96 cardStyle mt-5">
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="flex flex-col gap-1">
