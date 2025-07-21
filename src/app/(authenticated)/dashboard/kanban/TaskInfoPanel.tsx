@@ -200,7 +200,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         </Grid>
       </div>
       <div className=" p-4 h-full flex flex-col overflow-y-auto ">
-        <TaskComments />
+        <TaskComments taskId={task?.id} />
         <Editor
           onChange={(e) => handleUpdateTask(e, "desc")}
           content={task?.desc}
