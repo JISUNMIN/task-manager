@@ -29,6 +29,7 @@ body {
   --foreground: oklch(0.145 0 0);
   --item-bg: oklch(1 0 0);
   --text-base: #4b5563;
+  --text-blur: #4b5563;
   --hover-bg: oklch(0.92 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -69,6 +70,7 @@ body {
   --foreground: oklch(0.985 0 0);
   --item-bg: #374151;
   --text-base: #d1d5db;
+  --text-blur: #9ca3af;
   --hover-bg: oklch(46.585% 0.00256 16.113);
   --card: #111827;
   --card-foreground: oklch(0.985 0 0);

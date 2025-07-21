@@ -207,7 +207,7 @@ const ProjectCard: FC<ProjectCardProps> = memo(
               )}
             </div>
 
-            <div className="text-sm text-gray-600 dark:text-gray-200 flex gap-1.5 items-center">
+            <div className="text-sm text-[var(--foreground)] flex gap-1.5 items-center mt-1">
               담당자: {project?.manager?.name}
               <UserAvatar
                 src={project?.manager?.profileImage ?? ""}
@@ -217,17 +217,19 @@ const ProjectCard: FC<ProjectCardProps> = memo(
               />
             </div>
 
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              진행률: {project.progress}%
-            </p>
-
             {!project.isPersonal && (
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-[var(--text-blur)] mb-1">
                 마감일: {convertDateToString(new Date(project.deadline), "-")}
               </p>
             )}
 
-            <Progress value={project.progress} className="mt-4" />
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-[var(--text-blur)] mb-1">진행률</p>
+              <span className="text-sm text-[var(--text-base)]">
+                {project.progress}%
+              </span>
+            </div>
+            <Progress value={project.progress} />
           </div>
 
           <div className="flex justify-end mt-5 relative z-10">
