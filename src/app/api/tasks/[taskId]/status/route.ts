@@ -1,6 +1,7 @@
 // app/api/tasks/[taskId]/status/route.ts
 
 import { prisma } from "@/lib/prisma";
+import { updateProjectProgress } from "@/lib/utils/services/project";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(
@@ -15,6 +16,7 @@ export async function PATCH(
       where: { id: Number(taskId) },
       data: { status },
     });
+    await updateProjectProgress(updatedTask.projectId);
     return NextResponse.json(updatedTask, { status: 200 });
   } catch (error) {
     return NextResponse.json(

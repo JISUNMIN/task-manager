@@ -1,6 +1,7 @@
 //  → POST (task 생성)
 // app/api/tasks/route.ts
 import { prisma } from "@/lib/prisma";
+import { updateProjectProgress } from "@/lib/utils/services/project";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -9,13 +10,14 @@ export async function POST(req: NextRequest) {
 
     const newTask = await prisma.task.create({
       data: {
-        title: "",
-        desc: "",
+        title: body.title ?? "",
+        desc: body.desc ?? "",
         status: body.status ?? "To Do",
         projectId: Number(body.projectId),
         managerId: Number(body.managerId),
       },
     });
+    await updateProjectProgress(newTask.projectId);
     return NextResponse.json(newTask, { status: 201 });
   } catch (error) {
     console.error("Task 생성 에러:", error);

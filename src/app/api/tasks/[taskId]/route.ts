@@ -2,6 +2,7 @@
 // /api/tasks/[taskId]   → PUT (task 수정)
 
 import { prisma } from "@/lib/prisma";
+import { updateProjectProgress } from "@/lib/utils/services/project";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(
@@ -14,6 +15,7 @@ export async function DELETE(
     const newTask = await prisma.task.delete({
       where: { id: Number(taskId) },
     });
+    await updateProjectProgress(newTask.projectId);
     return NextResponse.json(newTask, { status: 201 });
   } catch (error) {
     console.error("Task 삭제 에러:", error);
