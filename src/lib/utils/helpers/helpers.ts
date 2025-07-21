@@ -295,3 +295,21 @@ export const convertGMTtoKST = (gmtTimeString: string) => {
 
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
+
+export function getTimeAgo(date: Date | string): string {
+  const now = new Date();
+  const inputDate = new Date(date);
+  const diff = Math.floor((now.getTime() - inputDate.getTime()) / 1000); // 초 차이
+
+  if (diff < 60) return "방금 전";
+  if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)}일 전`;
+
+  // 일주일 이상이면 날짜로 반환
+  return inputDate.toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}

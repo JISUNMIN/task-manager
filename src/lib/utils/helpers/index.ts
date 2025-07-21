@@ -9,4 +9,5 @@ export {
   isSameDate,
   getDateWithoutTime,
   formatDateToUtc,
+  getTimeAgo,
 } from './helpers';
