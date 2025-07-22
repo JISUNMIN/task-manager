@@ -1,5 +1,3 @@
-import { showToast, ToastMode } from "@/lib/toast";
-import { User, Task, Project } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
@@ -58,14 +56,26 @@ const useComment = (targetId?: string | number) => {
     onError: () => {},
   });
 
+  const { mutate: deleteTaskMutate } = useMutation<void, Error, number>({
+    mutationFn: async (data) => {
+      await axios.delete(`${COMMENT_API_PATH}/${data}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", targetId] });
+    },
+    onError: () => {},
+  });
+
   return {
-    // list
+    //list
     listData,
     isListLoading,
     isListFetching,
     //create
     createTaskMutate,
     isCreating,
+    //delete
+    deleteTaskMutate,
   };
 };
 

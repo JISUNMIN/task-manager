@@ -1,19 +1,20 @@
 // app/api/comments/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma"; // prisma 클라이언트 import 경로에 맞게 수정하세요
+import { prisma } from "@/lib/prisma";
 
-export async function GET(request: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(req.url);
+
     const taskId = searchParams.get("taskId");
     if (!taskId) {
       return NextResponse.json(
-        { error: "taskId query parameter is required" },
+        { error: "taskId query parameter은 필수입니다." },
         { status: 400 }
       );
     }
 
-    // taskId에 해당하는 댓글들(및 대댓글 포함) 모두 조회 (필요에 따라 정렬 추가 가능)
+    // taskId에 해당하는 댓글들(및 대댓글 포함) 모두 조회
     const comments = await prisma.comment.findMany({
       where: { taskId: Number(taskId), parentCommentId: null }, // 최상위 댓글만
 
@@ -38,27 +39,25 @@ export async function GET(request: NextRequest) {
       orderBy: { id: "asc" },
     });
 
-    console.log("뭔데", JSON.stringify(comments));
-
     return NextResponse.json(comments);
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Internal Server Error", detail: String(error) },
+      { error: "Comment를 불러오는데 실패했습니다.", detail: String(error) },
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
+    const body = await req.json();
 
     const { comment, userId, taskId, parentCommentId } = body;
 
     if (!comment || !userId || !taskId) {
       return NextResponse.json(
-        { error: "comment, userId, and taskId are required" },
+        { error: "comment, userId,taskId은 필수입니다." },
         { status: 400 }
       );
     }
@@ -76,7 +75,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Internal Server Error", detail: String(error) },
+      { error: "Comment 생성에 실패했습니다.", detail: String(error) },
       { status: 500 }
     );
   }

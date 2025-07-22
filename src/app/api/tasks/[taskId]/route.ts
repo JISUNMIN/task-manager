@@ -1,5 +1,5 @@
 // /api/tasks/[taskId]  → DELETE (task 삭제)
-// /api/tasks/[taskId]   → PUT (task 수정)
+// /api/tasks/[taskId]   → PATCH (task 수정)
 
 import { prisma } from "@/lib/prisma";
 import { updateProjectProgress } from "@/lib/utils/services/project";
@@ -16,11 +16,14 @@ export async function DELETE(
       where: { id: Number(taskId) },
     });
     await updateProjectProgress(newTask.projectId);
-    return NextResponse.json(newTask, { status: 201 });
+    return NextResponse.json(
+      { message: "Task가 삭제되었습니다." },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Task 삭제 에러:", error);
     return NextResponse.json(
-      { error: "Task 삭제에 실패했습니다." },
+      { error: "Task 삭제에 실패했습니다.", detail: String(error) },
       { status: 500 }
     );
   }

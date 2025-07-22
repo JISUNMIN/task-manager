@@ -16,8 +16,13 @@ type Props = {
 
 export const TaskComments = ({ taskId }: Props) => {
   const { user } = useAuthStore();
-  const { listData, isListLoading, createTaskMutate, isCreating } =
-    useComment(taskId);
+  const {
+    listData,
+    isListLoading,
+    createTaskMutate,
+    isCreating,
+    deleteTaskMutate,
+  } = useComment(taskId);
   const [newComment, setNewComment] = useState("");
   const [replyTarget, setReplyTarget] = useState<number | null>(null);
   const [replyCollapseMap, setReplyCollapseMap] = useState<
@@ -46,18 +51,14 @@ export const TaskComments = ({ taskId }: Props) => {
   };
 
   const handleDeleteComment = (commentId: number) => {
-    // 댓글 삭제 로직 추가 (예: mutate 호출)
-    console.log("삭제할 댓글 ID:", commentId);
+    deleteTaskMutate(commentId);
   };
 
   const handleEditComment = (commentId: number) => {
     // 댓글 수정 로직 추가
-    console.log("수정할 댓글 ID:", commentId);
   };
 
   if (isListLoading) return <div>댓글 불러오는 중...</div>;
-
-  console.log("listData", listData);
 
   return (
     <div className="p-4 border-b border-gray-300">
@@ -85,15 +86,6 @@ export const TaskComments = ({ taskId }: Props) => {
             },
           ];
 
-          // 대댓글(답글) 드롭다운 메뉴 - 삭제만 가능
-          const replyItems = [
-            {
-              label: "댓글 삭제",
-              icon: <Trash />,
-              variant: "destructive" as const,
-              onSelect: () => handleDeleteComment(reply.id),
-            },
-          ];
           return (
             <div key={comment.id} className="flex gap-2">
               <UserAvatar
@@ -139,30 +131,41 @@ export const TaskComments = ({ taskId }: Props) => {
                     </button>
 
                     {!replyCollapseMap[comment.id] &&
-                      comment.replies.map((reply) => (
-                        <div key={reply.id} className="flex gap-2 mt-3">
-                          <UserAvatar
-                            src={reply.user.profileImage ?? ""}
-                            alt={reply.user.name}
-                            className="mt-1"
-                          />
-                          <div className="flex-1">
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm font-medium">
-                                {reply.user.name}
-                              </span>
-                              <span className="text-xs text-gray-400">
-                                {getTimeAgo(reply?.createdAt ?? "")}
-                                {/* 우측에 드롭다운 메뉴 추가 */}
-                                <ActionDropdownMenu items={replyItems} />
-                              </span>
+                      comment.replies.map((reply) => {
+                        // 대댓글(답글) 드롭다운 메뉴 - 삭제만 가능
+                        const replyItems = [
+                          {
+                            label: "댓글 삭제",
+                            icon: <Trash />,
+                            variant: "destructive" as const,
+                            onSelect: () => handleDeleteComment(reply.id),
+                          },
+                        ];
+                        return (
+                          <div key={reply.id} className="flex gap-2 mt-3">
+                            <UserAvatar
+                              src={reply.user.profileImage ?? ""}
+                              alt={reply.user.name}
+                              className="mt-1"
+                            />
+                            <div className="flex-1">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm font-medium">
+                                  {reply.user.name}
+                                </span>
+                                <span className="text-xs text-gray-400">
+                                  {getTimeAgo(reply?.createdAt ?? "")}
+                                  {/* 우측에 드롭다운 메뉴 추가 */}
+                                  <ActionDropdownMenu items={replyItems} />
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-800 mt-1">
+                                {reply.comment}
+                              </p>
                             </div>
-                            <p className="text-sm text-gray-800 mt-1">
-                              {reply.comment}
-                            </p>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                   </div>
                 )}
 
