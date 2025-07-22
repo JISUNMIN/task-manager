@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 import { ActionDropdownMenu } from "@/components/ui/extended/ActionDropdownMenu";
 import { Calendar, Trash, User as UserIcon } from "lucide-react";
 import { LABEL_COLOR_MAP, LABELS } from "@/app/constants/common";
-import { DeleteProjectDialog } from "@/components/ui/extended/DeleteProjectDialog";
+import { DeleteDialog } from "@/components/ui/extended/DeleteDialog";
 import { UserSelectionModal } from "@/components/ui/extended/UserSelectionModal ";
 import { DeadlineModal } from "@/components/ui/extended/DeadlineModal";
 import { UserAvatar } from "@/components/ui/extended/UserAvatar";
@@ -258,10 +258,12 @@ const ProjectCard: FC<ProjectCardProps> = memo(
           onOpenChange={setIsUserSelectionModalOpen}
           onConfirm={onClickConfirmManagerChange}
         />
-        <DeleteProjectDialog
+        <DeleteDialog
           open={isDeleteDialogOpen}
           onOpenChange={setIsDeleteDialogOpen}
           onDelete={onClickDelete}
+          title="정말 삭제하시겠습니까?"
+          description="이 작업은 되돌릴 수 없습니다. 이 프로젝트가 완전히 삭제됩니다."
         />
         <DeadlineModal
           name="deadline"

@@ -9,6 +9,7 @@ import { IoMdSend } from "react-icons/io";
 import { getTimeAgo } from "@/lib/utils/helpers";
 import { Edit, Trash } from "tabler-icons-react";
 import { ActionDropdownMenu } from "@/components/ui/extended/ActionDropdownMenu";
+import { DeleteDialog } from "@/components/ui/extended/DeleteDialog";
 
 type Props = {
   taskId: number;
@@ -28,6 +29,10 @@ export const TaskComments = ({ taskId }: Props) => {
   const [replyCollapseMap, setReplyCollapseMap] = useState<
     Record<number, boolean>
   >({});
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [targetDeleteCommentId, setTargetDeleteCommentId] = useState<
+    number | null
+  >(null);
 
   const handleAddComment = (parentCommentId: number | null = null) => {
     if (!newComment.trim() || !user) return;
@@ -50,8 +55,11 @@ export const TaskComments = ({ taskId }: Props) => {
     }));
   };
 
-  const handleDeleteComment = (commentId: number) => {
-    deleteTaskMutate(commentId);
+  const handleDeleteComment = () => {
+    if (targetDeleteCommentId !== null) {
+      deleteTaskMutate(targetDeleteCommentId);
+      setTargetDeleteCommentId(null);
+    }
   };
 
   const handleEditComment = (commentId: number) => {
@@ -82,7 +90,10 @@ export const TaskComments = ({ taskId }: Props) => {
               label: "댓글 삭제",
               icon: <Trash />,
               variant: "destructive" as const,
-              onSelect: () => handleDeleteComment(comment.id),
+              onSelect: () => {
+                setTargetDeleteCommentId(comment.id);
+                setIsDeleteDialogOpen(true);
+              },
             },
           ];
 
@@ -138,7 +149,10 @@ export const TaskComments = ({ taskId }: Props) => {
                             label: "댓글 삭제",
                             icon: <Trash />,
                             variant: "destructive" as const,
-                            onSelect: () => handleDeleteComment(reply.id),
+                            onSelect: () => {
+                              setTargetDeleteCommentId(reply.id);
+                              setIsDeleteDialogOpen(true);
+                            },
                           },
                         ];
                         return (
@@ -248,6 +262,13 @@ export const TaskComments = ({ taskId }: Props) => {
           </div>
         </div>
       )}
+
+      <DeleteDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onDelete={handleDeleteComment}
+        title="이 댓글을 삭제하시겠습니까?"
+      />
     </div>
   );
 };

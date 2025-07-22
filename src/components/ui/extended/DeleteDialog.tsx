@@ -1,8 +1,5 @@
-import { Trash } from "lucide-react";
-import { useState } from "react";
 import {
   AlertDialog,
-  AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -12,25 +9,29 @@ import {
   AlertDialogAction,
 } from "../alert-dialog";
 
-interface DeleteProjectDialogProps {
+interface DeleteDialogProps {
   onDelete: () => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  title?: string;
+  description?: string;
 }
 
-export const DeleteProjectDialog = ({
+export const DeleteDialog = ({
   onDelete,
   open,
   onOpenChange,
-}: DeleteProjectDialogProps) => {
+  title = "",
+  description = "",
+}: DeleteDialogProps) => {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>정말 삭제하시겠습니까?</AlertDialogTitle>
-          <AlertDialogDescription>
-            이 작업은 되돌릴 수 없습니다. 이 프로젝트가 완전히 삭제됩니다.
-          </AlertDialogDescription>
+          {title && <AlertDialogTitle>{title}</AlertDialogTitle>}
+          {description && (
+            <AlertDialogDescription>{description}</AlertDialogDescription>
+          )}
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>취소</AlertDialogCancel>
