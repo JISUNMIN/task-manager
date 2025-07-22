@@ -10,6 +10,7 @@ import { getTimeAgo } from "@/lib/utils/helpers";
 import { Edit, Trash } from "tabler-icons-react";
 import { ActionDropdownMenu } from "@/components/ui/extended/ActionDropdownMenu";
 import { DeleteDialog } from "@/components/ui/extended/DeleteDialog";
+import { AiOutlineClose, AiOutlineCheck } from "react-icons/ai";
 
 type Props = {
   taskId: number;
@@ -20,10 +21,12 @@ export const TaskComments = ({ taskId }: Props) => {
   const {
     listData,
     isListLoading,
-    createTaskMutate,
+    createCommentMutate,
     isCreating,
-    deleteTaskMutate,
+    deleteCommentMutate,
+    updateCommentMutate,
   } = useComment(taskId);
+
   const [newComment, setNewComment] = useState("");
   const [replyTarget, setReplyTarget] = useState<number | null>(null);
   const [replyCollapseMap, setReplyCollapseMap] = useState<
@@ -34,10 +37,15 @@ export const TaskComments = ({ taskId }: Props) => {
     number | null
   >(null);
 
+  // 댓글 수정 관련 상태
+  const [editCommentId, setEditCommentId] = useState<number | null>(null);
+  const [editCommentContent, setEditCommentContent] = useState("");
+
+  // 댓글 추가
   const handleAddComment = (parentCommentId: number | null = null) => {
     if (!newComment.trim() || !user) return;
 
-    createTaskMutate({
+    createCommentMutate({
       comment: newComment,
       userId: user.id,
       taskId,
@@ -48,6 +56,43 @@ export const TaskComments = ({ taskId }: Props) => {
     setReplyTarget(null);
   };
 
+  // 댓글 수정 시작
+  const startEditComment = (commentId: number, currentContent: string) => {
+    setEditCommentId(commentId);
+    setEditCommentContent(currentContent);
+  };
+
+  // 댓글 수정 취소
+  const cancelEdit = () => {
+    setEditCommentId(null);
+    setEditCommentContent("");
+  };
+
+  // 댓글 수정 저장
+  const saveEditComment = () => {
+    if (!editCommentContent.trim() || editCommentId === null) return;
+
+    updateCommentMutate({
+      commentId: editCommentId,
+      comment: editCommentContent,
+    });
+
+    console.log("수정된 댓글 저장:", editCommentId, editCommentContent);
+
+    // 로컬에서 임시로 수정 반영하려면 별도 로직 필요 (예: 리팩토링 필요)
+    setEditCommentId(null);
+    setEditCommentContent("");
+  };
+
+  // 댓글 삭제 처리
+  const handleDeleteComment = () => {
+    if (targetDeleteCommentId !== null) {
+      deleteCommentMutate(targetDeleteCommentId);
+      setTargetDeleteCommentId(null);
+    }
+  };
+
+  // 대댓글 토글
   const toggleReplies = (commentId: number) => {
     setReplyCollapseMap((prev) => ({
       ...prev,
@@ -55,15 +100,9 @@ export const TaskComments = ({ taskId }: Props) => {
     }));
   };
 
-  const handleDeleteComment = () => {
-    if (targetDeleteCommentId !== null) {
-      deleteTaskMutate(targetDeleteCommentId);
-      setTargetDeleteCommentId(null);
-    }
-  };
-
-  const handleEditComment = (commentId: number) => {
-    // 댓글 수정 로직 추가
+  // 댓글 수정 시작 (기존 handleEditComment 대체)
+  const handleEditComment = (commentId: number, currentContent: string) => {
+    startEditComment(commentId, currentContent);
   };
 
   if (isListLoading) return <div>댓글 불러오는 중...</div>;
@@ -77,14 +116,13 @@ export const TaskComments = ({ taskId }: Props) => {
             user?.id === Number(comment.user.userId) || user?.role === "ADMIN";
           const canDelete =
             user?.id === Number(comment.user.userId) || user?.role === "ADMIN";
-          {
-            /* 댓글(최상위) 드롭다운 메뉴 */
-          }
+
           const commentItems = [
             {
               label: "댓글 수정",
               icon: <Edit />,
-              onSelect: () => handleEditComment(comment.id),
+              onSelect: () => handleEditComment(comment.id, comment.comment),
+              disabled: !canEdit,
             },
             {
               label: "댓글 삭제",
@@ -94,6 +132,7 @@ export const TaskComments = ({ taskId }: Props) => {
                 setTargetDeleteCommentId(comment.id);
                 setIsDeleteDialogOpen(true);
               },
+              disabled: !canDelete,
             },
           ];
 
@@ -109,15 +148,57 @@ export const TaskComments = ({ taskId }: Props) => {
                   <span className="text-sm font-medium">
                     {comment.user.name}
                   </span>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-gray-400 flex items-center gap-2">
                     {getTimeAgo(comment?.createdAt ?? "")}
-                    {/* 우측에 드롭다운 메뉴 추가 */}
                     <ActionDropdownMenu items={commentItems} />
                   </span>
                 </div>
-                <p className="text-sm text-gray-800 mt-1">{comment.comment}</p>
 
-                {/* 답글 달기 버튼 (토글 기능 적용) */}
+                {/* 수정 모드 */}
+                {editCommentId === comment.id ? (
+                  <div className="relative mt-1">
+                    <Input
+                      className="pr-16 border-none focus-visible:ring-0 hover:bg-transparent focus:bg-transparent shadow-none"
+                      value={editCommentContent}
+                      onChange={(e) => setEditCommentContent(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          saveEditComment();
+                        }
+                        if (e.key === "Escape") {
+                          cancelEdit();
+                        }
+                      }}
+                      autoFocus
+                    />
+                    <div className="absolute right-2 top-1.5 flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={cancelEdit}
+                        title="취소"
+                      >
+                        <AiOutlineClose className="w-5 h-5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={saveEditComment}
+                        disabled={!editCommentContent.trim()}
+                        title="저장"
+                      >
+                        <AiOutlineCheck className="w-5 h-5" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-800 mt-1">
+                    {comment.comment}
+                  </p>
+                )}
+
+                {/* 답글 달기 버튼 */}
                 <button
                   className="text-xs text-blue-500 mt-1 hover:underline"
                   onClick={() =>
@@ -143,7 +224,6 @@ export const TaskComments = ({ taskId }: Props) => {
 
                     {!replyCollapseMap[comment.id] &&
                       comment.replies.map((reply) => {
-                        // 대댓글(답글) 드롭다운 메뉴 - 삭제만 가능
                         const replyItems = [
                           {
                             label: "댓글 삭제",
@@ -169,7 +249,6 @@ export const TaskComments = ({ taskId }: Props) => {
                                 </span>
                                 <span className="text-xs text-gray-400">
                                   {getTimeAgo(reply?.createdAt ?? "")}
-                                  {/* 우측에 드롭다운 메뉴 추가 */}
                                   <ActionDropdownMenu items={replyItems} />
                                 </span>
                               </div>
@@ -241,7 +320,7 @@ export const TaskComments = ({ taskId }: Props) => {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  handleAddComment(); // parentCommentId = null
+                  handleAddComment();
                 }
               }}
               disabled={isCreating}

@@ -22,6 +22,11 @@ type CommentCreateParams = {
   parentCommentId?: number;
 };
 
+type CommentUpdateParams = {
+  commentId: number;
+  comment: string;
+};
+
 const COMMENT_API_PATH = "/comments";
 
 const useComment = (targetId?: string | number) => {
@@ -42,7 +47,8 @@ const useComment = (targetId?: string | number) => {
     enabled: !!targetId,
   });
 
-  const { mutate: createTaskMutate, isPending: isCreating } = useMutation<
+  // create
+  const { mutate: createCommentMutate, isPending: isCreating } = useMutation<
     void,
     Error,
     CommentCreateParams
@@ -56,7 +62,26 @@ const useComment = (targetId?: string | number) => {
     onError: () => {},
   });
 
-  const { mutate: deleteTaskMutate } = useMutation<void, Error, number>({
+  // update
+  const { mutate: updateCommentMutate } = useMutation<
+    void,
+    Error,
+    CommentUpdateParams
+  >({
+    mutationFn: async (data) => {
+      const { comment, commentId } = data;
+      await axios.patch(`${COMMENT_API_PATH}/${commentId}`, {
+        comment,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", targetId] });
+    },
+    onError: () => {},
+  });
+
+  // delete
+  const { mutate: deleteCommentMutate } = useMutation<void, Error, number>({
     mutationFn: async (data) => {
       await axios.delete(`${COMMENT_API_PATH}/${data}`);
     },
@@ -72,10 +97,12 @@ const useComment = (targetId?: string | number) => {
     isListLoading,
     isListFetching,
     //create
-    createTaskMutate,
+    createCommentMutate,
     isCreating,
+    //update
+    updateCommentMutate,
     //delete
-    deleteTaskMutate,
+    deleteCommentMutate,
   };
 };
 

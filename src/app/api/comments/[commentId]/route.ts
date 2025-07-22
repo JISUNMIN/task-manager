@@ -32,3 +32,39 @@ export async function DELETE(
     );
   }
 }
+
+export async function PATCH(
+  req: NextRequest,
+  context: { params: Promise<{ commentId: string }> }
+) {
+  try {
+    const { commentId } = await context.params;
+    const { comment } = await req.json();
+
+    console.log("comment확인", comment);
+
+    if (comment === undefined || comment === null) {
+      return NextResponse.json(
+        { error: "수정할 댓글 내용이 없습니다." },
+        { status: 400 }
+      );
+    }
+
+    await prisma.comment.update({
+      where: { id: Number(commentId) },
+      data: {
+        comment: comment,
+      },
+    });
+    return NextResponse.json(
+      { message: "댓글이 수정되었습니다." },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("comment 수정 에러:", error);
+    return NextResponse.json(
+      { error: "comment 수정에 실패했습니다.", detail: String(error) },
+      { status: 500 }
+    );
+  }
+}

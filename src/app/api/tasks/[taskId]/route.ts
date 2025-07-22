@@ -34,8 +34,8 @@ export async function PATCH(
   context: { params: Promise<{ taskId: string }> }
 ) {
   try {
-    const { title, desc, assignees } = await req.json();
     const { taskId } = await context.params;
+    const { title, desc, assignees } = await req.json();
 
     const updateData: any = {};
 
