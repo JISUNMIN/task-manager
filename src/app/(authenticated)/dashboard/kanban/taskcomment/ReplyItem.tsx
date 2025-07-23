@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/ui/extended/UserAvatar";
@@ -6,6 +5,7 @@ import { getTimeAgo } from "@/lib/utils/helpers";
 import { ActionDropdownMenu } from "@/components/ui/extended/ActionDropdownMenu";
 import { Edit } from "tabler-icons-react";
 import { AiOutlineClose, AiOutlineCheck } from "react-icons/ai";
+import { useCommentStore } from "@/store/useCommentStore";
 
 interface ReplyItemProps {
   reply: any;
@@ -17,23 +17,29 @@ interface ReplyItemProps {
 // 자신의 대댓글인 경우 수정 가능
 // 편집 상태 관리
 // 댓글 업데이트 호출
-
 export const ReplyItem = ({
   reply,
   currentUser,
   updateCommentMutate,
 }: ReplyItemProps) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState(reply.comment);
+  const editReplyId = useCommentStore((state) => state.editReplyId);
+  const setEditReplyId = useCommentStore((state) => state.setEditReplyId);
+
+  const editReplyContent = useCommentStore((state) => state.editReplyContent);
+  const setEditReplyContent = useCommentStore((state) => state.setEditReplyContent);
+
+  const resetEditReply = useCommentStore((state) => state.resetEditReply);
+
+  const isEditing = editReplyId === reply.id;
 
   const canEdit =
     currentUser?.id === Number(reply.user.userId) ||
     currentUser?.role === "ADMIN";
 
   const saveEdit = () => {
-    if (!editContent.trim()) return;
-    updateCommentMutate({ commentId: reply.id, comment: editContent });
-    setIsEditing(false);
+    if (!editReplyContent.trim()) return;
+    updateCommentMutate({ commentId: reply.id, comment: editReplyContent });
+    resetEditReply();
   };
 
   const items = [
@@ -41,8 +47,8 @@ export const ReplyItem = ({
       label: "댓글 수정",
       icon: <Edit />,
       onSelect: () => {
-        setIsEditing(true);
-        setEditContent(reply.comment);
+        setEditReplyId(reply.id);
+        setEditReplyContent(reply.comment);
       },
       disabled: !canEdit,
     },
@@ -68,14 +74,14 @@ export const ReplyItem = ({
           <div className="relative mt-1">
             <Input
               className="pr-16 border-none focus-visible:ring-0 shadow-none"
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
+              value={editReplyContent}
+              onChange={(e) => setEditReplyContent(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   saveEdit();
                 }
-                if (e.key === "Escape") setIsEditing(false);
+                if (e.key === "Escape") resetEditReply();
               }}
               autoFocus
             />
@@ -83,7 +89,7 @@ export const ReplyItem = ({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsEditing(false)}
+                onClick={resetEditReply}
               >
                 <AiOutlineClose className="w-5 h-5" />
               </Button>
@@ -91,7 +97,7 @@ export const ReplyItem = ({
                 variant="ghost"
                 size="icon"
                 onClick={saveEdit}
-                disabled={!editContent.trim()}
+                disabled={!editReplyContent.trim()}
               >
                 <AiOutlineCheck className="w-5 h-5" />
               </Button>

@@ -8,6 +8,7 @@ import { Edit, Trash } from "tabler-icons-react";
 import { AiOutlineClose, AiOutlineCheck } from "react-icons/ai";
 import { IoMdSend } from "react-icons/io";
 import { ReplyItem } from "./ReplyItem";
+import { useCommentStore } from "@/store/useCommentStore";
 
 export interface CommentItemProps {
   comment: any;
@@ -20,7 +21,7 @@ export interface CommentItemProps {
   isCreating: boolean;
 }
 
-// 단일 댓글 + 그에 대한 대댓글(ReplyItem) 목록 
+// 단일 댓글 + 그에 대한 대댓글(ReplyItem) 목록
 // 답급 입력창
 // 해당 댓글에 대한 수정/삭제 버튼 표시 및 제어
 // 대댓글 리스트 보여주기/숨기기
@@ -35,22 +36,39 @@ export const CommentItem = ({
   setIsDeleteDialogOpen,
   isCreating,
 }: CommentItemProps) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState(comment.comment);
+  // 전역 상태: 수정 중인 댓글 ID, 수정 내용 및 함수
+  const editCommentId = useCommentStore((state) => state.editCommentId);
+  const setEditCommentId = useCommentStore((state) => state.setEditCommentId);
+
+  const editCommentContent = useCommentStore(
+    (state) => state.editCommentContent
+  );
+  const setEditCommentContent = useCommentStore(
+    (state) => state.setEditCommentContent
+  );
+
+  const resetEdit = useCommentStore((state) => state.resetEdit);
+
+  // 로컬 상태: 대댓글 보이기/숨기기, 답글 입력창 토글, 답글 내용
   const [showReplies, setShowReplies] = useState(true);
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [replyContent, setReplyContent] = useState("");
 
+  const isEditing = editCommentId === comment.id;
+
+  // 권한 체크
   const canEdit =
     user?.id === Number(comment.user.userId) || user?.role === "ADMIN";
   const canDelete = canEdit;
 
+  // 댓글 수정 저장
   const saveEdit = () => {
-    if (!editContent.trim()) return;
-    updateCommentMutate({ commentId: comment.id, comment: editContent });
-    setIsEditing(false);
+    if (!editCommentContent.trim()) return;
+    updateCommentMutate({ commentId: comment.id, comment: editCommentContent });
+    resetEdit();
   };
 
+  // 답글 제출
   const handleReplySubmit = () => {
     if (!replyContent.trim()) return;
     createCommentMutate({
@@ -63,11 +81,15 @@ export const CommentItem = ({
     setShowReplyInput(false);
   };
 
+  // 액션 메뉴 아이템
   const commentItems = [
     {
       label: "댓글 수정",
       icon: <Edit />,
-      onSelect: () => setIsEditing(true),
+      onSelect: () => {
+        setEditCommentId(comment.id);
+        setEditCommentContent(comment.comment);
+      },
       disabled: !canEdit,
     },
     {
@@ -102,30 +124,26 @@ export const CommentItem = ({
           <div className="relative mt-1">
             <Input
               className="pr-16 border-none focus-visible:ring-0 shadow-none"
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
+              value={editCommentContent}
+              onChange={(e) => setEditCommentContent(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   saveEdit();
                 }
-                if (e.key === "Escape") setIsEditing(false);
+                if (e.key === "Escape") resetEdit();
               }}
               autoFocus
             />
             <div className="absolute right-2 top-1.5 flex gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsEditing(false)}
-              >
+              <Button variant="ghost" size="icon" onClick={resetEdit}>
                 <AiOutlineClose className="w-5 h-5" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={saveEdit}
-                disabled={!editContent.trim()}
+                disabled={!editCommentContent.trim()}
               >
                 <AiOutlineCheck className="w-5 h-5" />
               </Button>

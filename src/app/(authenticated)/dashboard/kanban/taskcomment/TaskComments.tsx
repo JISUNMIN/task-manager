@@ -1,4 +1,3 @@
-import { useState } from "react";
 import useComment from "@/hooks/react-query/useComment.";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Input } from "@/components/ui/input";
@@ -9,6 +8,7 @@ import { IoMdSend } from "react-icons/io";
 import { DeleteDialog } from "@/components/ui/extended/DeleteDialog";
 import { CommentItem } from "./CommentItem";
 import { ItemSkeleton } from "@/components/ui/extended/ItemSkeleton";
+import { useCommentStore } from "@/store/useCommentStore"; // ✅ zustand store import
 
 type Props = {
   taskId: number;
@@ -22,6 +22,7 @@ type Props = {
 
 export const TaskComments = ({ taskId }: Props) => {
   const { user } = useAuthStore();
+
   const {
     listData,
     isListLoading,
@@ -31,11 +32,22 @@ export const TaskComments = ({ taskId }: Props) => {
     updateCommentMutate,
   } = useComment(taskId);
 
-  const [newComment, setNewComment] = useState("");
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
-  const [targetDeleteCommentId, setTargetDeleteCommentId] = useState<
-    number | null
-  >(null);
+  const newComment = useCommentStore((state) => state.newComment);
+  const setNewComment = useCommentStore((state) => state.setNewComment);
+
+  const isDeleteDialogOpen = useCommentStore(
+    (state) => state.isDeleteDialogOpen
+  );
+  const setIsDeleteDialogOpen = useCommentStore(
+    (state) => state.setIsDeleteDialogOpen
+  );
+
+  const targetDeleteCommentId = useCommentStore(
+    (state) => state.targetDeleteCommentId
+  );
+  const setTargetDeleteCommentId = useCommentStore(
+    (state) => state.setTargetDeleteCommentId
+  );
 
   const handleAddComment = () => {
     if (!newComment.trim() || !user) return;
@@ -44,19 +56,21 @@ export const TaskComments = ({ taskId }: Props) => {
       userId: user.id,
       taskId,
     });
-    setNewComment("");
+    setNewComment(""); // ✅ 전역 상태 초기화
   };
 
   const handleDeleteComment = () => {
     if (targetDeleteCommentId !== null) {
       deleteCommentMutate(targetDeleteCommentId);
       setTargetDeleteCommentId(null);
+      setIsDeleteDialogOpen(false);
     }
   };
 
   if (isListLoading) {
     return <ItemSkeleton />;
   }
+
   return (
     <div className="p-4 border-b border-gray-300">
       {/* 댓글 리스트 */}
