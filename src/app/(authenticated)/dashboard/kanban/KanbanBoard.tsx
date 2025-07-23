@@ -135,7 +135,7 @@ const KanbanBoard = () => {
   }, [detailData, initializeColumns]);
 
   return (
-    <SidebarProvider>
+    <SidebarProvider className={`bg-[var(--bg-fourth)]`}>
       <KanbanSidebar />
       <SidebarTrigger />
       <ResizablePanelGroup direction="horizontal">

@@ -25,7 +25,10 @@ body {
 :root {
   /* --background: #eceff1; */
   --background: #ecf1ef;
-  --color-bg-primary: white;
+  --bg-seonday: oklch(1 0 0);
+  --bg-third: #ecf1ef;
+  --bg-fourth: oklch(1 0 0);
+  --color-bg-primary: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --item-bg: oklch(1 0 0);
   --text-base: #4b5563;
@@ -66,7 +69,10 @@ body {
 
 .dark {
   --background: #111827;
-  --color-bg-primary: black;
+  --bg-seonday: #1f2937;
+  --bg-third: #1f2937;
+  --bg-fourth: #111827;
+  --color-bg-primary: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --item-bg: #374151;
   --text-base: #d1d5db;

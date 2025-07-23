@@ -174,7 +174,7 @@ const ProjectCard: FC<ProjectCardProps> = memo(
           ref={containerRef}
           onClick={disabled ? undefined : onClick}
           className={cn(
-            "relative h-55 rounded-lg p-6 shadow-md mb-3 transition-all duration-100 bg-white dark:bg-gray-800",
+            "relative h-55 rounded-lg p-6 shadow-md mb-3 transition-all duration-100 bg-[var(--bg-seonday)]",
             project.isPersonal
               ? "border-4 border-blue-400"
               : "border border-stone-300 dark:border-gray-600",

@@ -127,7 +127,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       defaultSize={25}
       minSize={isTaskInfoPanelOpen ? (isMobile ? 100 : 30) : 0}
       maxSize={isTaskInfoPanelOpen ? (isMobile ? 100 : 50) : 0}
-      className={`min-h-screen bg-green-50 transition-transform transform  ${isTaskInfoPanelOpen ? "translate-x-0" : "translate-x-full"}  `}
+      className={`min-h-screen bg-[var(--bg-third)] transition-transform transform  ${isTaskInfoPanelOpen ? "translate-x-0" : "translate-x-full"}  `}
     >
       {/* 닫기 버튼 */}
       <Button

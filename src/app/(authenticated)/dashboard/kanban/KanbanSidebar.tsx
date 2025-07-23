@@ -68,7 +68,7 @@ export function KanbanSidebar() {
 
   return (
     <Sidebar className="pt-14">
-      <SidebarContent className="bg-green-50">
+      <SidebarContent className={`bg-[var(--bg-third)]`}>
         <SidebarGroup>
           <SidebarGroupLabel></SidebarGroupLabel>
           <SidebarGroupContent>
@@ -84,7 +84,7 @@ export function KanbanSidebar() {
                   />
                 </Link>
               </div>
-              <p className="text-base sm:text-lg lg:text-2xl font-extrabold text-center text-gray-800 drop-shadow-md mb-2">
+              <p className="text-base sm:text-lg lg:text-2xl font-extrabold text-center drop-shadow-md mb-2">
                 Squirrel Board
               </p>
             </div>
