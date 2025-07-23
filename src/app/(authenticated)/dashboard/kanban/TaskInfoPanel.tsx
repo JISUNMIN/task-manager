@@ -21,7 +21,7 @@ import { debounce } from "lodash";
 import { UserSelectInput } from "@/components/form/UserSelectInput";
 import { Controller, useForm } from "react-hook-form";
 import useTasks from "@/hooks/react-query/useTasks";
-import { TaskComments } from "./TaskComments";
+import { TaskComments } from "./taskcomment/TaskComments";
 
 interface TaskInfoPanelProps {
   isTaskInfoPanelOpen: boolean;
