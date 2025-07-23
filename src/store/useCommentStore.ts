@@ -13,8 +13,8 @@ type CommentState = {
   setReplyTarget: (id: number | null) => void;
 
   // 댓글의 대댓글 접힘 여부 (댓글 ID → true/false)
-  replyCollapseMap: Record<number, boolean>;
-  toggleReplyCollapse: (id: number) => void;
+  showReplyMap: Record<number, boolean>;
+  toggleShowReply: (id: number) => void;
 
   // 현재 수정 중인 댓글의 ID (null이면 수정 중 아님)
   editCommentId: number | null;
@@ -59,12 +59,12 @@ export const useCommentStore = create<CommentState>()(
         replyTarget: null,
         setReplyTarget: (id) => set({ replyTarget: id }),
 
-        replyCollapseMap: {},
-        toggleReplyCollapse: (id) =>
+        showReplyMap: {},
+        toggleShowReply: (id) =>
           set((state) => ({
-            replyCollapseMap: {
-              ...state.replyCollapseMap,
-              [id]: !state.replyCollapseMap[id],
+            showReplyMap: {
+              ...state.showReplyMap,
+              [id]: !state.showReplyMap[id],
             },
           })),
 

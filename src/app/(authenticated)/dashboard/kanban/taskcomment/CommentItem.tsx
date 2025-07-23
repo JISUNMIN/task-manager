@@ -50,9 +50,11 @@ export const CommentItem = ({
   const resetEdit = useCommentStore((state) => state.resetEdit);
 
   // 로컬 상태: 대댓글 보이기/숨기기, 답글 입력창 토글, 답글 내용
-  const [showReplies, setShowReplies] = useState(true);
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [replyContent, setReplyContent] = useState("");
+  const showReplyMap = useCommentStore((state) => state.showReplyMap);
+  const toggleShowReply = useCommentStore((state) => state.toggleShowReply);
+  const isVisible = showReplyMap[comment.id] ?? true;
 
   const isEditing = editCommentId === comment.id;
 
@@ -165,12 +167,12 @@ export const CommentItem = ({
           <div className="mt-2 ml-6">
             <button
               className="text-xs text-gray-500"
-              onClick={() => setShowReplies((prev) => !prev)}
+              onClick={() => toggleShowReply(comment.id)}
             >
-              {showReplies ? "▼ 대댓글 숨기기" : "▶ 대댓글 펼치기"}
+              {!isVisible ? "▶ 대댓글 보기" : "▼ 대댓글 숨기기"}
             </button>
 
-            {showReplies &&
+            {isVisible &&
               comment.replies.map((reply: any) => (
                 <ReplyItem
                   key={reply.id}
