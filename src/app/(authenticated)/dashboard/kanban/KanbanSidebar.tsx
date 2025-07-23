@@ -103,9 +103,14 @@ export function KanbanSidebar() {
                       className={cn(
                         "flex flex-col items-start mb-2 border-b p-3 rounded-md shadow-sm h-full",
                         isSelected
-                          ? "bg-gray-200 border-gray-400 shadow-md"
-                          : "bg-gray-50 hover:bg-gray-100 hover:border-gray-400"
+                          ? "border-gray-400 shadow-md"
+                          : "hover:border-gray-400"
                       )}
+                      style={{
+                        backgroundColor: isSelected
+                          ? "var(--box-bg-selected)" 
+                          : "var(--box-bg)", 
+                      }}
                     >
                       <p className="font-medium text-gray-800">
                         📌 프로젝트명: {project.projectName}

@@ -196,7 +196,7 @@ const KanbanBoard = () => {
                                 >
                                   {(provided) => (
                                     <div
-                                      className="mb-4 border rounded p-4 bg-white"
+                                      className={`mb-4 border rounded p-4 bg-[var(--box-bg)]`}
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
@@ -228,7 +228,7 @@ const KanbanBoard = () => {
                                           setTaskInfoPanelrOpen(true)
                                         }
                                         placeholder="Enter new task"
-                                        className="w-full p-2 border rounded"
+                                        className="w-full p-2 border rounded text-[var(--box-text)]"
                                       />
                                     </div>
                                   )}
