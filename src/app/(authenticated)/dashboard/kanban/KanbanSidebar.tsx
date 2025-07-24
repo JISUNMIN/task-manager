@@ -73,7 +73,7 @@ export function KanbanSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel></SidebarGroupLabel>
           <SidebarGroupContent>
-            <div>
+            <div className="sticky top-0 z-10 bg-[var(--bg-third)] pb-3">
               {/* 로고 */}
               <div className="flex justify-center">
                 <Link href="/projectlist">
