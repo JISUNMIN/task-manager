@@ -5,8 +5,14 @@ import { Status } from "@/store/useKanbanStore";
 import React from "react";
 import { getStatusColors } from "@/lib/utils/colors/index";
 
-const KanbanColumnBadge = ({ columnKey }: { columnKey: Status }) => {
-  const { statusBgColor, dotColor } = getStatusColors(columnKey);
+const KanbanColumnBadge = ({
+  columnKey,
+  isDark,
+}: {
+  columnKey: Status;
+  isDark: boolean;
+}) => {
+  const { statusBgColor, dotColor } = getStatusColors(columnKey, isDark);
 
   return (
     <Badge
@@ -15,7 +21,9 @@ const KanbanColumnBadge = ({ columnKey }: { columnKey: Status }) => {
       <div
         className={`w-3 h-3 ${dotColor} rounded-full border-2 border-solid ${dotColor}`}
       ></div>
-      <span className="text-xl font-semibold text-gray-100">{columnKey}</span>
+      <span className="text-lg  font-semibold text-gray-100">
+        {columnKey}
+      </span>
     </Badge>
   );
 };

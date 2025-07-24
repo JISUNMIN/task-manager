@@ -148,43 +148,50 @@ const KanbanBoard = () => {
         <ResizablePanel defaultSize={75}>
           {/* 칸반 보드 영역 */}
           <div className="p-8 mt-10">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6 p-6 rounded-xl bg-[var(---item-bg)] border border-[var(--border)] shadow-sm transition-all">
-              {/* 왼쪽: 프로젝트 명+ 담당자명 */}
-              <div className="flex flex-col gap-2">
+            <div className="bg-[var(--box-bg)] p-4 rounded-xl mb-6  border border-[var(--border)] shadow-sm transition-all">
+              {/* 프로젝트 제목 */}
+              <div className="mb-2">
                 <h2 className="text-2xl font-bold flex items-center gap-2">
                   {detailData?.projectName}
                 </h2>
-                <p className="text-sm text-[var(--sub-text)]">
-                  담당자:{" "}
-                  <span className="font-medium">
-                    {detailData?.manager.name}
-                  </span>
-                </p>
               </div>
 
-              {/* 오른쪽: 마감일 + 진행률 */}
-              <div className="flex flex-col md:items-end gap-2 w-full md:w-auto">
-                {!isPersonal && (
-                  <p className="text-sm text-[var(--text-blur)] mb-1">
-                    마감일:{" "}
-                    {detailData?.deadline
-                      ? convertDateToString(new Date(detailData.deadline), "-")
-                      : "미정"}
-                  </p>
-                )}
-                <div className="w-full md:w-64">
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm text-[var(--text-blur)] mb-1">
-                      진행률
-                    </p>
-                    <span className="text-sm text-[var(--text-base)]">
-                      {detailData?.progress}%
+              <div className="w-full space-y-2">
+                {/* 담당자 + 마감일 */}
+                <div className="text-sm text-[var(--sub-text)] flex flex-wrap items-center gap-x-1">
+                  <span>
+                    담당자:{" "}
+                    <span className="font-medium">
+                      {detailData?.manager.name}
+                    </span>
+                  </span>
+                  {!isPersonal && detailData?.deadline && (
+                    <>
+                      <span className="mx-1">|</span>
+                      <span>
+                        마감일:{" "}
+                        {convertDateToString(
+                          new Date(detailData.deadline),
+                          "-"
+                        )}
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                {/* 진행률*/}
+                <div className="w-full">
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="text-sm text-[var(--text-blur)]">진행률</p>
+                    <span className="text-sm text-[var(--text-base)] font-medium">
+                      {detailData?.progress ?? 0}%
                     </span>
                   </div>
                   <Progress value={detailData?.progress} />
                 </div>
               </div>
             </div>
+
             {isDetailLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -193,7 +200,7 @@ const KanbanBoard = () => {
               </div>
             ) : (
               <DragDropContext onDragEnd={handleDragEnd}>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 items-start">
                   {Object.keys(columns).map((columnKey) => {
                     const status = columnKey as Status;
                     const keys = Object.keys(columns);
@@ -203,17 +210,20 @@ const KanbanBoard = () => {
                     return (
                       <div
                         key={columnKey}
-                        className={`flex flex-col ${kanbanBoardBg} rounded p-4`}
+                        className={`flex flex-col ${kanbanBoardBg} border border-[var(--border)] rounded-xl p-4`}
                       >
                         <div className="flex justify-between items-center mb-4">
-                          <KanbanColumnBadge columnKey={status} />
+                          <KanbanColumnBadge
+                            columnKey={status}
+                            isDark={isDark}
+                          />
                           <Button
                             variant="outline"
                             size="icon"
                             onClick={() =>
                               handleCreateTask(status, columnIndex)
                             }
-                            className="bg-gray-400 text-white rounded"
+                            className="w-8 h-8 shrink-0 bg-[var(--item-bg)] hover:bg-[var(--hover-bg)] text-[var(--text-base)] border-[var(--border)] hover:border-[var(--border)] rounded"
                           >
                             <FaPlus />
                           </Button>
@@ -223,7 +233,7 @@ const KanbanBoard = () => {
                         <Droppable droppableId={columnKey}>
                           {(provided) => (
                             <div
-                              className={`flex flex-col min-h-full max-h-[500px] lg:max-h-[80vh] p-1 overflow-y-auto`}
+                              className="flex flex-col min-h-full max-h-[500px] lg:max-h-[80vh] overflow-y-auto space-y-3"
                               ref={provided.innerRef}
                               {...provided.droppableProps}
                             >
@@ -246,7 +256,7 @@ const KanbanBoard = () => {
                                   >
                                     {(provided) => (
                                       <div
-                                        className={`mb-4 border rounded p-4 bg-[var(--item-bg)]`}
+                                        className="bg-[var(--box-bg)] border  rounded-lg p-3 cursor-pointer"
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}
@@ -277,8 +287,8 @@ const KanbanBoard = () => {
                                           onClick={() =>
                                             setTaskInfoPanelrOpen(true)
                                           }
-                                          placeholder="새 작업 추가"
-                                          className="w-full p-2 border border-[var(--border)] text-[var(--text-base)] rounded"
+                                          placeholder="제목을 입력하세요"
+                                          className="w-full p-2 border text-[var(--text-base)] rounded dark:focus:border-gray-300 dark:focus:outline-none"
                                         />
                                       </div>
                                     )}
@@ -287,6 +297,16 @@ const KanbanBoard = () => {
                               })}
 
                               {provided.placeholder}
+
+                              {/* 새 작업 추가 버튼 */}
+                              <button
+                                onClick={() =>
+                                  handleCreateTask(status, columnIndex)
+                                }
+                                className="bg-[var(--btn-bg)] border-2 border-dashed border-[var(--btn-border)] hover:bg-[var(--btn-hover-bg)] hover:border-[var(--btn-hover-border)] hover:text-[var(--foreground)] rounded-lg p-3 text-center text-[var(--text-blur)] cursor-pointer transition-all duration-200  mt-3"
+                              >
+                                + 새 작업 추가
+                              </button>
                             </div>
                           )}
                         </Droppable>
