@@ -169,7 +169,9 @@ export const CommentItem = ({
               className="text-xs text-gray-500"
               onClick={() => toggleShowReply(comment.id)}
             >
-              {!isVisible ? "▶ 대댓글 보기" : "▼ 대댓글 숨기기"}
+              {!isVisible
+                ? `▶ 대댓글 보기 (${comment.replies.length}개)`
+                : "▼ 대댓글 숨기기"}
             </button>
 
             {isVisible &&
