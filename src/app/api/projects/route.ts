@@ -16,7 +16,6 @@ export async function GET(req: NextRequest) {
       projects = await prisma.project.findMany({
         include: {
           manager: true,
-          tasks: { include: { assignees: true } },
         },
         orderBy: [{ isPersonal: "desc" }, { order: "asc" }, { id: "desc" }],
       });
@@ -41,7 +40,6 @@ export async function GET(req: NextRequest) {
         },
         include: {
           manager: true,
-          tasks: { include: { assignees: true } },
         },
       });
     }
