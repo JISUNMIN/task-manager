@@ -186,10 +186,11 @@ const ProjectList = () => {
               주세요.
             </div>
           )}
-
         {!editableProjects.length && !!listData.length ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <CardSkeleton />
+            {Array.from({ length: 4 }).map((_, i) => (
+              <CardSkeleton key={i} />
+            ))}
           </div>
         ) : isEditing ? (
           <DndContext

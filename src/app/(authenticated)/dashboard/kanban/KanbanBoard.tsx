@@ -31,15 +31,19 @@ import { Trash } from "lucide-react";
 import { ActionDropdownMenu } from "@/components/ui/extended/ActionDropdownMenu";
 import { Progress } from "@/components/ui/progress";
 import { convertDateToString } from "@/lib/utils/helpers";
+import { CardSkeleton } from "@/components/ui/extended/Skeleton/CardSkeleton";
+import { useThemeStore } from "@/store/useThemeStore";
 
 const KanbanBoard = () => {
+  const { theme } = useThemeStore();
+  const isDark = theme === "dark";
   const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
   const togglePanel = () => setTaskInfoPanelrOpen(!isTaskInfoPanelOpen);
   const [focusedInputKey, setFocusedInputKey] = useState<string>("Completed-0");
   const inputRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId") ?? undefined;
-  const { detailData } = useProjects(projectId);
+  const { detailData, isDetailLoading } = useProjects(projectId);
   const {
     createTaskMutate,
     deleteTaskMutate,
@@ -181,108 +185,117 @@ const KanbanBoard = () => {
                 </div>
               </div>
             </div>
-
-            <DragDropContext onDragEnd={handleDragEnd}>
+            {isDetailLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
-                {Object.keys(columns).map((columnKey) => {
-                  const status = columnKey as Status;
-                  const keys = Object.keys(columns);
-                  const columnIndex = keys.indexOf(status);
-                  const { kanbanBoardBg } = getStatusColors(status);
-
-                  return (
-                    <div
-                      key={columnKey}
-                      className={`flex flex-col ${kanbanBoardBg} rounded p-4`}
-                    >
-                      <div className="flex justify-between items-center mb-4">
-                        <KanbanColumnBadge columnKey={status} />
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => handleCreateTask(status, columnIndex)}
-                          className="bg-gray-400 text-white rounded"
-                        >
-                          <FaPlus />
-                        </Button>
-                      </div>
-
-                      {/* 각 칸반 열 */}
-                      <Droppable droppableId={columnKey}>
-                        {(provided) => (
-                          <div
-                            className={`flex flex-col min-h-full max-h-[500px] lg:max-h-[80vh] p-1 overflow-y-auto`}
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                          >
-                            {columns[status].map((task, itemIndex) => {
-                              const items = [
-                                {
-                                  label: "삭제",
-                                  icon: <Trash />,
-                                  variant: "destructive" as const,
-                                  onSelect: () =>
-                                    handleDeleteTask(status, itemIndex),
-                                },
-                              ];
-
-                              return (
-                                <Draggable
-                                  key={`${columnKey}-${itemIndex}`}
-                                  draggableId={`${columnKey}-${itemIndex}`}
-                                  index={itemIndex}
-                                >
-                                  {(provided) => (
-                                    <div
-                                      className={`mb-4 border rounded p-4 bg-[var(--item-bg)]`}
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                    >
-                                      <div className="text-right">
-                                        <ActionDropdownMenu items={items} />
-                                      </div>
-
-                                      <TextareaAutosize
-                                        ref={(el) => {
-                                          inputRefs.current[
-                                            `${columnKey}-${itemIndex}`
-                                          ] = el;
-                                        }}
-                                        value={task.title}
-                                        onChange={(e) =>
-                                          handleUpdateTask(
-                                            status,
-                                            e.target.value,
-                                            itemIndex
-                                          )
-                                        }
-                                        onFocus={() =>
-                                          setFocusedInputKey(
-                                            `${columnKey}-${itemIndex}`
-                                          )
-                                        }
-                                        onClick={() =>
-                                          setTaskInfoPanelrOpen(true)
-                                        }
-                                        placeholder="새 작업 추가"
-                                        className="w-full p-2 border border-[var(--border)] text-[var(--text-base)] rounded"
-                                      />
-                                    </div>
-                                  )}
-                                </Draggable>
-                              );
-                            })}
-
-                            {provided.placeholder}
-                          </div>
-                        )}
-                      </Droppable>
-                    </div>
-                  );
-                })}
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <CardSkeleton key={i} />
+                ))}
               </div>
-            </DragDropContext>
+            ) : (
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
+                  {Object.keys(columns).map((columnKey) => {
+                    const status = columnKey as Status;
+                    const keys = Object.keys(columns);
+                    const columnIndex = keys.indexOf(status);
+                    const { kanbanBoardBg } = getStatusColors(status, isDark);
+
+                    return (
+                      <div
+                        key={columnKey}
+                        className={`flex flex-col ${kanbanBoardBg} rounded p-4`}
+                      >
+                        <div className="flex justify-between items-center mb-4">
+                          <KanbanColumnBadge columnKey={status} />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() =>
+                              handleCreateTask(status, columnIndex)
+                            }
+                            className="bg-gray-400 text-white rounded"
+                          >
+                            <FaPlus />
+                          </Button>
+                        </div>
+
+                        {/* 각 칸반 열 */}
+                        <Droppable droppableId={columnKey}>
+                          {(provided) => (
+                            <div
+                              className={`flex flex-col min-h-full max-h-[500px] lg:max-h-[80vh] p-1 overflow-y-auto`}
+                              ref={provided.innerRef}
+                              {...provided.droppableProps}
+                            >
+                              {columns[status].map((task, itemIndex) => {
+                                const items = [
+                                  {
+                                    label: "삭제",
+                                    icon: <Trash />,
+                                    variant: "destructive" as const,
+                                    onSelect: () =>
+                                      handleDeleteTask(status, itemIndex),
+                                  },
+                                ];
+
+                                return (
+                                  <Draggable
+                                    key={`${columnKey}-${itemIndex}`}
+                                    draggableId={`${columnKey}-${itemIndex}`}
+                                    index={itemIndex}
+                                  >
+                                    {(provided) => (
+                                      <div
+                                        className={`mb-4 border rounded p-4 bg-[var(--item-bg)]`}
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                      >
+                                        <div className="text-right">
+                                          <ActionDropdownMenu items={items} />
+                                        </div>
+
+                                        <TextareaAutosize
+                                          ref={(el) => {
+                                            inputRefs.current[
+                                              `${columnKey}-${itemIndex}`
+                                            ] = el;
+                                          }}
+                                          value={task.title}
+                                          onChange={(e) =>
+                                            handleUpdateTask(
+                                              status,
+                                              e.target.value,
+                                              itemIndex
+                                            )
+                                          }
+                                          onFocus={() =>
+                                            setFocusedInputKey(
+                                              `${columnKey}-${itemIndex}`
+                                            )
+                                          }
+                                          onClick={() =>
+                                            setTaskInfoPanelrOpen(true)
+                                          }
+                                          placeholder="새 작업 추가"
+                                          className="w-full p-2 border border-[var(--border)] text-[var(--text-base)] rounded"
+                                        />
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                );
+                              })}
+
+                              {provided.placeholder}
+                            </div>
+                          )}
+                        </Droppable>
+                      </div>
+                    );
+                  })}
+                </div>
+              </DragDropContext>
+            )}
           </div>
         </ResizablePanel>
 

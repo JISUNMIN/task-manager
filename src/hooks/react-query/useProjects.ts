@@ -24,7 +24,7 @@ const useProjects = (targetId?: string | number) => {
 
   const {
     data: listData,
-    isPending: isListPending,
+   isLoading: isListLoading,
     isFetching: isListFetching,
   } = useQuery<ClientProject[], Error>({
     queryKey: ["projects", "list"],
@@ -37,7 +37,7 @@ const useProjects = (targetId?: string | number) => {
 
   const {
     data: detailData,
-    isPending: isDetailPending,
+    isLoading: isDetailLoading,
     isFetching: isDetailFetching,
   } = useQuery<ClientProject, Error>({
     queryKey: ["projects", "list", "detail", targetId],
@@ -53,11 +53,11 @@ const useProjects = (targetId?: string | number) => {
   return {
     // list
     listData,
-    isListPending,
+    isListLoading,
     isListFetching,
     // detail
     detailData,
-    isDetailPending,
+    isDetailLoading,
     isDetailFetching,
   };
 };

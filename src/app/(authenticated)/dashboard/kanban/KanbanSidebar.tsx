@@ -18,11 +18,12 @@ import { convertDateToString } from "@/lib/utils/helpers";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import React, { useEffect, useRef } from "react";
+import { CardSkeleton } from "@/components/ui/extended/Skeleton/CardSkeleton";
 
 export function KanbanSidebar() {
   const router = useRouter();
 
-  const { listData } = useProjects();
+  const { listData, isListLoading } = useProjects();
   const { user } = useAuthStore();
   const searchParams = useSearchParams();
   const selectedProjectId = searchParams.get("projectId");
@@ -90,44 +91,59 @@ export function KanbanSidebar() {
             </div>
             <SidebarMenu>
               <div>
-                {filteredProjects?.map((project, index) => {
-                  const isSelected = selectedProjectId === String(project.id);
-                  return (
-                    <SidebarMenuButton
-                      key={project.id}
-                      role="button"
-                      ref={(el) => {
-                        buttonRefs.current[index] = el;
-                      }}
-                      onClick={() => handleSetProjectId(project.id)}
-                      className={cn(
-                        "flex flex-col items-start mb-2 border-b p-3 rounded-md shadow-sm h-full",
-                        isSelected
-                          ? "border-gray-400 shadow-md"
-                          : "hover:border-gray-400"
-                      )}
-                      style={{
-                        backgroundColor: isSelected
-                          ? "var(--box-bg-selected)"
-                          : "var(--item-bg)",
-                      }}
-                    >
-                      <p className="font-medium">
-                        📌 프로젝트명: {project.projectName}
-                      </p>
-                      <p className="text-sm">
-                        👤 담당자: {project.manager.name}
-                      </p>
-                      <p className="text-sm">📊 진행률: {project.progress}%</p>
-                      {!project.isPersonal && (
-                        <p className=" text-xs sm:text-sm lg:text-base">
-                          🗓 마감일:{" "}
-                          {convertDateToString(new Date(project.deadline), "-")}
+                {isListLoading ? (
+                  <div className="flex flex-col">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="mb-2">
+                        <CardSkeleton width="w-full h-28" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  filteredProjects?.map((project, index) => {
+                    const isSelected = selectedProjectId === String(project.id);
+                    return (
+                      <SidebarMenuButton
+                        key={project.id}
+                        role="button"
+                        ref={(el) => {
+                          buttonRefs.current[index] = el;
+                        }}
+                        onClick={() => handleSetProjectId(project.id)}
+                        className={cn(
+                          "flex flex-col items-start mb-2 border-b p-3 rounded-md shadow-sm h-full",
+                          isSelected
+                            ? "border-gray-400 shadow-md"
+                            : "hover:border-gray-400"
+                        )}
+                        style={{
+                          backgroundColor: isSelected
+                            ? "var(--box-bg-selected)"
+                            : "var(--item-bg)",
+                        }}
+                      >
+                        <p className="font-medium">
+                          📌 프로젝트명: {project.projectName}
                         </p>
-                      )}
-                    </SidebarMenuButton>
-                  );
-                })}
+                        <p className="text-sm">
+                          👤 담당자: {project.manager.name}
+                        </p>
+                        <p className="text-sm">
+                          📊 진행률: {project.progress}%
+                        </p>
+                        {!project.isPersonal && (
+                          <p className="text-xs sm:text-sm lg:text-base">
+                            🗓 마감일:{" "}
+                            {convertDateToString(
+                              new Date(project.deadline),
+                              "-"
+                            )}
+                          </p>
+                        )}
+                      </SidebarMenuButton>
+                    );
+                  })
+                )}
               </div>
             </SidebarMenu>
           </SidebarGroupContent>
