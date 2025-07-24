@@ -24,6 +24,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import useProjectMutations from "@/hooks/react-query/useProjectMutations";
+import { CardSkeleton } from "@/components/ui/extended/Skeleton/CardSkeleton";
 
 const SortableItem = ({
   id,
@@ -54,7 +55,6 @@ const SortableItem = ({
 
 const ProjectList = () => {
   const formInstance = useForm();
-
   const { user } = useAuthStore();
   const role = user?.role;
   const { listData } = useProjects();
@@ -105,7 +105,6 @@ const ProjectList = () => {
 
   const renderProjects = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      {/* 새 프로젝트 생성 박스 (편집 중이 아니고 관리자일 때만) */}
       {!isEditing && role === "ADMIN" && (
         <div
           className="h-55 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 mb-3 cursor-pointer bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
@@ -124,7 +123,6 @@ const ProjectList = () => {
         </div>
       )}
 
-      {/* 프로젝트 목록 */}
       {editableProjects.map((project) =>
         isEditing ? (
           <SortableItem
@@ -154,14 +152,14 @@ const ProjectList = () => {
     <FormProvider {...formInstance}>
       <div className="mx-auto max-w-screen-xl p-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-2 mb-4">
-          <h1 className="text-3xl font-extrabold  text-[var(--foreground)]">
+          <h1 className="text-3xl font-extrabold text-[var(--foreground)]">
             프로젝트 목록
           </h1>
           {isEditing ? (
             <div className="space-x-2">
               <Button onClick={onClickConfirmProjectOrder}>확인</Button>
               <Button
-              variant="secondary"
+                variant="secondary"
                 onClick={() => {
                   setEditableProjects(originalProjects);
                   setIsEditing(false);
@@ -189,8 +187,11 @@ const ProjectList = () => {
             </div>
           )}
 
-        {/* 프로젝트 카드 목록 */}
-        {isEditing ? (
+        {!editableProjects.length && !!listData.length ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <CardSkeleton />
+          </div>
+        ) : isEditing ? (
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}

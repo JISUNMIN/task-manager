@@ -7,7 +7,7 @@ import { HiOutlinePaperClip } from "react-icons/hi";
 import { IoMdSend } from "react-icons/io";
 import { DeleteDialog } from "@/components/ui/extended/DeleteDialog";
 import { CommentItem } from "./CommentItem";
-import { ItemSkeleton } from "@/components/ui/extended/ItemSkeleton";
+import { ItemSkeleton } from "@/components/ui/extended/Skeleton/ItemSkeleton";
 import { useCommentStore } from "@/store/useCommentStore"; // ✅ zustand store import
 
 type Props = {
