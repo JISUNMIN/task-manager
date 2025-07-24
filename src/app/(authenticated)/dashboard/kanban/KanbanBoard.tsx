@@ -29,6 +29,8 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { getStatusColors } from "@/lib/utils/colors";
 import { Trash } from "lucide-react";
 import { ActionDropdownMenu } from "@/components/ui/extended/ActionDropdownMenu";
+import { Progress } from "@/components/ui/progress";
+import { convertDateToString } from "@/lib/utils/helpers";
 
 const KanbanBoard = () => {
   const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
@@ -142,7 +144,43 @@ const KanbanBoard = () => {
         <ResizablePanel defaultSize={75}>
           {/* 칸반 보드 영역 */}
           <div className="p-8 mt-10">
-            <h1 className="text-3xl font-semibold mb-6">작업 보드</h1>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6 p-6 rounded-xl bg-[var(---item-bg)] border border-[var(--border)] shadow-sm transition-all">
+              {/* 왼쪽: 프로젝트 명+ 담당자명 */}
+              <div className="flex flex-col gap-2">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  {detailData?.projectName}
+                </h2>
+                <p className="text-sm text-[var(--sub-text)]">
+                  담당자:{" "}
+                  <span className="font-medium">
+                    {detailData?.manager.name}
+                  </span>
+                </p>
+              </div>
+
+              {/* 오른쪽: 마감일 + 진행률 */}
+              <div className="flex flex-col md:items-end gap-2 w-full md:w-auto">
+                {!isPersonal && (
+                  <p className="text-sm text-[var(--text-blur)] mb-1">
+                    마감일:{" "}
+                    {detailData?.deadline
+                      ? convertDateToString(new Date(detailData.deadline), "-")
+                      : "미정"}
+                  </p>
+                )}
+                <div className="w-full md:w-64">
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-[var(--text-blur)] mb-1">
+                      진행률
+                    </p>
+                    <span className="text-sm text-[var(--text-base)]">
+                      {detailData?.progress}%
+                    </span>
+                  </div>
+                  <Progress value={detailData?.progress} />
+                </div>
+              </div>
+            </div>
 
             <DragDropContext onDragEnd={handleDragEnd}>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
@@ -196,16 +234,13 @@ const KanbanBoard = () => {
                                 >
                                   {(provided) => (
                                     <div
-                                      className={`mb-4 border rounded p-4 bg-[var(--box-bg)]`}
+                                      className={`mb-4 border rounded p-4 bg-[var(--item-bg)]`}
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
                                     >
                                       <div className="text-right">
-                                        <ActionDropdownMenu
-                                          items={items}
-                                          isOnLightBackground
-                                        />
+                                        <ActionDropdownMenu items={items} />
                                       </div>
 
                                       <TextareaAutosize
@@ -230,8 +265,8 @@ const KanbanBoard = () => {
                                         onClick={() =>
                                           setTaskInfoPanelrOpen(true)
                                         }
-                                        placeholder="Enter new task"
-                                        className="w-full p-2 border rounded text-[var(--box-text)]"
+                                        placeholder="새 작업 추가"
+                                        className="w-full p-2 border border-[var(--border)] text-[var(--text-base)] rounded"
                                       />
                                     </div>
                                   )}

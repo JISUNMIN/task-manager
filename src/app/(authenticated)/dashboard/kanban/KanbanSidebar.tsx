@@ -108,22 +108,20 @@ export function KanbanSidebar() {
                       )}
                       style={{
                         backgroundColor: isSelected
-                          ? "var(--box-bg-selected)" 
-                          : "var(--box-bg)", 
+                          ? "var(--box-bg-selected)"
+                          : "var(--item-bg)",
                       }}
                     >
-                      <p className="font-medium text-gray-800">
+                      <p className="font-medium">
                         📌 프로젝트명: {project.projectName}
                       </p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm">
                         👤 담당자: {project.manager.name}
                       </p>
-                      <p className="text-sm text-gray-600">
-                        📊 진행률: {project.progress}%
-                      </p>
+                      <p className="text-sm">📊 진행률: {project.progress}%</p>
                       {!project.isPersonal && (
-                        <p className="text-gray-600 text-xs sm:text-sm lg:text-base">
-                          🗓 마감일:
+                        <p className=" text-xs sm:text-sm lg:text-base">
+                          🗓 마감일:{" "}
                           {convertDateToString(new Date(project.deadline), "-")}
                         </p>
                       )}

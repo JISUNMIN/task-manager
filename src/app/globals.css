@@ -31,7 +31,7 @@ body {
   --color-bg-primary: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --item-bg: oklch(1 0 0);
-  --box-bg: white;
+  --box-bg: oklch(1 0 0);
   --box-bg-selected: #e5e7eb;
   --box-text: oklch(0.145 0 0);
   --text-base: #4b5563;
@@ -78,8 +78,8 @@ body {
   --color-bg-primary: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --item-bg: #374151;
-  --box-bg: oklch(0.90 0 0);
-  --box-bg-selected: oklch(0.75 0 0);
+  --box-bg: #2d2d2d;
+  --box-bg-selected: #4b5563;
   --box-text: oklch(0.2 0 0);
   --text-base: #d1d5db;
   --text-blur: #9ca3af;
