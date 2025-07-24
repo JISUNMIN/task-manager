@@ -202,7 +202,10 @@ const KanbanBoard = () => {
                                       {...provided.dragHandleProps}
                                     >
                                       <div className="text-right">
-                                        <ActionDropdownMenu items={items} />
+                                        <ActionDropdownMenu
+                                          items={items}
+                                          isOnLightBackground
+                                        />
                                       </div>
 
                                       <TextareaAutosize

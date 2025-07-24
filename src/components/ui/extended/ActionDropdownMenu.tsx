@@ -24,6 +24,7 @@ import { MoreVertical, Tags } from "lucide-react";
 import { ProjectLabel } from "@prisma/client";
 import { ClientProject } from "@/hooks/react-query/useProjects";
 import { useOptionalFormContext } from "@/hooks/useOptionalFormContext";
+import { cn } from "@/lib/utils";
 
 interface DropdownActionItem {
   label?: string;
@@ -39,6 +40,7 @@ interface ActionDropdownMenuProps {
   labels?: readonly string[];
   handleSelectedLabel?: (label: ProjectLabel) => void;
   project?: ClientProject;
+  isOnLightBackground?: boolean;
 }
 
 export function ActionDropdownMenu({
@@ -47,6 +49,7 @@ export function ActionDropdownMenu({
   labels,
   handleSelectedLabel,
   project,
+  isOnLightBackground,
 }: ActionDropdownMenuProps) {
   const formContext = useOptionalFormContext();
   const setValue = formContext?.setValue;
@@ -69,9 +72,14 @@ export function ActionDropdownMenu({
         <Button
           variant="ghost"
           size="sm"
-          className="hover:bg-gray-200 dark:hover:bg-gray-600"
+          className={cn(
+            "hover:bg-gray-200 dark:hover:bg-gray-600",
+            isOnLightBackground && "dark:hover:bg-gray-400"
+          )}
         >
-          <MoreVertical />
+          <MoreVertical
+            className={isOnLightBackground ? "text-[var(--box-text)]" : ""}
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
