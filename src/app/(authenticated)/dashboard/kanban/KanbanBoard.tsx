@@ -97,7 +97,7 @@ const KanbanBoard = () => {
     columnIndex: number,
     orderType: "top" | "bottom" = "bottom"
   ) => {
-    addTask(columnIndex);
+    addTask(columnIndex, orderType);
     createTaskMutate({
       title: "",
       desc: "",
@@ -134,19 +134,19 @@ const KanbanBoard = () => {
     }
   }, [focusedInputKey]);
 
-useEffect(() => {
-  if (detailData?.tasks) {
-    const sortedTasks = detailData.tasks
-      .map((task) => ({ ...task, status: task.status as Status }))
-      .sort((a, b) => {
-        const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
-        const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
-        return orderA - orderB;
-      });
+  useEffect(() => {
+    if (detailData?.tasks) {
+      const sortedTasks = detailData.tasks
+        .map((task) => ({ ...task, status: task.status as Status }))
+        .sort((a, b) => {
+          const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
+          const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
+          return orderA - orderB;
+        });
 
-    initializeColumns(sortedTasks);
-  }
-}, [detailData, initializeColumns]);
+      initializeColumns(sortedTasks);
+    }
+  }, [detailData, initializeColumns]);
   return (
     <SidebarProvider className={`bg-[var(--bg-fourth)]`}>
       <KanbanSidebar />

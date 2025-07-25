@@ -17,6 +17,7 @@ export async function GET(
           include: {
             assignees: true,
           },
+          orderBy: { order: "asc" },
         },
       },
       where: { id: Number(projectId) },

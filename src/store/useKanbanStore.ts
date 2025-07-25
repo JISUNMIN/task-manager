@@ -38,9 +38,10 @@ export const useKanbanStore = create<{
       desc: string;
       status: Status;
       assignees?: number[];
+      order: number;
     }[]
   ) => void;
-  addTask: (index: number) => void;
+  addTask: (index: number, orderType?: "top" | "bottom") => void;
   updateTask: (
     columnName: Status,
     index: number,
@@ -80,24 +81,32 @@ export const useKanbanStore = create<{
                 title: task.title,
                 desc: task.desc,
                 assignees: task.assignees || [],
+                order: task.order,
               });
             }
           });
 
           set({ columns: newColumns });
         },
-        addTask: (index: number) =>
+        addTask: (index: number, orderType = "bottom") =>
           set((state) => {
             const columnKeys = Object.keys(state.columns) as Status[];
             const columnKey = columnKeys[index];
             if (!columnKey) return state;
+
+            const newTask = { title: "", desc: "", assignees: [] };
+
+            // orderType에 따라 배열 앞/뒤에 추가
+            let updatedColumn;
+            if (orderType === "top") {
+              updatedColumn = [newTask, ...state.columns[columnKey]];
+            } else {
+              updatedColumn = [...state.columns[columnKey], newTask];
+            }
             return {
               columns: {
                 ...state.columns,
-                [columnKey]: [
-                  ...state.columns[columnKey],
-                  { title: "", desc: "", assignees: [] },
-                ],
+                [columnKey]: updatedColumn,
               },
             };
           }),
