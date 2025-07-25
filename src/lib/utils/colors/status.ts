@@ -7,7 +7,8 @@ export const getStatusColors = (status: Status, isDark: boolean) => {
   switch (status) {
     case "To Do":
       return {
-        statusBgColor: isDark ? "bg-slate-800" : "bg-gray-400",
+        //bg-slate-700
+        statusBgColor: isDark ? "bg-blue-900" : "bg-gray-400",
         dotColor: isDark ? "bg-slate-400" : "bg-gray-500",
         kanbanBoardBg: isDark ? darkKanbanBg : "bg-gray-100",
       };

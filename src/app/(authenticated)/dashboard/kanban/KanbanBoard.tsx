@@ -147,7 +147,7 @@ const KanbanBoard = () => {
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={75}>
           {/* 칸반 보드 영역 */}
-          <div className="p-8 mt-10">
+          <div className="p-8">
             <div className="bg-[var(--box-bg)] p-4 rounded-xl mb-6  border border-[var(--border)] shadow-sm transition-all">
               {/* 프로젝트 제목 */}
               <div className="mb-2">
