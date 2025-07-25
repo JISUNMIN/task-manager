@@ -92,7 +92,11 @@ const KanbanBoard = () => {
     setFocusedInputKey(`${columnKey}-${itemIndex}`);
   };
 
-  const handleCreateTask = (columnKey: Status, columnIndex: number) => {
+  const handleCreateTask = (
+    columnKey: Status,
+    columnIndex: number,
+    orderType: "top" | "bottom" = "bottom"
+  ) => {
     addTask(columnIndex);
     createTaskMutate({
       title: "",
@@ -101,6 +105,7 @@ const KanbanBoard = () => {
       projectId: Number(projectId),
       userId: user?.id ?? 1,
       managerId: user?.id ?? 1,
+      orderType,
     });
   };
 
@@ -129,17 +134,19 @@ const KanbanBoard = () => {
     }
   }, [focusedInputKey]);
 
-  useEffect(() => {
-    if (detailData?.tasks) {
-      initializeColumns(
-        detailData.tasks.map((task) => ({
-          ...task,
-          status: task.status as Status,
-        }))
-      );
-    }
-  }, [detailData, initializeColumns]);
+useEffect(() => {
+  if (detailData?.tasks) {
+    const sortedTasks = detailData.tasks
+      .map((task) => ({ ...task, status: task.status as Status }))
+      .sort((a, b) => {
+        const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
+        const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
+        return orderA - orderB;
+      });
 
+    initializeColumns(sortedTasks);
+  }
+}, [detailData, initializeColumns]);
   return (
     <SidebarProvider className={`bg-[var(--bg-fourth)]`}>
       <KanbanSidebar />
@@ -221,7 +228,7 @@ const KanbanBoard = () => {
                             variant="outline"
                             size="icon"
                             onClick={() =>
-                              handleCreateTask(status, columnIndex)
+                              handleCreateTask(status, columnIndex, "top")
                             }
                             className="w-8 h-8 shrink-0 bg-[var(--item-bg)] hover:bg-[var(--hover-bg)] text-[var(--text-base)] border-[var(--border)] hover:border-[var(--border)] rounded"
                           >
@@ -301,7 +308,11 @@ const KanbanBoard = () => {
                               {/* 새 작업 추가 버튼 */}
                               <button
                                 onClick={() =>
-                                  handleCreateTask(status, columnIndex)
+                                  handleCreateTask(
+                                    status,
+                                    columnIndex,
+                                    "bottom"
+                                  )
                                 }
                                 className="bg-[var(--btn-bg)] border-2 border-dashed border-[var(--btn-border)] hover:bg-[var(--btn-hover-bg)] hover:border-[var(--btn-hover-border)] hover:text-[var(--foreground)] rounded-lg p-3 text-center text-[var(--text-blur)] cursor-pointer transition-all duration-200  mt-3"
                               >

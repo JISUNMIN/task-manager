@@ -64,6 +64,8 @@ model Task {
   project  Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   comments Comment[]
 
+  order Int? @default(0)
+
   // 할당된 담당자들
   assignees User[] @relation("TaskAssignees")
 }

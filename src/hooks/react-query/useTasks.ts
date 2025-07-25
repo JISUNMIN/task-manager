@@ -12,6 +12,7 @@ type TaskCreateParams = {
   userId?: number;
   managerId?: number;
   assignees?: number[];
+  orderType?: "top" | "bottom" ;
 };
 
 const TASK_PROJECT_API_PATH = "/tasks";

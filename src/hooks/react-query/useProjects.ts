@@ -1,6 +1,5 @@
-import { showToast, ToastMode } from "@/lib/toast";
 import { User, Task, Project } from "@prisma/client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
 export type ClientProject = Omit<Project, "deadline" | "managerId"> & {
@@ -10,21 +9,12 @@ export type ClientProject = Omit<Project, "deadline" | "managerId"> & {
   tasks?: Task[];
 };
 
-type ProjectCreateParams = {
-  projectName: string;
-  deadline: string;
-  managerId: number;
-  progress?: number;
-};
-
 const PROJECT_API_PATH = "/projects";
 
 const useProjects = (targetId?: string | number) => {
-  const queryClient = useQueryClient();
-
   const {
     data: listData,
-   isLoading: isListLoading,
+    isLoading: isListLoading,
     isFetching: isListFetching,
   } = useQuery<ClientProject[], Error>({
     queryKey: ["projects", "list"],
