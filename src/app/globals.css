@@ -82,7 +82,7 @@ body {
   --color-bg-primary: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --item-bg: #374151;
-  --box-bg: #2d2d2d;
+  --box-bg: #1f2a36;
   --box-bg-selected: #4b5563;
   --box-text: oklch(0.2 0 0);
   --text-base: #d1d5db;
@@ -90,10 +90,10 @@ body {
   --hover-bg: oklch(46.585% 0.00256 16.113);
   --card: #111827;
   --card-foreground: oklch(0.985 0 0);
-  --btn-bg: #404040;
+  --btn-bg: #2c3e50;
   --btn-border: #9ca3af;
-  --btn-hover-bg: #4b5563;
-  --btn-hover-border: #9ca3af;
+  --btn-hover-bg: 	#3a5163;
+ --btn-hover-border: #9ca3af;
   --popover: oklch(0.145 0 0);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.985 0 0);

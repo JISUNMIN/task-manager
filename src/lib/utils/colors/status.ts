@@ -2,7 +2,7 @@
 import { Status } from "@/store/useKanbanStore";
 
 export const getStatusColors = (status: Status, isDark: boolean) => {
-  const darkKanbanBg = "bg-[#2d2d2d]";
+  const darkKanbanBg = "bg-[var(--box-bg)]";
 
   switch (status) {
     case "To Do":
