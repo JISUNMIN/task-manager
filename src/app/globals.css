@@ -215,6 +215,11 @@ body {
     background-color: var(--input);
   }
 
+  .inputDivStyle-noFocus {
+    @apply flex items-center rounded-md px-3 py-2 text-sm text-gray-700 dark:text-gray-300 transition-colors duration-300 border border-gray-300 dark:border-gray-600;
+    background-color: var(--input);
+  }
+
   .cardStyle {
     @apply shadow-2xl rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-300;
     background-color: var(--item-bg);

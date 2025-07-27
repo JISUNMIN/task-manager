@@ -61,10 +61,12 @@ const NewProjectCard = ({ onCancel, onCreated }: Props) => {
     >
       <div className="mb-3 flex flex-col gap-1">
         <label className="text-sm font-medium">프로젝트명</label>
-        <input
-          className="w-full border p-2 rounded-md bg-[var(--input)]"
-          {...register("projectName", { required: true })}
-        />
+        <div className="inputDivStyle-noFocus">
+          <input
+            className="bg-[var(--input)]"
+            {...register("projectName", { required: true })}
+          />
+        </div>
       </div>
 
       <div className="mb-3 ">
