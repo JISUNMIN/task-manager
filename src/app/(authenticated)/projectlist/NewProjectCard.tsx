@@ -9,21 +9,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import useUser from "@/hooks/react-query/useUser";
 import { useUserStore } from "@/store/useUserStore";
 import { DatePicker } from "@/components/form/DatePicker";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import useProjectMutations from "@/hooks/react-query/useProjectMutations";
+import { Loader2Icon } from "lucide-react";
 
 type Props = {
   onCancel: () => void;
   onCreated: () => void;
-};
-
-type User = {
-  id: number;
-  name: string;
 };
 
 type FormValues = {
@@ -36,7 +31,7 @@ const DEFAULT_DATE = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
 const NewProjectCard = ({ onCancel, onCreated }: Props) => {
   const { users } = useUserStore();
-  const { isListPending } = useProjects();
+  const { isListLoading } = useProjects();
   const { createProjectMutate, isCreatePending } = useProjectMutations();
 
   const {
@@ -62,17 +57,17 @@ const NewProjectCard = ({ onCancel, onCreated }: Props) => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="border rounded-lg p-6 mb-3 bg-white shadow-md"
+      className="border rounded-lg p-6 mb-3 shadow-md bg-[var(--item-bg)] border-[var(--sidebar-border)]"
     >
-      <div className="mb-3">
-        <label className="block text-sm font-medium">프로젝트명</label>
+      <div className="mb-3 flex flex-col gap-1">
+        <label className="text-sm font-medium">프로젝트명</label>
         <input
-          className="w-full border p-2 rounded"
+          className="w-full border p-2 rounded-md bg-[var(--input)]"
           {...register("projectName", { required: true })}
         />
       </div>
 
-      <div className="mb-3">
+      <div className="mb-3 ">
         <Controller
           control={control}
           name="deadline"
@@ -87,11 +82,12 @@ const NewProjectCard = ({ onCancel, onCreated }: Props) => {
         />
       </div>
 
-      <div className="mb-3">
-        <label className="block text-sm font-medium">담당자</label>
+      <div className="mb-3 flex flex-col gap-1">
+        <label className="text-sm font-medium">담당자</label>
         <Controller
           name="managerId"
           control={control}
+          rules={{ required: "담당자를 선택해주세요" }}
           render={({ field }) => (
             <Select onValueChange={field.onChange}>
               <SelectTrigger className="w-full">
@@ -110,18 +106,22 @@ const NewProjectCard = ({ onCancel, onCreated }: Props) => {
       </div>
 
       <div className="flex justify-end gap-2">
-        <Button type="button" onClick={onCancel}>
+        <Button type="button" variant="secondary" onClick={onCancel}>
           취소
         </Button>
         <Button
           type="submit"
-          className={cn(
-            "bg-blue-600 text-white hover:bg-blue-700",
-            isCreatePending && "btn-fill-loading"
-          )}
-          disabled={isListPending || isCreatePending || !isValid}
+          className={cn(isCreatePending ? "cursor-not-allowed" : "")}
+          disabled={isListLoading || isCreatePending || !isValid}
         >
-          {isCreatePending ? "생성 중..." : "확인"}
+          {isCreatePending ? (
+            <>
+              <Loader2Icon className="animate-spin w-4 h-4" />
+              <span>생성 중...</span>
+            </>
+          ) : (
+            "확인"
+          )}
         </Button>
       </div>
     </form>
