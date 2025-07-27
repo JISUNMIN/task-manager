@@ -108,23 +108,17 @@ export function ActionDropdownMenu({
 
           {showLabelMenu && (
             <>
-              <DropdownMenuSeparator className="dark:border-gray-700" />
+              <DropdownMenuSeparator />
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="dark:text-gray-200 dark:hover:bg-gray-700 flex items-center">
+                <DropdownMenuSubTrigger className="dark:hover:bg-gray-700 dark:text-gray-200">
                   <Tags />
                   <span className="ml-2">라벨 적용</span>
                 </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent className="p-0 bg-white dark:bg-gray-800 dark:text-gray-200">
+                <DropdownMenuSubContent>
                   <Command>
-                    <CommandInput
-                      placeholder="라벨 검색"
-                      autoFocus={true}
-                      className="bg-white dark:bg-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
-                    />
-                    <CommandList className="bg-white dark:bg-gray-800 dark:text-gray-200">
-                      <CommandEmpty className="dark:text-gray-400">
-                        라벨을 찾을 수 없습니다.
-                      </CommandEmpty>
+                    <CommandInput placeholder="라벨 검색" autoFocus={true} />
+                    <CommandList>
+                      <CommandEmpty>라벨을 찾을 수 없습니다.</CommandEmpty>
                       <CommandGroup>
                         {labels.map((label) => (
                           <CommandItem
@@ -134,7 +128,6 @@ export function ActionDropdownMenu({
                               handleSelectedLabel(value as ProjectLabel);
                               setOpen(false);
                             }}
-                            className="dark:hover:bg-gray-700 dark:text-gray-200"
                           >
                             {label}
                           </CommandItem>
