@@ -48,7 +48,7 @@ const KanbanBoard = () => {
     createTaskMutate,
     deleteTaskMutate,
     updateTaskMutate,
-    updateTaskStatus,
+    moveTaskMutate,
   } = useTasks();
   const isPersonal = detailData?.isPersonal;
   const { user } = useAuthStore();
@@ -83,11 +83,19 @@ const KanbanBoard = () => {
     const destinationStatus = destination.droppableId as Status;
     const task = columns[sourceStatus][source.index];
 
+    // 로컬 상태 먼저 반영
     moveTask(sourceStatus, destinationStatus, source.index, destination.index);
-    updateTaskStatus({ id: task.id, status: destinationStatus });
+
+    // 서버 동기화 (moveTask API 호출)
+    moveTaskMutate({
+      id: task.id,
+      fromColumn: sourceStatus,
+      toColumn: destinationStatus,
+      toIndex: destination.index,
+    });
+
     setFocusedInputKey(`${destinationStatus}-${destination.index}`);
   };
-
   const handleFocusedInputKey = (columnKey: string, itemIndex: number) => {
     setFocusedInputKey(`${columnKey}-${itemIndex}`);
   };

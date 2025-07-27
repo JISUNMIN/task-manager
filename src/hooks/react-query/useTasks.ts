@@ -12,7 +12,14 @@ type TaskCreateParams = {
   userId?: number;
   managerId?: number;
   assignees?: number[];
-  orderType?: "top" | "bottom" ;
+  orderType?: "top" | "bottom";
+};
+
+type MoveTaskParams = {
+  id: number;
+  fromColumn: Status;
+  toColumn: Status;
+  toIndex: number;
 };
 
 const TASK_PROJECT_API_PATH = "/tasks";
@@ -55,22 +62,20 @@ const useTasks = () => {
     onError: () => {},
   });
 
-  // task status update
-  const { mutate: updateTaskStatus } = useMutation<
-    void,
-    Error,
-    { id: number; status: Status }
-  >({
-    mutationFn: async (data) => {
-      const { id, status } = data;
-      await axios.patch(`${TASK_PROJECT_API_PATH}/${id}/status`, {
-        status,
+  const { mutate: moveTaskMutate } = useMutation<void, Error, MoveTaskParams>({
+    mutationFn: async ({ id, fromColumn, toColumn, toIndex }) => {
+      await axios.patch(`${TASK_PROJECT_API_PATH}/${id}/moveTask`, {
+        fromColumn,
+        toColumn,
+        toIndex,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
     },
-    onError: () => {},
+    onError: (error) => {
+      console.error("이동 실패:", error);
+    },
   });
 
   // task delete
@@ -90,7 +95,7 @@ const useTasks = () => {
   return {
     createTaskMutate,
     updateTaskMutate,
-    updateTaskStatus,
+    moveTaskMutate,
     deleteTaskMutate,
   };
 };
