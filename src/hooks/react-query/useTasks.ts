@@ -1,6 +1,7 @@
-import { Status } from "@/store/useKanbanStore";
+import { Status, useKanbanStore } from "@/store/useKanbanStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
+import { Task } from "@prisma/client";
 
 type TaskCreateParams = {
   id?: number;
@@ -26,38 +27,43 @@ const TASK_PROJECT_API_PATH = "/tasks";
 
 const useTasks = () => {
   const queryClient = useQueryClient();
+  const { updateTask } = useKanbanStore();
 
   // task create
   const { mutate: createTaskMutate } = useMutation<
-    void,
+    Task,
     Error,
     TaskCreateParams
   >({
     mutationFn: async (data) => {
-      await axios.post(TASK_PROJECT_API_PATH, data);
+      const res = await axios.post(TASK_PROJECT_API_PATH, data);
+      return res.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
-    },
+    onSuccess: () => {},
     onError: () => {},
   });
 
   // task update
   const { mutate: updateTaskMutate } = useMutation<
-    void,
+    Task,
     Error,
     TaskCreateParams
   >({
     mutationFn: async (data) => {
       const { id, title, desc, assignees } = data;
-      await axios.patch(`${TASK_PROJECT_API_PATH}/${id}`, {
-        title,
-        desc,
-        assignees,
-      });
+
+      const response = await axios.patch<Task>(
+        `${TASK_PROJECT_API_PATH}/${id}`,
+        {
+          title,
+          desc,
+          assignees,
+        }
+      );
+      return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
+    onSuccess: (updatedTask) => {
+      updateTask(updatedTask.status as Status, updatedTask.id, updatedTask);
     },
     onError: () => {},
   });

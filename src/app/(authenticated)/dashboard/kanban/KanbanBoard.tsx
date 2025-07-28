@@ -44,6 +44,9 @@ const KanbanBoard = () => {
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId") ?? undefined;
   const { detailData, isDetailLoading } = useProjects(projectId);
+  const debouncedUpdateMap = useRef<Record<number, (title: string) => void>>(
+    {}
+  );
   const {
     createTaskMutate,
     deleteTaskMutate,
@@ -60,15 +63,17 @@ const KanbanBoard = () => {
     updateTask,
     moveTask,
     removeColumn,
+    replaceTempTask,
   } = useKanbanStore();
 
-  const debouncedUpdate = useMemo(
-    () =>
-      debounce((taskId: number, newTitle: string) => {
-        updateTaskMutate({ id: taskId, title: newTitle });
-      }, 500),
-    [updateTaskMutate]
-  );
+  const debouncedUpdate = (taskId: number, newTitle: string) => {
+    if (!debouncedUpdateMap.current[taskId]) {
+      debouncedUpdateMap.current[taskId] = debounce((title: string) => {
+        updateTaskMutate({ id: taskId, title: title });
+      }, 500);
+    }
+    debouncedUpdateMap.current[taskId](newTitle);
+  };
 
   const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result;
@@ -105,16 +110,28 @@ const KanbanBoard = () => {
     columnIndex: number,
     orderType: "top" | "bottom" = "bottom"
   ) => {
-    addTask(columnIndex, orderType);
-    createTaskMutate({
-      title: "",
-      desc: "",
-      status: columnKey,
-      projectId: Number(projectId),
-      userId: user?.id ?? 1,
-      managerId: user?.id ?? 1,
-      orderType,
-    });
+    const tempId = `temp-${Date.now()}`;
+
+    // tempId를 넣어서 임시 Task를 추가
+    addTask(columnIndex, orderType, tempId);
+
+    createTaskMutate(
+      {
+        title: "",
+        desc: "",
+        status: columnKey,
+        projectId: Number(projectId),
+        userId: user?.id ?? 1,
+        managerId: user?.id ?? 1,
+        orderType,
+      },
+      {
+        onSuccess: (realTask) => {
+          // 성공하면 임시 task를 실제 task로 교체
+          replaceTempTask(columnKey, tempId, realTask);
+        },
+      }
+    );
   };
 
   const handleDeleteTask = (columnKey: Status, itemIndex: number) => {
@@ -131,8 +148,10 @@ const KanbanBoard = () => {
     const task = columns[columnKey][itemIndex];
     // 로컬 상태
     updateTask(columnKey, itemIndex, { title: value });
-    // API 요청 debounce 처리
-    debouncedUpdate(task.id, value);
+
+    if (typeof task.id === "number") {
+      debouncedUpdate(task.id, value);
+    }
   };
 
   useEffect(() => {
@@ -145,12 +164,12 @@ const KanbanBoard = () => {
   useEffect(() => {
     if (detailData?.tasks) {
       const sortedTasks = detailData.tasks
-        .map((task) => ({ ...task, status: task.status as Status }))
-        .sort((a, b) => {
-          const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
-          const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
-          return orderA - orderB;
-        });
+        .map((task) => ({
+          ...task,
+          status: task.status as Status,
+          order: task.order ?? Number.MAX_SAFE_INTEGER,
+        }))
+        .sort((a, b) => a.order - b.order);
 
       initializeColumns(sortedTasks);
     }
@@ -252,64 +271,66 @@ const KanbanBoard = () => {
                               ref={provided.innerRef}
                               {...provided.droppableProps}
                             >
-                              {columns[status].map((task, itemIndex) => {
-                                const items = [
-                                  {
-                                    label: "삭제",
-                                    icon: <Trash />,
-                                    variant: "destructive" as const,
-                                    onSelect: () =>
-                                      handleDeleteTask(status, itemIndex),
-                                  },
-                                ];
+                              {Array.isArray(columns[status]) &&
+                                columns[status].map((task, itemIndex) => {
+                                  if (!task) return null;
+                                  const items = [
+                                    {
+                                      label: "삭제",
+                                      icon: <Trash />,
+                                      variant: "destructive" as const,
+                                      onSelect: () =>
+                                        handleDeleteTask(status, itemIndex),
+                                    },
+                                  ];
 
-                                return (
-                                  <Draggable
-                                    key={`${columnKey}-${itemIndex}`}
-                                    draggableId={`${columnKey}-${itemIndex}`}
-                                    index={itemIndex}
-                                  >
-                                    {(provided) => (
-                                      <div
-                                        className="bg-[var(--box-bg)] border  rounded-lg p-3 cursor-pointer"
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                      >
-                                        <div className="text-right">
-                                          <ActionDropdownMenu items={items} />
+                                  return (
+                                    <Draggable
+                                      key={`${columnKey}-${itemIndex}`}
+                                      draggableId={`${columnKey}-${itemIndex}`}
+                                      index={itemIndex}
+                                    >
+                                      {(provided) => (
+                                        <div
+                                          className="bg-[var(--box-bg)] border  rounded-lg p-3 cursor-pointer"
+                                          ref={provided.innerRef}
+                                          {...provided.draggableProps}
+                                          {...provided.dragHandleProps}
+                                        >
+                                          <div className="text-right">
+                                            <ActionDropdownMenu items={items} />
+                                          </div>
+
+                                          <TextareaAutosize
+                                            ref={(el) => {
+                                              inputRefs.current[
+                                                `${columnKey}-${itemIndex}`
+                                              ] = el;
+                                            }}
+                                            value={task.title}
+                                            onChange={(e) =>
+                                              handleUpdateTask(
+                                                status,
+                                                e.target.value,
+                                                itemIndex
+                                              )
+                                            }
+                                            onFocus={() =>
+                                              setFocusedInputKey(
+                                                `${columnKey}-${itemIndex}`
+                                              )
+                                            }
+                                            onClick={() =>
+                                              setTaskInfoPanelrOpen(true)
+                                            }
+                                            placeholder="제목을 입력하세요"
+                                            className="w-full p-2 border text-[var(--text-base)] rounded dark:focus:border-gray-300 dark:focus:outline-none"
+                                          />
                                         </div>
-
-                                        <TextareaAutosize
-                                          ref={(el) => {
-                                            inputRefs.current[
-                                              `${columnKey}-${itemIndex}`
-                                            ] = el;
-                                          }}
-                                          value={task.title}
-                                          onChange={(e) =>
-                                            handleUpdateTask(
-                                              status,
-                                              e.target.value,
-                                              itemIndex
-                                            )
-                                          }
-                                          onFocus={() =>
-                                            setFocusedInputKey(
-                                              `${columnKey}-${itemIndex}`
-                                            )
-                                          }
-                                          onClick={() =>
-                                            setTaskInfoPanelrOpen(true)
-                                          }
-                                          placeholder="제목을 입력하세요"
-                                          className="w-full p-2 border text-[var(--text-base)] rounded dark:focus:border-gray-300 dark:focus:outline-none"
-                                        />
-                                      </div>
-                                    )}
-                                  </Draggable>
-                                );
-                              })}
+                                      )}
+                                    </Draggable>
+                                  );
+                                })}
 
                               {provided.placeholder}
 

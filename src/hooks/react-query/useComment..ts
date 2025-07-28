@@ -44,7 +44,7 @@ const useComment = (targetId?: string | number) => {
       });
       return res.data;
     },
-    enabled: !!targetId,
+    enabled: !!targetId && typeof targetId === "number",
   });
 
   // create
