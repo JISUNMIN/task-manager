@@ -18,7 +18,6 @@ type TaskCreateParams = {
 
 type MoveTaskParams = {
   id: number;
-  fromColumn: Status;
   toColumn: Status;
   toIndex: number;
 };
@@ -69,9 +68,8 @@ const useTasks = () => {
   });
 
   const { mutate: moveTaskMutate } = useMutation<void, Error, MoveTaskParams>({
-    mutationFn: async ({ id, fromColumn, toColumn, toIndex }) => {
+    mutationFn: async ({ id, toColumn, toIndex }) => {
       await axios.patch(`${TASK_PROJECT_API_PATH}/${id}/moveTask`, {
-        fromColumn,
         toColumn,
         toIndex,
       });

@@ -1,40 +1,32 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { FaPlus, FaTrash } from "react-icons/fa";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { KanbanSidebar } from "./KanbanSidebar";
+import { KanbanSidebar } from "../sidebar/KanbanSidebar";
 import { Status, useKanbanStore } from "@/store/useKanbanStore";
-import KanbanColumnBadge from "./KanbanColumnBadge";
-import TaskInfoPanel from "./TaskInfoPanel";
-import { Button } from "@/components/ui/button";
+import TaskInfoPanel from "../panel/TaskInfoPanel";
 import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import TextareaAutosize from "react-textarea-autosize";
-import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  DropResult,
-} from "@hello-pangea/dnd";
+import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
 import useProjects from "@/hooks/react-query/useProjects";
 import { useSearchParams } from "next/navigation";
 import { debounce } from "lodash";
 import useTasks from "@/hooks/react-query/useTasks";
 import { useAuthStore } from "@/store/useAuthStore";
 import { getStatusColors } from "@/lib/utils/colors";
-import { Trash } from "lucide-react";
-import { ActionDropdownMenu } from "@/components/ui/extended/ActionDropdownMenu";
-import { Progress } from "@/components/ui/progress";
-import { convertDateToString } from "@/lib/utils/helpers";
 import { CardSkeleton } from "@/components/ui/extended/Skeleton/CardSkeleton";
 import { useThemeStore } from "@/store/useThemeStore";
+import TaskItem from "./TaskItem";
+import ProjectInfoCard from "./ProjectInfoCard";
+import ColumnHeader from "./KanbanColumnHeader";
 
 const KanbanBoard = () => {
+  const sidebar = useMemo(() => <KanbanSidebar />, []);
+  const trigger = useMemo(() => <SidebarTrigger />, []);
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
   const [isTaskInfoPanelOpen, setTaskInfoPanelrOpen] = useState(false);
@@ -94,7 +86,6 @@ const KanbanBoard = () => {
     // 서버 동기화 (moveTask API 호출)
     moveTaskMutate({
       id: task.id,
-      fromColumn: sourceStatus,
       toColumn: destinationStatus,
       toIndex: destination.index,
     });
@@ -176,55 +167,19 @@ const KanbanBoard = () => {
   }, [detailData, initializeColumns]);
   return (
     <SidebarProvider className={`bg-[var(--bg-fourth)]`}>
-      <KanbanSidebar />
-      <SidebarTrigger />
+      {sidebar}
+      {trigger}
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={75}>
           {/* 칸반 보드 영역 */}
           <div className="p-8">
-            <div className="bg-[var(--box-bg)] p-4 rounded-xl mb-6  border border-[var(--border)] shadow-sm transition-all">
-              {/* 프로젝트 제목 */}
-              <div className="mb-2">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
-                  {detailData?.projectName}
-                </h2>
-              </div>
-
-              <div className="w-full space-y-2">
-                {/* 담당자 + 마감일 */}
-                <div className="text-sm text-[var(--sub-text)] flex flex-wrap items-center gap-x-1">
-                  <span>
-                    담당자:{" "}
-                    <span className="font-medium">
-                      {detailData?.manager.name}
-                    </span>
-                  </span>
-                  {!isPersonal && detailData?.deadline && (
-                    <>
-                      <span className="mx-1">|</span>
-                      <span>
-                        마감일:{" "}
-                        {convertDateToString(
-                          new Date(detailData.deadline),
-                          "-"
-                        )}
-                      </span>
-                    </>
-                  )}
-                </div>
-
-                {/* 진행률*/}
-                <div className="w-full">
-                  <div className="flex justify-between items-center mb-1">
-                    <p className="text-sm text-[var(--text-blur)]">진행률</p>
-                    <span className="text-sm text-[var(--text-base)] font-medium">
-                      {detailData?.progress ?? 0}%
-                    </span>
-                  </div>
-                  <Progress value={detailData?.progress} />
-                </div>
-              </div>
-            </div>
+            <ProjectInfoCard
+              projectName={detailData?.projectName}
+              managerName={detailData?.manager.name}
+              deadline={detailData?.deadline}
+              progress={detailData?.progress}
+              isPersonal={isPersonal}
+            />
 
             {isDetailLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
@@ -246,22 +201,14 @@ const KanbanBoard = () => {
                         key={columnKey}
                         className={`flex flex-col ${kanbanBoardBg} border border-[var(--border)] rounded-xl p-4`}
                       >
-                        <div className="flex justify-between items-center mb-4">
-                          <KanbanColumnBadge
-                            columnKey={status}
-                            isDark={isDark}
-                          />
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() =>
-                              handleCreateTask(status, columnIndex, "top")
-                            }
-                            className="w-8 h-8 shrink-0 bg-[var(--item-bg)] hover:bg-[var(--hover-bg)] text-[var(--text-base)] border-[var(--border)] hover:border-[var(--border)] rounded"
-                          >
-                            <FaPlus />
-                          </Button>
-                        </div>
+                        <ColumnHeader
+                          status={status}
+                          isDark={isDark}
+                          columnIndex={columnIndex}
+                          onCreateTask={(status, columnIndex) =>
+                            handleCreateTask(status, columnIndex, "top")
+                          }
+                        />
 
                         {/* 각 칸반 열 */}
                         <Droppable droppableId={columnKey}>
@@ -274,61 +221,20 @@ const KanbanBoard = () => {
                               {Array.isArray(columns[status]) &&
                                 columns[status].map((task, itemIndex) => {
                                   if (!task) return null;
-                                  const items = [
-                                    {
-                                      label: "삭제",
-                                      icon: <Trash />,
-                                      variant: "destructive" as const,
-                                      onSelect: () =>
-                                        handleDeleteTask(status, itemIndex),
-                                    },
-                                  ];
-
                                   return (
-                                    <Draggable
+                                    <TaskItem
                                       key={`${columnKey}-${itemIndex}`}
-                                      draggableId={`${columnKey}-${itemIndex}`}
-                                      index={itemIndex}
-                                    >
-                                      {(provided) => (
-                                        <div
-                                          className="bg-[var(--box-bg)] border  rounded-lg p-3 cursor-pointer"
-                                          ref={provided.innerRef}
-                                          {...provided.draggableProps}
-                                          {...provided.dragHandleProps}
-                                        >
-                                          <div className="text-right">
-                                            <ActionDropdownMenu items={items} />
-                                          </div>
-
-                                          <TextareaAutosize
-                                            ref={(el) => {
-                                              inputRefs.current[
-                                                `${columnKey}-${itemIndex}`
-                                              ] = el;
-                                            }}
-                                            value={task.title}
-                                            onChange={(e) =>
-                                              handleUpdateTask(
-                                                status,
-                                                e.target.value,
-                                                itemIndex
-                                              )
-                                            }
-                                            onFocus={() =>
-                                              setFocusedInputKey(
-                                                `${columnKey}-${itemIndex}`
-                                              )
-                                            }
-                                            onClick={() =>
-                                              setTaskInfoPanelrOpen(true)
-                                            }
-                                            placeholder="제목을 입력하세요"
-                                            className="w-full p-2 border text-[var(--text-base)] rounded dark:focus:border-gray-300 dark:focus:outline-none"
-                                          />
-                                        </div>
-                                      )}
-                                    </Draggable>
+                                      columnKey={columnKey}
+                                      itemIndex={itemIndex}
+                                      task={task}
+                                      handleDeleteTask={handleDeleteTask}
+                                      handleUpdateTask={handleUpdateTask}
+                                      setFocusedInputKey={setFocusedInputKey}
+                                      setTaskInfoPanelrOpen={
+                                        setTaskInfoPanelrOpen
+                                      }
+                                      inputRefs={inputRefs}
+                                    />
                                   );
                                 })}
 
