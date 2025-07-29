@@ -1,4 +1,4 @@
-import React, { memo, useRef, useEffect } from "react";
+import React from "react";
 import { Draggable } from "@hello-pangea/dnd";
 import TextareaAutosize from "react-textarea-autosize";
 import { ActionDropdownMenu } from "@/components/ui/extended/ActionDropdownMenu";
@@ -15,65 +15,59 @@ interface TaskItemProps {
   inputRefs: React.MutableRefObject<Record<string, HTMLTextAreaElement | null>>;
 }
 
-const TaskItem = memo(
-  ({
-    columnKey,
-    itemIndex,
-    task,
-    handleDeleteTask,
-    handleUpdateTask,
-    setFocusedInputKey,
-    setTaskInfoPanelrOpen,
-    inputRefs,
-  }: TaskItemProps) => {
-    const items = [
-      {
-        label: "삭제",
-        icon: <Trash />,
-        variant: "destructive" as const,
-        onSelect: () => handleDeleteTask(columnKey as any, itemIndex),
-      },
-    ];
+const TaskItem = ({
+  columnKey,
+  itemIndex,
+  task,
+  handleDeleteTask,
+  handleUpdateTask,
+  setFocusedInputKey,
+  setTaskInfoPanelrOpen,
+  inputRefs,
+}: TaskItemProps) => {
+  const items = [
+    {
+      label: "삭제",
+      icon: <Trash />,
+      variant: "destructive" as const,
+      onSelect: () => handleDeleteTask(columnKey as any, itemIndex),
+    },
+  ];
 
-    return (
-      <Draggable
-        key={`${columnKey}-${itemIndex}`}
-        draggableId={`${columnKey}-${itemIndex}`}
-        index={itemIndex}
-      >
-        {(provided) => (
-          <div
-            className="bg-[var(--box-bg)] border rounded-lg p-3 cursor-pointer"
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-          >
-            <div className="text-right">
-              <ActionDropdownMenu items={items} />
-            </div>
-
-            <TextareaAutosize
-              ref={(el) => {
-                inputRefs.current[`${columnKey}-${itemIndex}`] = el;
-              }}
-              value={task.title}
-              onChange={(e) =>
-                handleUpdateTask(columnKey as any, e.target.value, itemIndex)
-              }
-              onFocus={() => setFocusedInputKey(`${columnKey}-${itemIndex}`)}
-              onClick={() => setTaskInfoPanelrOpen(true)}
-              placeholder="제목을 입력하세요"
-              className="w-full p-2 border text-[var(--text-base)] rounded dark:focus:border-gray-300 dark:focus:outline-none"
-            />
+  return (
+    <Draggable
+      key={`${columnKey}-${itemIndex}`}
+      draggableId={`${columnKey}-${itemIndex}`}
+      index={itemIndex}
+    >
+      {(provided) => (
+        <div
+          className="bg-[var(--box-bg)] border rounded-lg p-3 cursor-pointer"
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+        >
+          <div className="text-right">
+            <ActionDropdownMenu items={items} />
           </div>
-        )}
-      </Draggable>
-    );
-  },
-  // props가 바뀐 경우만 리렌더링
-  (prev, next) => {
-    return prev.task === next.task; // 객체 레퍼런스가 같으면 리렌더링 방지
-  }
-);
 
-export default TaskItem;
+          <TextareaAutosize
+            ref={(el) => {
+              inputRefs.current[`${columnKey}-${itemIndex}`] = el;
+            }}
+            value={task.title}
+            onChange={(e) =>
+              handleUpdateTask(columnKey as any, e.target.value, itemIndex)
+            }
+            onFocus={() => setFocusedInputKey(`${columnKey}-${itemIndex}`)}
+            onClick={() => setTaskInfoPanelrOpen(true)}
+            placeholder="제목을 입력하세요"
+            className="w-full p-2 border text-[var(--text-base)] rounded dark:focus:border-gray-300 dark:focus:outline-none"
+          />
+        </div>
+      )}
+    </Draggable>
+  );
+};
+
+export default React.memo(TaskItem, (prev, next) => prev.task === next.task);
