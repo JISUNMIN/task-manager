@@ -36,7 +36,7 @@ type FormData = {
   assignees: number[];
 };
 
-const TaskInfoPanelComponent: React.FC<TaskInfoPanelProps> = ({
+const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   isTaskInfoPanelOpen,
   togglePanel,
   focusedInputKey,
@@ -216,13 +216,4 @@ const TaskInfoPanelComponent: React.FC<TaskInfoPanelProps> = ({
   );
 };
 
-// memo 적용
-const TaskInfoPanel = React.memo(
-  TaskInfoPanelComponent,
-  (prev, next) =>
-    prev.isTaskInfoPanelOpen === next.isTaskInfoPanelOpen &&
-    prev.focusedInputKey === next.focusedInputKey &&
-    prev.isPersonal === next.isPersonal
-);
-
-export default TaskInfoPanel;
+export default React.memo(TaskInfoPanel);
