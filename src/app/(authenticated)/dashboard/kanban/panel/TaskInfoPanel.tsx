@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { ResizablePanel } from "@/components/ui/resizable";
 import { ALL_STATUS, Status, useKanbanStore } from "@/store/useKanbanStore";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
 import KanbanColumnBadge from "../board/KanbanColumnBadge";
@@ -30,6 +29,8 @@ interface TaskInfoPanelProps {
   focusedInputKey: string;
   handleFocusedInputKey: (columnKey: string, itemIndex: number) => void;
   isPersonal?: boolean;
+  panelWidth: number;
+  setPanelWidth: (w: number) => void;
 }
 
 type FormData = {
@@ -42,6 +43,8 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   focusedInputKey,
   handleFocusedInputKey,
   isPersonal,
+  panelWidth,
+  setPanelWidth,
 }) => {
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
@@ -50,8 +53,8 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
 
   const [columnKey, itemIndexStr] = focusedInputKey.split("-");
   const taskIndex = Number(itemIndexStr);
+  const resizing = useRef(false);
 
-  // columns 값이 바뀌어도, taskIndex/columnKey가 같으면 memoization으로 task만 가져옴
   const task = useMemo(
     () => columns[columnKey as Status]?.[taskIndex],
     [columns, columnKey, taskIndex]
@@ -94,18 +97,10 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     target: "title" | "desc"
   ) => {
     const value = typeof e === "string" ? e : e.target.value;
+    updateTask(columnKey as Status, taskIndex, { [target]: value });
 
-    const updates: Partial<typeof task> = {
-      [target]: value,
-    };
-
-    updateTask(columnKey as Status, taskIndex, updates);
-
-    if (target === "title") {
-      debouncedUpdateTitle(task.id, value);
-    } else {
-      debouncedUpdateDesc(task.id, value);
-    }
+    if (target === "title") debouncedUpdateTitle(task.id, value);
+    else debouncedUpdateDesc(task.id, value);
   };
 
   const handleUpdateStatus = (newStatus: Status) => {
@@ -129,90 +124,128 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     }
   }, [task, setValue]);
 
-  return (
-    <ResizablePanel
-      defaultSize={25}
-      minSize={isTaskInfoPanelOpen ? (isMobile ? 100 : 30) : 0}
-      maxSize={isTaskInfoPanelOpen ? (isMobile ? 100 : 50) : 0}
-      className={`min-h-screen bg-[var(--bg-third)] transition-transform transform  ${
-        isTaskInfoPanelOpen ? "translate-x-0" : "translate-x-full"
-      }`}
-    >
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={togglePanel}
-        className="text-gray-600 ml-2"
-      >
-        <FaAngleDoubleRight className="w-6 h-6" />
-      </Button>
-      <div className="pl-4">
-        <TextareaAutosize
-          style={{ fontSize: "20px" }}
-          maxRows={2}
-          className="w-full p-2 resize-none"
-          placeholder="제목을 입력하세요"
-          onChange={(e) => handleUpdateTask(e, "title")}
-          value={task?.title}
-        />
-        <Grid className="grid grid-cols-[1fr_6fr] px-5">
-          <div className="flex items-center">
-            <TbCircleDotted />
-            <span className="text-gray-700 ml-1"> 상태</span>
-          </div>
-          <Select
-            value={columnKey}
-            onValueChange={(newStatus: Status) => {
-              handleUpdateStatus(newStatus);
-            }}
-          >
-            <SelectTrigger className="w-full py-6">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {ALL_STATUS.map((status) => (
-                <SelectItem key={status} value={status}>
-                  <KanbanColumnBadge columnKey={status} isDark={isDark} />
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+  // 드래그 핸들
+  const handleMouseDown = (e: React.MouseEvent) => {
+    resizing.current = true;
+    e.preventDefault();
+  };
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!resizing.current) return;
+    const newWidth = window.innerWidth - e.clientX;
+    setPanelWidth(Math.min(Math.max(newWidth, 400), 800));
+  };
+  const handleMouseUp = () => {
+    resizing.current = false;
+  };
+  useEffect(() => {
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
 
-          {!isPersonal && (
-            <>
-              <div className="flex items-center">
-                <FaPeopleGroup />
-                <span className="text-gray-700 ml-1"> 할당자</span>
-              </div>
-              <Controller
-                name="assignees"
-                control={control}
-                render={({ field }) => (
-                  <UserSelectInput
-                    value={field.value ?? []}
-                    onChange={(newAssignees) => {
-                      field.onChange(newAssignees);
-                      updateTask(columnKey as Status, taskIndex, {
-                        assignees: newAssignees,
-                      });
-                      debouncedUpdateAssignees(task.id, newAssignees);
-                    }}
-                    placeholder="사용자 검색"
-                  />
-                )}
-              />
-            </>
-          )}
-        </Grid>
-      </div>
-      <div className="p-4 h-full flex flex-col overflow-y-auto">
-        <TaskComments taskId={task?.id} />
-        <Editor
-          onChange={(e) => handleUpdateTask(e, "desc")}
-          content={task?.desc}
+
+  return (
+    // 오버레이: 클릭 시 닫힘
+    <div
+      className="absolute top-0 left-0 w-full h-full z-50"
+      onClick={togglePanel}
+    >
+      {/* 실제 패널 */}
+      <div
+        className={`
+      absolute top-0 right-0 h-full flex flex-col
+      bg-[var(--bg-third)] shadow-[ -2px_0_6px_rgba(0,0,0,0.15)]
+      transition-transform duration-300 ease-in-out
+    `}
+        style={{
+          width: isMobile ? "100%" : `${panelWidth}px`,
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* 드래그 핸들 */}
+        <div
+          className="absolute top-0 bottom-0 -left-[6px] w-[6px] cursor-col-resize z-[60]"
+          onMouseDown={handleMouseDown}
         />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={togglePanel}
+          className="text-gray-600 ml-2 mt-2"
+        >
+          <FaAngleDoubleRight className="w-6 h-6" />
+        </Button>
+        <div className="pl-4">
+          <TextareaAutosize
+            style={{ fontSize: "20px" }}
+            maxRows={2}
+            className="w-full p-2 resize-none"
+            placeholder="제목을 입력하세요"
+            onChange={(e) => handleUpdateTask(e, "title")}
+            value={task?.title}
+          />
+          <Grid className="grid grid-cols-[1fr_6fr] px-5">
+            <div className="flex items-center">
+              <TbCircleDotted />
+              <span className="text-gray-700 ml-1"> 상태</span>
+            </div>
+            <Select
+              value={columnKey}
+              onValueChange={(newStatus: Status) => {
+                handleUpdateStatus(newStatus);
+              }}
+            >
+              <SelectTrigger className="w-full py-6">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ALL_STATUS.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    <KanbanColumnBadge columnKey={status} isDark={isDark} />
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {!isPersonal && (
+              <>
+                <div className="flex items-center">
+                  <FaPeopleGroup />
+                  <span className="text-gray-700 ml-1"> 할당자</span>
+                </div>
+                <Controller
+                  name="assignees"
+                  control={control}
+                  render={({ field }) => (
+                    <UserSelectInput
+                      value={field.value ?? []}
+                      onChange={(newAssignees) => {
+                        field.onChange(newAssignees);
+                        updateTask(columnKey as Status, taskIndex, {
+                          assignees: newAssignees,
+                        });
+                        debouncedUpdateAssignees(task.id, newAssignees);
+                      }}
+                      placeholder="사용자 검색"
+                    />
+                  )}
+                />
+              </>
+            )}
+          </Grid>
+        </div>
+        <div className="p-4 h-full flex flex-col overflow-y-auto">
+          <TaskComments taskId={task?.id} />
+          <Editor
+            onChange={(e) => handleUpdateTask(e, "desc")}
+            content={task?.desc}
+          />
+        </div>
       </div>
-    </ResizablePanel>
+    </div>
   );
 };
 
