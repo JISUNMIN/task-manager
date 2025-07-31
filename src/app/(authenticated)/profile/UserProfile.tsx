@@ -1,13 +1,12 @@
 import { PasswordInput } from "@/components/form/PasswordInput";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/useAuthStore";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { User } from "@prisma/client";
 import React, { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-
+import { Image as ImageIcon } from "lucide-react";
 const defaultProfileImage = "/default-profile.png";
 
 const schema = yup.object().shape({
@@ -51,7 +50,7 @@ export default function UserProfile({ onSave }: UserProfileProps) {
   const onChangeProfileImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setProfileImageFile(file);
+      // setProfileImageFile(file); // 이 부분은 props로 온 onSave 내부에서 처리하도록 할 수도 있음
       const reader = new FileReader();
       reader.onload = () => {
         setCurrentProfileImage(reader.result as string);
@@ -65,24 +64,26 @@ export default function UserProfile({ onSave }: UserProfileProps) {
   };
 
   const onSubmit = async (data: UserProfileProps) => {
-    //do somegting
+    // do something
   };
 
   return (
-    <div
-      className="
-        w-full max-w-xl mx-auto p-6 rounded-lg shadow-md select-none
-        bg-[var(--bg-seonday)] text-[var(--foreground)]
-      "
-    >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="flex flex-col items-center">
+    <div className="w-full max-w-xl mx-auto p-8">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="
+          space-y-6 rounded-2xl shadow-lg p-8
+          bg-gradient-to-br from-[var(--bg-seonday)] to-[var(--card)]
+          border border-[var(--border)]
+        "
+      >
+        {/* 프로필 영역 */}
+        <div className="flex flex-col items-center space-y-2">
           <div
             className="
-            relative w-32 h-32 rounded-full overflow-hidden border-4 cursor-pointer
-            hover:opacity-80 transition-opacity
-            border-[var(--primary)]
-          "
+              relative w-32 h-32 rounded-full overflow-hidden border-4
+              cursor-pointer group border-[var(--primary)]
+            "
             onClick={handleImageClick}
             title="프로필 사진 변경"
           >
@@ -93,12 +94,12 @@ export default function UserProfile({ onSave }: UserProfileProps) {
             />
             <div
               className="
-              absolute bottom-0 w-full text-center font-semibold py-1 opacity-0
-              hover:opacity-100 transition-opacity
-              bg-[rgba(0,0,0,0.4)] text-[var(--primary-foreground)]
-            "
+                absolute inset-0 flex items-center justify-center
+                bg-black/40 opacity-0 group-hover:opacity-100
+                transition-opacity duration-300
+              "
             >
-              변경
+              <ImageIcon className="w-8 h-8 text-white" />
             </div>
             <input
               type="file"
@@ -109,33 +110,47 @@ export default function UserProfile({ onSave }: UserProfileProps) {
             />
           </div>
 
-          <p className="mt-4 font-semibold text-lg text-[var(--primary)]">
+          <p className="mt-3 font-semibold text-lg text-[var(--primary)]">
             @{userId}
           </p>
           <h2 className="text-2xl font-bold text-[var(--text-base)]">
             {name}님
           </h2>
         </div>
-        <PasswordInput
-          register={register}
-          name="password"
-          placeholder="비밀번호"
-          errors={errors}
-        />
-        <PasswordInput
-          register={register}
-          name="confirmPassword"
-          placeholder="비밀번호 확인"
-          errors={errors}
-        />
-        {error && (
-          <p className="font-semibold text-[var(--destructive)]">{error}</p>
-        )}
-        {success && (
-          <p className="font-semibold text-[var(--accent)]">{success}</p>
-        )}
 
-        <Button type="submit" className="w-full py-3 mt-2 font-bold rounded-md">
+        {/* 비밀번호 입력 */}
+        <div className="space-y-4">
+          <PasswordInput
+            register={register}
+            name="password"
+            placeholder="새 비밀번호"
+            errors={errors}
+          />
+          <PasswordInput
+            register={register}
+            name="confirmPassword"
+            placeholder="새 비밀번호 확인"
+            errors={errors}
+          />
+        </div>
+
+        {/* 메시지 */}
+        {error && (
+          <div className="rounded-md bg-[var(--destructive)]/10 p-3 text-[var(--destructive)] font-medium">
+            {error}
+          </div>
+        )}
+        {/* {success && (
+          <div className="rounded-md bg-[var(--accent)]/10 p-3 text-[var(--accent)] font-medium">
+            {success}
+          </div>
+        )} */}
+
+        {/* 저장 버튼 */}
+        <Button
+          type="submit"
+          className="w-full py-3 mt-2 font-bold text-white animated-gradient-btn hover:opacity-90"
+        >
           저장하기
         </Button>
       </form>
