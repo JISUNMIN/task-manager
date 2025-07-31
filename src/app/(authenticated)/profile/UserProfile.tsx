@@ -2,11 +2,11 @@ import { PasswordInput } from "@/components/form/PasswordInput";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/useAuthStore";
 import { yupResolver } from "@hookform/resolvers/yup";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { Image as ImageIcon } from "lucide-react";
 import useUser from "@/hooks/react-query/useUser";
+import { ImageUploader } from "@/components/shared/editor/ImageUploader";
 
 const schema = yup.object().shape({
   password: yup
@@ -39,21 +39,9 @@ export default function UserProfile() {
   const profileImage = user?.profileImage ?? "";
   const id = user?.id ?? "";
 
-  // 화면 미리보기용 이미지 URL
-  const [currentProfileImage, setCurrentProfileImage] = useState<string>(
-    profileImage || "/default-profile.png"
-  );
-  console.log("user ", user, "currentProfileImage", currentProfileImage);
-
-  // 실제로 서버에 업로드할 원본 데이터 를 저장
-  // formData에 append해서 서버로 전송하는 용도
+  // 서버 전송용 파일 상태
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const { updateProfileImage } = useUser(id);
-
-  console.log("currentProfileImage", currentProfileImage);
+  const { updateProfile } = useUser(id);
 
   const {
     register,
@@ -68,50 +56,21 @@ export default function UserProfile() {
     },
   });
 
-  console.log("errors", errors);
-
-  const onChangeProfileImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setProfileImageFile(file);
-      const reader = new FileReader();
-      reader.onload = () => {
-        console.log("reader.result", reader.result);
-        setCurrentProfileImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleImageClick = () => {
-    fileInputRef.current?.click();
+  const onFileChange = (file: File | null) => {
+    setProfileImageFile(file);
   };
 
   const onSubmit = async (data: { password?: string }) => {
-    setError(null);
-    setSuccess(null);
     const formData = new FormData();
 
-    try {
-      if (profileImageFile) {
-        formData.append("profileImage", profileImageFile);
-        updateProfileImage(formData);
-      }
-      if (data.password) {
-        formData.append("password", data.password);
-      }
-
-      if (data.password) {
-        // await updatePassword({ password: data.password });
-      }
-    } catch {
-      // 에러는 mutation 훅 내 onError에서 처리 중
+    if (profileImageFile) {
+      formData.append("profileImage", profileImageFile);
     }
+    if (data.password) {
+      formData.append("password", data.password);
+    }
+    updateProfile(formData);
   };
-
-  useEffect(() => {
-    setCurrentProfileImage(profileImage || "/default-profile.png");
-  }, [profileImage]);
 
   return (
     <div className="w-full max-w-xl mx-auto p-8">
@@ -125,37 +84,11 @@ export default function UserProfile() {
       >
         {/* 프로필 영역 */}
         <div className="flex flex-col items-center space-y-2">
-          <div
-            className="
-              relative w-32 h-32 rounded-full overflow-hidden border-4
-              cursor-pointer group border-[var(--primary)]
-            "
-            onClick={handleImageClick}
-            title="프로필 사진 변경"
-          >
-            <img
-              src={currentProfileImage}
-              alt="프로필 이미지"
-              className="w-full h-full object-cover"
-            />
-            <div
-              className="
-                absolute inset-0 flex items-center justify-center
-                bg-black/40 opacity-0 group-hover:opacity-100
-                transition-opacity duration-300
-              "
-            >
-              <ImageIcon className="w-8 h-8 text-white" />
-            </div>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              ref={fileInputRef}
-              onChange={onChangeProfileImage}
-            />
-          </div>
-
+          <ImageUploader
+            initialImageUrl={profileImage}
+            onFileChange={onFileChange}
+            alt="프로필 이미지"
+          />
           <p className="mt-3 font-semibold text-lg text-[var(--primary)]">
             @{userId}
           </p>
