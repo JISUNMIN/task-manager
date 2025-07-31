@@ -23,7 +23,7 @@ const useUser = (targetId?: string | number) => {
   });
 
   // profileImage update
-  const { mutate: updateProfileImage } = useMutation<
+  const { mutate: updateProfile } = useMutation<
     { profileImage: string },
     Error,
     FormData
@@ -53,7 +53,7 @@ const useUser = (targetId?: string | number) => {
     isListLoading,
     isListFetching,
     //update
-    updateProfileImage,
+    updateProfile,
   };
 };
 
