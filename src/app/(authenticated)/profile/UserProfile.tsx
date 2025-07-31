@@ -2,57 +2,81 @@ import { PasswordInput } from "@/components/form/PasswordInput";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/useAuthStore";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { User } from "@prisma/client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { Image as ImageIcon } from "lucide-react";
-const defaultProfileImage = "/default-profile.png";
+import useUser from "@/hooks/react-query/useUser";
 
 const schema = yup.object().shape({
   password: yup
     .string()
-    .min(6, "비밀번호를 6자 이상 입력해주세요.")
-    .max(20, "비밀번호는 최대 20자 이내여야 합니다.")
-    .required("비밀번호를 입력해주세요."),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref("password")], "비밀번호가 일치하지 않습니다.")
-    .required("비밀번호 확인을 입력해주세요."),
+    .notRequired()
+    .test(
+      "password-length",
+      "비밀번호를 6자 이상 입력해주세요.",
+      (value) => !value || value.length >= 6
+    )
+    .test(
+      "password-max-length",
+      "비밀번호는 최대 20자 이내여야 합니다.",
+      (value) => !value || value.length <= 20
+    ),
+  // confirmPassword: yup.string().when("password", (password, schema) => {
+  //   console.log("password", password);
+  //   return password && password.length > 0
+  //     ? schema
+  //         .required("비밀번호 확인을 입력해주세요.")
+  //         .oneOf([yup.ref("password")], "비밀번호가 일치하지 않습니다.")
+  //     : schema.notRequired();
+  // }),
 });
 
-interface UserProfileProps {
-  onSave: (data: {
-    password?: string;
-    profileImageFile?: File;
-  }) => Promise<void>;
-}
-
-export default function UserProfile({ onSave }: UserProfileProps) {
+export default function UserProfile() {
   const { user } = useAuthStore();
-  const { userId, name, profileImage } = user as User;
+  const userId = user?.userId ?? "";
+  const name = user?.name ?? "";
+  const profileImage = user?.profileImage ?? "";
+  const id = user?.id ?? "";
+
+  // 화면 미리보기용 이미지 URL
   const [currentProfileImage, setCurrentProfileImage] = useState<string>(
-    profileImage ?? defaultProfileImage
+    profileImage || "/default-profile.png"
   );
+  console.log("user ", user, "currentProfileImage", currentProfileImage);
+
+  // 실제로 서버에 업로드할 원본 데이터 를 저장
+  // formData에 append해서 서버로 전송하는 용도
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { updateProfileImage } = useUser(id);
+
+  console.log("currentProfileImage", currentProfileImage);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<UserProfileProps>({
+  } = useForm<{ password?: string; confirmPassword?: string }>({
     resolver: yupResolver(schema),
     mode: "onBlur",
+    defaultValues: {
+      password: "",
+      confirmPassword: "",
+    },
   });
+
+  console.log("errors", errors);
 
   const onChangeProfileImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // setProfileImageFile(file); // 이 부분은 props로 온 onSave 내부에서 처리하도록 할 수도 있음
+      setProfileImageFile(file);
       const reader = new FileReader();
       reader.onload = () => {
+        console.log("reader.result", reader.result);
         setCurrentProfileImage(reader.result as string);
       };
       reader.readAsDataURL(file);
@@ -63,9 +87,31 @@ export default function UserProfile({ onSave }: UserProfileProps) {
     fileInputRef.current?.click();
   };
 
-  const onSubmit = async (data: UserProfileProps) => {
-    // do something
+  const onSubmit = async (data: { password?: string }) => {
+    setError(null);
+    setSuccess(null);
+    const formData = new FormData();
+
+    try {
+      if (profileImageFile) {
+        formData.append("profileImage", profileImageFile);
+        updateProfileImage(formData);
+      }
+      if (data.password) {
+        formData.append("password", data.password);
+      }
+
+      if (data.password) {
+        // await updatePassword({ password: data.password });
+      }
+    } catch {
+      // 에러는 mutation 훅 내 onError에서 처리 중
+    }
   };
+
+  useEffect(() => {
+    setCurrentProfileImage(profileImage || "/default-profile.png");
+  }, [profileImage]);
 
   return (
     <div className="w-full max-w-xl mx-auto p-8">
@@ -123,7 +169,7 @@ export default function UserProfile({ onSave }: UserProfileProps) {
           <PasswordInput
             register={register}
             name="password"
-            placeholder="새 비밀번호"
+            placeholder="새 비밀번호 (변경하지 않을 경우 비워두세요)"
             errors={errors}
           />
           <PasswordInput
@@ -133,18 +179,6 @@ export default function UserProfile({ onSave }: UserProfileProps) {
             errors={errors}
           />
         </div>
-
-        {/* 메시지 */}
-        {error && (
-          <div className="rounded-md bg-[var(--destructive)]/10 p-3 text-[var(--destructive)] font-medium">
-            {error}
-          </div>
-        )}
-        {/* {success && (
-          <div className="rounded-md bg-[var(--accent)]/10 p-3 text-[var(--accent)] font-medium">
-            {success}
-          </div>
-        )} */}
 
         {/* 저장 버튼 */}
         <Button
