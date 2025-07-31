@@ -15,14 +15,14 @@ import { PasswordInput } from "@/components/form/PasswordInput";
 const schema = yup.object().shape({
   userId: yup
     .string()
-    // .min(4, "아이디를 4자 이상 입력해주세요.")
-    // .max(12, "아이디는 최대 12자 이내여야 합니다.")
+    .min(4, "아이디를 4자 이상 입력해주세요.")
+    .max(12, "아이디는 최대 12자 이내여야 합니다.")
     .required("아이디를 입력해주세요."),
 
   password: yup
     .string()
-    // .min(6, "비밀번호를 6자 이상 입력해주세요.")
-    // .max(20, "비밀번호는 최대 20자 이내여야 합니다.")
+    .min(6, "비밀번호를 6자 이상 입력해주세요.")
+    .max(20, "비밀번호는 최대 20자 이내여야 합니다.")
     .required("비밀번호를 입력해주세요."),
 });
 

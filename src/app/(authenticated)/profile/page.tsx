@@ -2,15 +2,10 @@
 
 "use client";
 
+import { useAuthStore } from "@/store/useAuthStore";
 import UserProfile from "./UserProfile";
 
 export default function ProfilePage() {
-  const user = {
-    userId: "sunminji",
-    name: "선민지",
-    profileImage: null,
-  };
-
   const handleSave = async ({
     password,
     profileImageFile,
@@ -40,7 +35,7 @@ export default function ProfilePage() {
 
   return (
     <div className="pt-4">
-      <UserProfile {...user} onSave={handleSave} />;
+      <UserProfile onSave={handleSave} />;
     </div>
   );
 }
