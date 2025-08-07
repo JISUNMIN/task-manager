@@ -179,7 +179,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
 
           {!isPersonal && (
             <>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 whitespace-nowrap">
                 <FaPeopleGroup />
                 <span className="text-sm sm:text-base text-gray-700">
                   할당자
