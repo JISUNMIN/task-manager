@@ -56,7 +56,7 @@ export const TaskComments = ({ taskId }: Props) => {
       userId: user.id,
       taskId,
     });
-    setNewComment(""); // ✅ 전역 상태 초기화
+    setNewComment("");
   };
 
   const handleDeleteComment = () => {
@@ -99,8 +99,8 @@ export const TaskComments = ({ taskId }: Props) => {
         />
         <div className="flex-1 relative">
           <Input
-            placeholder="댓글을 입력하세요"
-            className="pr-16 border-none focus-visible:ring-0 shadow-none"
+            placeholder="댓글 추가"
+            className="pr-20 border-none focus-visible:ring-0 shadow-none"
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             onKeyDown={(e) => {
@@ -111,7 +111,8 @@ export const TaskComments = ({ taskId }: Props) => {
             }}
             disabled={isCreating}
           />
-          <div className="absolute right-2 top-1.5 flex gap-2">
+
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
             <Button variant="ghost" size="icon" disabled={isCreating}>
               <HiOutlinePaperClip className="w-5 h-5 text-gray-600" />
             </Button>

@@ -155,16 +155,15 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           onChange={(e) => handleUpdateTask(e, "title")}
           value={task?.title}
         />
-        <Grid className="grid grid-cols-[1fr_6fr] px-5">
-          <div className="flex items-center">
+        <Grid className="grid grid-cols-1 sm:grid-cols-[1fr_6fr] gap-y-3 px-5">
+          <div className="flex items-center gap-1 whitespace-nowrap">
             <TbCircleDotted />
-            <span className="text-gray-700 ml-1"> 상태</span>
+            <span className="text-sm sm:text-base text-gray-700">상태</span>
           </div>
+
           <Select
             value={columnKey}
-            onValueChange={(newStatus: Status) => {
-              handleUpdateStatus(newStatus);
-            }}
+            onValueChange={(newStatus: Status) => handleUpdateStatus(newStatus)}
           >
             <SelectTrigger className="w-full py-6">
               <SelectValue />
@@ -180,10 +179,13 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
 
           {!isPersonal && (
             <>
-              <div className="flex items-center">
+              <div className="flex items-center gap-1">
                 <FaPeopleGroup />
-                <span className="text-gray-700 ml-1"> 할당자</span>
+                <span className="text-sm sm:text-base text-gray-700">
+                  할당자
+                </span>
               </div>
+
               <Controller
                 name="assignees"
                 control={control}
