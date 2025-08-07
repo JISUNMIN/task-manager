@@ -1,167 +1,142 @@
+import { PasswordInput } from "@/components/form/PasswordInput";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import React, { useState, useRef } from "react";
+import { useAuthStore } from "@/store/useAuthStore";
+import { yupResolver } from "@hookform/resolvers/yup";
+import React, { useState } from "react";
+import { FormProvider, Resolver, useForm } from "react-hook-form";
+import * as yup from "yup";
+import useUser from "@/hooks/react-query/useUser";
+import { ImageUploader } from "@/components/shared/editor/ImageUploader";
 
-const defaultProfileImage = "/default-profile.png";
+type FormData = {
+  profileImage?: File | null;
+  password?: string | null;
+  confirmPassword?: string | null;
+};
 
-interface UserProfileProps {
-  userId: string;
-  name: string;
-  profileImage?: string | null;
-  onSave: (data: {
-    password?: string;
-    profileImageFile?: File;
-  }) => Promise<void>;
-}
+const schema = yup.object().shape({
+  profileImage: yup.mixed<File>().when("password", {
+    is: (password: string) => !password?.length,
+    then: (schema) => schema.required("프로필 이미지를 업로드해주세요."),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  password: yup
+    .string()
+    .notRequired()
+    .test(
+      "password-length",
+      "비밀번호를 6자 이상 입력해주세요.",
+      (value) => !value || value.length >= 6
+    )
+    .test(
+      "password-max-length",
+      "비밀번호는 최대 20자 이내여야 합니다.",
+      (value) => !value || value.length <= 20
+    ),
+  confirmPassword: yup.string().when("password", {
+    is: (password: string) => !!password?.length,
+    then: (schema) =>
+      schema
+        .required("비밀번호 확인을 입력해주세요.")
+        .oneOf([yup.ref("password")], "비밀번호가 일치하지 않습니다."),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+});
 
-export default function UserProfile({
-  userId,
-  name,
-  profileImage,
-  onSave,
-}: UserProfileProps) {
-  const [currentProfileImage, setCurrentProfileImage] = useState<string>(
-    profileImage ?? defaultProfileImage
-  );
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+export default function UserProfile() {
+  const { user } = useAuthStore();
+  const userId = user?.userId ?? "";
+  const name = user?.name ?? "";
+  const profileImage = user?.profileImage ?? "";
+  const id = user?.id ?? "";
+  const methods = useForm<FormData>({
+    resolver: yupResolver(schema) as unknown as Resolver<FormData>,
+    mode: "onBlur",
+    defaultValues: {
+      profileImage: null,
+      password: null,
+      confirmPassword: null,
+    },
+  });
+
+  // 서버 전송용 파일 상태
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const { updateProfile } = useUser(id);
 
-  const onChangeProfileImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setProfileImageFile(file);
-      const reader = new FileReader();
-      reader.onload = () => {
-        setCurrentProfileImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = methods;
+
+  const onFileChange = (file: File | null) => {
+    setProfileImageFile(file);
   };
 
-  const handleImageClick = () => {
-    fileInputRef.current?.click();
-  };
+  const onSubmit = async (data: FormData) => {
+    const formData = new FormData();
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
-
-    if (newPassword !== confirmPassword) {
-      setError("새 비밀번호와 확인 비밀번호가 일치하지 않습니다.");
-      return;
+    if (profileImageFile) {
+      formData.append("profileImage", profileImageFile);
     }
-
-    try {
-      await onSave({
-        password: newPassword ? newPassword : undefined,
-        profileImageFile: profileImageFile ?? undefined,
-      });
-      setSuccess("프로필이 성공적으로 저장되었습니다.");
-      setNewPassword("");
-      setConfirmPassword("");
-      setProfileImageFile(null);
-    } catch (err) {
-      setError("프로필 저장 중 오류가 발생했습니다.");
+    if (data.password) {
+      formData.append("password", data.password);
     }
+    updateProfile(formData);
   };
 
   return (
-    <div
-      className="
-        w-full max-w-xl mx-auto p-6 rounded-lg shadow-md select-none
-        bg-[var(--bg-seonday)] text-[var(--foreground)]
-      "
-    >
-      <div className="flex flex-col items-center">
-        <div
+    <div className="w-full max-w-xl mx-auto p-8">
+      <FormProvider {...methods}>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
           className="
-            relative w-32 h-32 rounded-full overflow-hidden border-4 cursor-pointer
-            hover:opacity-80 transition-opacity
-            border-[var(--primary)]
-          "
-          onClick={handleImageClick}
-          title="프로필 사진 변경"
+          space-y-6 rounded-2xl shadow-lg p-8
+          bg-gradient-to-br from-[var(--bg-seonday)] to-[var(--card)]
+          border border-[var(--border)]
+        "
         >
-          <img
-            src={currentProfileImage}
-            alt="프로필 이미지"
-            className="w-full h-full object-cover"
-          />
-          <div
-            className="
-              absolute bottom-0 w-full text-center font-semibold py-1 opacity-0
-              hover:opacity-100 transition-opacity
-              bg-[rgba(0,0,0,0.4)] text-[var(--primary-foreground)]
-            "
-          >
-            변경
+          {/* 프로필 영역 */}
+          <div className="flex flex-col items-center space-y-2">
+            <ImageUploader
+              initialImageUrl={profileImage}
+              onFileChange={onFileChange}
+              alt="프로필 이미지"
+              name="profileImage"
+            />
+            <p className="mt-3 font-semibold text-lg text-[var(--primary)]">
+              @{userId}
+            </p>
+            <h2 className="text-2xl font-bold text-[var(--text-base)]">
+              {name}님
+            </h2>
           </div>
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            ref={fileInputRef}
-            onChange={onChangeProfileImage}
-          />
-        </div>
 
-        <p className="mt-4 font-semibold text-lg text-[var(--primary)]">
-          @{userId}
-        </p>
-        <h2 className="text-2xl font-bold text-[var(--text-base)]">{name}님</h2>
-      </div>
+          {/* 비밀번호 입력 */}
+          <div className="space-y-4">
+            <PasswordInput
+              register={register}
+              name="password"
+              placeholder="새 비밀번호 (변경하지 않을 경우 비워두세요)"
+              errors={errors}
+            />
+            <PasswordInput
+              register={register}
+              name="confirmPassword"
+              placeholder="새 비밀번호 확인"
+              errors={errors}
+            />
+          </div>
 
-      <form className="mt-8 space-y-4" onSubmit={onSubmit}>
-        <div>
-          <label
-            htmlFor="newPassword"
-            className="block mb-1 font-medium text-[var(--text-base)]"
+          {/* 저장 버튼 */}
+          <Button
+            type="submit"
+            className="w-full py-3 mt-2 font-bold text-white animated-gradient-btn hover:opacity-90"
           >
-            새 비밀번호
-          </label>
-          <Input
-            id="newPassword"
-            type="password"
-            autoComplete="new-password"
-            placeholder="새 비밀번호를 입력하세요"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="confirmPassword"
-            className="block mb-1 font-medium text-[var(--text-base)]"
-          >
-            비밀번호 확인
-          </label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            autoComplete="new-password"
-            placeholder="비밀번호를 다시 입력하세요"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-        </div>
-
-        {error && (
-          <p className="font-semibold text-[var(--destructive)]">{error}</p>
-        )}
-        {success && (
-          <p className="font-semibold text-[var(--accent)]">{success}</p>
-        )}
-
-        <Button type="submit" className="w-full py-3 mt-2 font-bold rounded-md">
-          저장하기
-        </Button>
-      </form>
+            저장하기
+          </Button>
+        </form>
+      </FormProvider>
     </div>
   );
 }

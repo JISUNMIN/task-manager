@@ -37,7 +37,7 @@ const UserMenu = ({ open, onOpenChange }: UserMenuProps) => {
         >
           <div className="py-2">
             {/* 사용자 정보 */}
-            <div className="flex items-center px-4 py-3 gap-3 border-b border-[var(--border)]">
+            <Link  href="/profile" className="flex items-center px-4 py-3 gap-3 border-b border-[var(--border)]">
               <UserAvatar
                 src={user?.profileImage ?? ""}
                 alt={user?.name}
@@ -49,7 +49,7 @@ const UserMenu = ({ open, onOpenChange }: UserMenuProps) => {
                   {user?.role || "Admin"}
                 </p>
               </div>
-            </div>
+            </Link>
 
             {/* 메뉴 항목 */}
             <Link

@@ -72,6 +72,7 @@ body {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --logo-name-gradient: linear-gradient(to right, #f59e0b, #c2410c);
 }
 
 .dark {
@@ -195,7 +196,7 @@ body {
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background-color: #4b5d70; /* thumb 색상 */
+  background-color: #4b5d70;
   border-radius: 4px;
 }
 
@@ -226,14 +227,26 @@ body {
     box-shadow:
       0 -1px 4px rgba(0, 0, 0, 0.3),
       0 4px 6px rgba(0, 0, 0, 0.7);
-
-    /* 커스텀 애니메이션 */
     animation: shadowColorChangeLight 6s ease-in-out infinite;
   }
 
   .dark .cardStyle {
     border-color: #3b82f6;
     animation: shadowColorChangeDark 6s ease-in-out infinite;
+  }
+
+  /* 버튼 그라디언트 애니메이션 */
+  .animated-gradient-btn {
+    @apply transition-opacity duration-300 rounded-xl;
+
+    background-size: 300% 300%;
+    animation: gradientShiftLight 6s ease infinite;
+    background-image: linear-gradient(to right, #0ea5e9, #14b8a6);
+  }
+
+  .dark .animated-gradient-btn {
+    animation: gradientShiftDark 6s ease infinite;
+    background-image: linear-gradient(to right, #2563eb, #4f46e5);
   }
 }
 
@@ -290,6 +303,31 @@ body {
         /* teal */ 0 4px 8px rgba(0, 0, 0, 0.9);
     }
   }
+
+  @keyframes gradientShiftLight {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  @keyframes gradientShiftDark {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
   .logo-name {
     @apply font-extrabold tracking-wide bg-clip-text text-transparent drop-shadow-sm mb-2 text-center;
     background-image: var(--logo-name-gradient);
