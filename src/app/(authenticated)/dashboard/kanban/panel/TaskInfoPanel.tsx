@@ -25,7 +25,7 @@ import { useThemeStore } from "@/store/useThemeStore";
 
 interface TaskInfoPanelProps {
   isTaskInfoPanelOpen: boolean;
-  togglePanel: () => void;
+  closePanel: () => void;
   focusedInputKey: string;
   handleFocusedInputKey: (columnKey: string, itemIndex: number) => void;
   isPersonal?: boolean;
@@ -39,7 +39,7 @@ type FormData = {
 
 const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   isTaskInfoPanelOpen,
-  togglePanel,
+  closePanel,
   focusedInputKey,
   handleFocusedInputKey,
   isPersonal,
@@ -133,7 +133,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         panelRef.current &&
         !panelRef.current.contains(event.target as Node)
       ) {
-        togglePanel();
+        closePanel();
       }
     };
 
@@ -141,7 +141,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [togglePanel]);
+  }, [closePanel]);
 
   // 패널 resize 핸들
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -172,13 +172,13 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     <div
       ref={panelRef}
       className={`
-        absolute top-0 right-0 h-full flex flex-col z-50
-        bg-[var(--bg-third)] shadow-[ -2px_0_6px_rgba(0,0,0,0.15)]
-        transition-transform duration-300 ease-in-out
-      `}
+    absolute top-0 right-0 h-full flex flex-col z-50
+    bg-[var(--bg-third)] shadow-[ -2px_0_6px_rgba(0,0,0,0.15)]
+    transition-transform duration-300 ease-in-out
+    ${isTaskInfoPanelOpen ? "translate-x-0" : "translate-x-full"}
+  `}
       style={{
         width: isMobile ? "100%" : `${panelWidth}px`,
-        
       }}
     >
       {/* resize 핸들 */}
@@ -190,7 +190,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       <Button
         variant="ghost"
         size="icon"
-        onClick={togglePanel}
+        onClick={closePanel}
         className="text-gray-600 ml-2 mt-2"
       >
         <FaAngleDoubleRight className="w-6 h-6" />

@@ -28,7 +28,8 @@ const KanbanBoard = () => {
 
   // TaskInfoPanel 열림/닫힘
   const [isTaskInfoPanelOpen, setTaskInfoPanelOpen] = useState(false);
-  const togglePanel = () => setTaskInfoPanelOpen(!isTaskInfoPanelOpen);
+  const closePanel = () => setTaskInfoPanelOpen(false);
+  const openPanel = () => setTaskInfoPanelOpen(true);
 
   // 오른쪽 패널 width 상태
   const [panelWidth, setPanelWidth] = useState(400);
@@ -221,7 +222,7 @@ const KanbanBoard = () => {
                                 handleDeleteTask={handleDeleteTask}
                                 handleUpdateTask={handleUpdateTask}
                                 setFocusedInputKey={setFocusedInputKey}
-                                setTaskInfoPanelrOpen={setTaskInfoPanelOpen}
+                                openPanel={openPanel}
                                 inputRefs={inputRefs}
                               />
                             );
@@ -248,18 +249,15 @@ const KanbanBoard = () => {
         )}
       </div>
 
-      {/* 오른쪽 Task Info Panel (겹치게) */}
-      {isTaskInfoPanelOpen && (
-        <TaskInfoPanel
-          isTaskInfoPanelOpen={isTaskInfoPanelOpen}
-          togglePanel={togglePanel}
-          focusedInputKey={focusedInputKey}
-          handleFocusedInputKey={handleFocusedInputKey}
-          isPersonal={isPersonal}
-          panelWidth={panelWidth}
-          setPanelWidth={setPanelWidth}
-        />
-      )}
+      <TaskInfoPanel
+        isTaskInfoPanelOpen={isTaskInfoPanelOpen}
+        closePanel={closePanel}
+        focusedInputKey={focusedInputKey}
+        handleFocusedInputKey={handleFocusedInputKey}
+        isPersonal={isPersonal}
+        panelWidth={panelWidth}
+        setPanelWidth={setPanelWidth}
+      />
     </SidebarProvider>
   );
 };

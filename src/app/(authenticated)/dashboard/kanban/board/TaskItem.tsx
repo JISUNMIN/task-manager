@@ -11,7 +11,7 @@ interface TaskItemProps {
   handleDeleteTask: (columnKey: any, index: number) => void;
   handleUpdateTask: (columnKey: any, value: string, index: number) => void;
   setFocusedInputKey: (key: string) => void;
-  setTaskInfoPanelrOpen: (open: boolean) => void;
+  openPanel: () => void;
   inputRefs: React.MutableRefObject<Record<string, HTMLTextAreaElement | null>>;
 }
 
@@ -22,7 +22,7 @@ const TaskItem = ({
   handleDeleteTask,
   handleUpdateTask,
   setFocusedInputKey,
-  setTaskInfoPanelrOpen,
+  openPanel,
   inputRefs,
 }: TaskItemProps) => {
   const items = [
@@ -60,7 +60,7 @@ const TaskItem = ({
               handleUpdateTask(columnKey as any, e.target.value, itemIndex)
             }
             onFocus={() => setFocusedInputKey(`${columnKey}-${itemIndex}`)}
-            onClick={() => setTaskInfoPanelrOpen(true)}
+            onClick={() => openPanel()}
             placeholder="제목을 입력하세요"
             className="w-full p-2 border text-[var(--text-base)] rounded dark:focus:border-gray-300 dark:focus:outline-none"
           />
