@@ -31,6 +31,7 @@ interface TaskInfoPanelProps {
   isPersonal?: boolean;
   panelWidth: number;
   setPanelWidth: (w: number) => void;
+  inputRefs?: React.MutableRefObject<Record<string, HTMLTextAreaElement | null>>; 
 }
 
 type FormData = {
@@ -45,6 +46,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   isPersonal,
   panelWidth,
   setPanelWidth,
+  inputRefs,
 }) => {
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
@@ -125,23 +127,32 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     }
   }, [task, setValue]);
 
-  // 패널 외부 클릭 시 닫기 (드래그 중이면 제외)
+  // 패널 외부 클릭 시 닫기 (드래그 중이면 제외, 그리고 TaskItem input 클릭 시 제외)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (resizing.current) return;
+
+      const target = event.target as Node;
+
       if (
-        panelRef.current &&
-        !panelRef.current.contains(event.target as Node)
+        panelRef.current?.contains(target) ||
+        // inputRefs 내 ref 중 클릭 대상 포함 여부 체크
+        Object.values(inputRefs?.current ?? {}).some(
+          (el) => el && el.contains(target)
+        )
       ) {
-        closePanel();
+        // 패널 내부 또는 input 클릭 시 닫지 않음
+        return;
       }
+
+      closePanel();
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [closePanel]);
+  }, [closePanel, inputRefs]);
 
   // 패널 resize 핸들
   const handleMouseDown = (e: React.MouseEvent) => {

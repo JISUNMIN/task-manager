@@ -60,7 +60,7 @@ const TaskItem = ({
               handleUpdateTask(columnKey as any, e.target.value, itemIndex)
             }
             onFocus={() => setFocusedInputKey(`${columnKey}-${itemIndex}`)}
-            onClick={() => openPanel()}
+            onClick={openPanel}
             placeholder="제목을 입력하세요"
             className="w-full p-2 border text-[var(--text-base)] rounded dark:focus:border-gray-300 dark:focus:outline-none"
           />

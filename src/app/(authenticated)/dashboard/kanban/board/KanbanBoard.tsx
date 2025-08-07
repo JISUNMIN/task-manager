@@ -257,6 +257,7 @@ const KanbanBoard = () => {
         isPersonal={isPersonal}
         panelWidth={panelWidth}
         setPanelWidth={setPanelWidth}
+        inputRefs={inputRefs}
       />
     </SidebarProvider>
   );
