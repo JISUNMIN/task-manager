@@ -165,7 +165,7 @@ const KanbanBoard = () => {
       {trigger}
 
       {/* 메인 보드 */}
-      <div className="p-8">
+      <div className="p-8 w-[80%]">
         <ProjectInfoCard
           projectName={detailData?.projectName}
           managerName={detailData?.manager.name}

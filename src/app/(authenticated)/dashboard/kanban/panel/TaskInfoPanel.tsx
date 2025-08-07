@@ -54,13 +54,14 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const [columnKey, itemIndexStr] = focusedInputKey.split("-");
   const taskIndex = Number(itemIndexStr);
   const resizing = useRef(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const task = useMemo(
     () => columns[columnKey as Status]?.[taskIndex],
     [columns, columnKey, taskIndex]
   );
 
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useMediaQuery("(max-width: 767px)");
 
   const { control, setValue } = useForm<FormData>({
     defaultValues: {
@@ -124,19 +125,40 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     }
   }, [task, setValue]);
 
-  // 드래그 핸들
+  // 패널 외부 클릭 시 닫기 (드래그 중이면 제외)
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (resizing.current) return;
+      if (
+        panelRef.current &&
+        !panelRef.current.contains(event.target as Node)
+      ) {
+        togglePanel();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [togglePanel]);
+
+  // 패널 resize 핸들
   const handleMouseDown = (e: React.MouseEvent) => {
     resizing.current = true;
     e.preventDefault();
   };
+
   const handleMouseMove = (e: MouseEvent) => {
     if (!resizing.current) return;
     const newWidth = window.innerWidth - e.clientX;
     setPanelWidth(Math.min(Math.max(newWidth, 400), 800));
   };
+
   const handleMouseUp = () => {
     resizing.current = false;
   };
+
   useEffect(() => {
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
@@ -147,104 +169,99 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   }, []);
 
   return (
-    // 오버레이: 클릭 시 닫힘
     <div
-      className="absolute top-0 left-0 w-full h-full z-50"
-      onClick={togglePanel}
+      ref={panelRef}
+      className={`
+        absolute top-0 right-0 h-full flex flex-col z-50
+        bg-[var(--bg-third)] shadow-[ -2px_0_6px_rgba(0,0,0,0.15)]
+        transition-transform duration-300 ease-in-out
+      `}
+      style={{
+        width: isMobile ? "100%" : `${panelWidth}px`,
+        
+      }}
     >
-      {/* 실제 패널 */}
+      {/* resize 핸들 */}
       <div
-        className={`
-      absolute top-0 right-0 h-full flex flex-col
-      bg-[var(--bg-third)] shadow-[ -2px_0_6px_rgba(0,0,0,0.15)]
-      transition-transform duration-300 ease-in-out
-    `}
-        style={{
-          width: isMobile ? "100%" : `${panelWidth}px`,
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* 드래그 핸들 */}
-        <div
-          className="absolute top-0 bottom-0 -left-[6px] w-[6px] cursor-col-resize z-[60]"
-          onMouseDown={handleMouseDown}
-        />
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={togglePanel}
-          className="text-gray-600 ml-2 mt-2"
-        >
-          <FaAngleDoubleRight className="w-6 h-6" />
-        </Button>
-        <div className="pl-4">
-          <TextareaAutosize
-            style={{ fontSize: "20px" }}
-            maxRows={2}
-            className="w-full p-2 resize-none"
-            placeholder="제목을 입력하세요"
-            onChange={(e) => handleUpdateTask(e, "title")}
-            value={task?.title}
-          />
-          <Grid className="grid grid-cols-1 sm:grid-cols-[1fr_6fr] gap-y-3 px-5">
-            <div className="flex items-center gap-1 whitespace-nowrap">
-              <TbCircleDotted />
-              <span className="text-sm sm:text-base text-gray-700">상태</span>
-            </div>
-            <Select
-              value={columnKey}
-              onValueChange={(newStatus: Status) =>
-                handleUpdateStatus(newStatus)
-              }
-            >
-              <SelectTrigger className="w-full py-6">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ALL_STATUS.map((status) => (
-                  <SelectItem key={status} value={status}>
-                    <KanbanColumnBadge columnKey={status} isDark={isDark} />
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        className="absolute top-0 bottom-0 -left-[6px] w-[6px] cursor-col-resize z-[60]"
+        onMouseDown={handleMouseDown}
+      />
 
-            {!isPersonal && (
-              <>
-                <div className="flex items-center gap-1  whitespace-nowrap">
-                  <FaPeopleGroup />
-                  <span className="text-sm sm:text-base text-gray-700">
-                    할당자
-                  </span>
-                </div>
-                <Controller
-                  name="assignees"
-                  control={control}
-                  render={({ field }) => (
-                    <UserSelectInput
-                      value={field.value ?? []}
-                      onChange={(newAssignees) => {
-                        field.onChange(newAssignees);
-                        updateTask(columnKey as Status, taskIndex, {
-                          assignees: newAssignees,
-                        });
-                        debouncedUpdateAssignees(task.id, newAssignees);
-                      }}
-                      placeholder="사용자 검색"
-                    />
-                  )}
-                />
-              </>
-            )}
-          </Grid>
-        </div>
-        <div className="p-4 h-full flex flex-col overflow-y-auto">
-          <TaskComments taskId={task?.id} />
-          <Editor
-            onChange={(e) => handleUpdateTask(e, "desc")}
-            content={task?.desc}
-          />
-        </div>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={togglePanel}
+        className="text-gray-600 ml-2 mt-2"
+      >
+        <FaAngleDoubleRight className="w-6 h-6" />
+      </Button>
+
+      <div className="pl-4">
+        <TextareaAutosize
+          style={{ fontSize: "20px" }}
+          maxRows={2}
+          className="w-full p-2 resize-none"
+          placeholder="제목을 입력하세요"
+          onChange={(e) => handleUpdateTask(e, "title")}
+          value={task?.title}
+        />
+        <Grid className="grid grid-cols-1 sm:grid-cols-[1fr_6fr] gap-y-3 px-5">
+          <div className="flex items-center gap-1 whitespace-nowrap">
+            <TbCircleDotted />
+            <span className="text-sm sm:text-base text-gray-700">상태</span>
+          </div>
+          <Select
+            value={columnKey}
+            onValueChange={(newStatus: Status) => handleUpdateStatus(newStatus)}
+          >
+            <SelectTrigger className="w-full py-6">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {ALL_STATUS.map((status) => (
+                <SelectItem key={status} value={status}>
+                  <KanbanColumnBadge columnKey={status} isDark={isDark} />
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {!isPersonal && (
+            <>
+              <div className="flex items-center gap-1 whitespace-nowrap">
+                <FaPeopleGroup />
+                <span className="text-sm sm:text-base text-gray-700">
+                  할당자
+                </span>
+              </div>
+              <Controller
+                name="assignees"
+                control={control}
+                render={({ field }) => (
+                  <UserSelectInput
+                    value={field.value ?? []}
+                    onChange={(newAssignees) => {
+                      field.onChange(newAssignees);
+                      updateTask(columnKey as Status, taskIndex, {
+                        assignees: newAssignees,
+                      });
+                      debouncedUpdateAssignees(task.id, newAssignees);
+                    }}
+                    placeholder="사용자 검색"
+                  />
+                )}
+              />
+            </>
+          )}
+        </Grid>
+      </div>
+
+      <div className="p-4 h-full flex flex-col overflow-y-auto">
+        <TaskComments taskId={task?.id} />
+        <Editor
+          onChange={(e) => handleUpdateTask(e, "desc")}
+          content={task?.desc}
+        />
       </div>
     </div>
   );
