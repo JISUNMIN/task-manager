@@ -219,7 +219,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         <Grid className="grid grid-cols-1 sm:grid-cols-[1fr_6fr] gap-y-3 px-5">
           <div className="flex items-center gap-1 whitespace-nowrap">
             <TbCircleDotted />
-            <span className="text-sm sm:text-base text-gray-700">상태</span>
+            <span className="text-sm sm:text-base">상태</span>
           </div>
           <Select
             value={columnKey}
@@ -241,7 +241,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
             <>
               <div className="flex items-center gap-1 whitespace-nowrap">
                 <FaPeopleGroup />
-                <span className="text-sm sm:text-base text-gray-700">
+                <span className="text-sm sm:text-base">
                   할당자
                 </span>
               </div>

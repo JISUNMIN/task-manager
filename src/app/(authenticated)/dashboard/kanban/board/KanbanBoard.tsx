@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { KanbanSidebar } from "../sidebar/KanbanSidebar";
 import { Status, useKanbanStore } from "@/store/useKanbanStore";
-import TaskInfoPanel from "../panel/TaskInfoPanel";
+import dynamic from "next/dynamic";
 
 import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
 import useProjects from "@/hooks/react-query/useProjects";
@@ -19,6 +19,13 @@ import { useThemeStore } from "@/store/useThemeStore";
 import TaskItem from "./TaskItem";
 import ProjectInfoCard from "./ProjectInfoCard";
 import ColumnHeader from "./KanbanColumnHeader";
+
+const TaskInfoPanel = dynamic(
+  () => import("@/app/(authenticated)/dashboard/kanban/panel/TaskInfoPanel"),
+  {
+    ssr: false,
+  }
+);
 
 const KanbanBoard = () => {
   const sidebar = useMemo(() => <KanbanSidebar />, []);
