@@ -2,7 +2,7 @@ import { ImageIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-type ImageUploaderProps = {
+type ProfileImageUploaderProps = {
   initialImageUrl?: string;
   onFileChange: (file: File | null) => void;
   alt?: string;
@@ -10,13 +10,13 @@ type ImageUploaderProps = {
   name: string;
 };
 
-export function ImageUploader({
+export function ProfileImageUploader({
   initialImageUrl,
   onFileChange,
   alt = "이미지",
   className,
   name,
-}: ImageUploaderProps) {
+}: ProfileImageUploaderProps) {
   const [previewUrl, setPreviewUrl] = useState(
     initialImageUrl || "/default-profile.png"
   );
