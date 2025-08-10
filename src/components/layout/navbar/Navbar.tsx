@@ -24,7 +24,7 @@ const Navbar = () => {
       </button>
 
       {/* 검색 */}
-      <div className="flex items-center cursor-pointer -ms-3 select-none">
+      {/* <div className="flex items-center cursor-pointer -ms-3 select-none">
         <button className="btn-icon">
           <Search />
         </button>
@@ -34,7 +34,7 @@ const Navbar = () => {
             ⌘K
           </span>
         </span>
-      </div>
+      </div> */}
 
       <div className="flex-1" />
 
@@ -54,14 +54,14 @@ const Navbar = () => {
       </button> */}
 
       {/* 알림 */}
-      <button
+      {/* <button
         className="btn-icon relative me-1"
         id="notification-btn"
         onClick={() => setNotificationsOpen(!notificationsOpen)}
       >
         <Bell />
         <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500" />
-      </button>
+      </button> */}
 
       {/* 아바타 */}
       <div
