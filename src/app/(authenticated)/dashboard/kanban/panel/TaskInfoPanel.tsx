@@ -31,7 +31,9 @@ interface TaskInfoPanelProps {
   isPersonal?: boolean;
   panelWidth: number;
   setPanelWidth: (w: number) => void;
-  inputRefs?: React.MutableRefObject<Record<string, HTMLTextAreaElement | null>>; 
+  inputRefs?: React.MutableRefObject<
+    Record<string, HTMLTextAreaElement | null>
+  >;
 }
 
 type FormData = {
@@ -183,7 +185,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     <div
       ref={panelRef}
       className={`
-    absolute top-0 right-0 h-full flex flex-col z-50
+    fixed top-14 right-0 h-full flex flex-col z-50
     bg-[var(--bg-third)] shadow-[ -2px_0_6px_rgba(0,0,0,0.15)]
     transition-transform duration-300 ease-in-out
     ${isTaskInfoPanelOpen ? "translate-x-0" : "translate-x-full"}
@@ -241,9 +243,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
             <>
               <div className="flex items-center gap-1 whitespace-nowrap">
                 <FaPeopleGroup />
-                <span className="text-sm sm:text-base">
-                  할당자
-                </span>
+                <span className="text-sm sm:text-base">할당자</span>
               </div>
               <Controller
                 name="assignees"
