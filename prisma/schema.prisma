@@ -23,6 +23,13 @@ enum ProjectLabel {
   maintenance
 }
 
+enum FileType {
+  IMAGE
+  PDF
+  EXCEL
+  OTHER
+}
+
 model User {
   id           Int     @id @default(autoincrement())
   userId       String  @unique
@@ -68,6 +75,9 @@ model Task {
 
   // 할당된 담당자들
   assignees User[] @relation("TaskAssignees")
+
+  // 첨부 파일
+  attachments TaskAttachment[]
 }
 
 model Comment {
@@ -84,5 +94,16 @@ model Comment {
   replies       Comment[] @relation("CommentToReplies")
 
   user User @relation(fields: [userId], references: [id])
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model TaskAttachment {
+  id        Int      @id @default(autoincrement())
+  taskId    Int
+  fileName  String
+  fileUrl   String
+  fileType  FileType
+  createdAt DateTime @default(now())
+
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 }
