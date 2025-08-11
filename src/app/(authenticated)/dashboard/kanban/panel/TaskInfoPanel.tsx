@@ -22,6 +22,7 @@ import { Controller, useForm } from "react-hook-form";
 import useTasks from "@/hooks/react-query/useTasks";
 import { TaskComments } from "../taskcomment/TaskComments";
 import { useThemeStore } from "@/store/useThemeStore";
+import useUpload from "@/hooks/react-query/useUpload";
 
 interface TaskInfoPanelProps {
   isTaskInfoPanelOpen: boolean;
@@ -54,16 +55,17 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const isDark = theme === "dark";
   const { updateTask, columns, moveTask } = useKanbanStore();
   const { updateTaskMutate, moveTaskMutate } = useTasks();
-
+  
   const [columnKey, itemIndexStr] = focusedInputKey.split("-");
   const taskIndex = Number(itemIndexStr);
   const resizing = useRef(false);
   const panelRef = useRef<HTMLDivElement>(null);
-
+  
   const task = useMemo(
     () => columns[columnKey as Status]?.[taskIndex],
     [columns, columnKey, taskIndex]
   );
+  const { upload } = useUpload(task?.id);
 
   const isMobile = useMediaQuery("(max-width: 767px)");
 
@@ -272,6 +274,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         <Editor
           onChange={(e) => handleUpdateTask(e, "desc")}
           content={task?.desc}
+          upload={upload} 
         />
       </div>
     </div>
