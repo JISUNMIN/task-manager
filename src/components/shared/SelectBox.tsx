@@ -88,10 +88,10 @@ export function SelectBox<T extends string | number>({
         aria-haspopup="listbox"
         aria-expanded={open}
         className=" w-full flex justify-between items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm shadow-sm
-    hover:border-blue-500
-    dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100
-    dark:hover:border-blue-400
-    dark:focus:ring-blue-400"
+        hover:border-blue-500
+        dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100
+        dark:hover:border-blue-400
+        dark:focus:ring-blue-400"
       >
         <span
           className={`${value ? "text-gray-900" : "text-gray-400"} dark:text-gray-100 dark:placeholder:text-gray-400`}
