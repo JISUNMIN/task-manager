@@ -31,7 +31,7 @@ const SlashCommandKeyHandler = Extension.create({
           if (typeof window !== "undefined") {
             const event = new CustomEvent("slash-command-enter");
             window.dispatchEvent(event);
-            return true; 
+            return true;
           }
         }
         return false;
@@ -186,7 +186,7 @@ export default function Editor({
   const editor = useEditor({
     extensions: [
       StarterKit,
-          FileCard,
+      FileCard,
       Heading.configure({ levels: [1, 2] }),
       BulletList,
       ListItem,
@@ -224,11 +224,11 @@ export default function Editor({
   };
 
   // 파일 크기 포맷 함수
-const formatFileSize = (size: number) => {
-  if (size < 1024) return `${size} B`;
-  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-};
+  const formatFileSize = (size: number) => {
+    if (size < 1024) return `${size} B`;
+    if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  };
 
   const handleDrop = useCallback(
     async (event: React.DragEvent<HTMLDivElement>) => {
@@ -254,23 +254,23 @@ const formatFileSize = (size: number) => {
                 })
                 .run();
             } else {
-      const fileSizeText = formatFileSize(file.size);
+              const fileSizeText = formatFileSize(file.size);
 
-editor
-  .chain()
-  .focus()
-  .insertContentAt(
-    pos, // 드롭된 위치
-    {
-      type: "fileCard",
-      attrs: {
-        fileName,
-        fileUrl,
-        fileSize: fileSizeText,
-      },
-    }
-  )
-  .run();
+              editor
+                .chain()
+                .focus()
+                .insertContentAt(
+                  pos, // 드롭된 위치
+                  {
+                    type: "fileCard",
+                    attrs: {
+                      fileName,
+                      fileUrl,
+                      fileSize: fileSizeText,
+                    },
+                  }
+                )
+                .run();
             }
           }
         } catch {
@@ -287,7 +287,7 @@ editor
   }, [content]);
 
   return (
-    <div className="relative p-4">
+    <div className="relative p-4 h-full">
       {editor && <SlashCommands editor={editor} />}
       <EditorContent
         editor={editor}
