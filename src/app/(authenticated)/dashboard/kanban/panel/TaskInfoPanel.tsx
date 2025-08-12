@@ -5,13 +5,6 @@ import { FaAngleDoubleRight } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
 import KanbanColumnBadge from "../board/KanbanColumnBadge";
 import Editor from "@/components/shared/editor/Editor";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import Grid from "@/layout/Grid";
 import { TbCircleDotted } from "react-icons/tb";
 import { FaPeopleGroup } from "react-icons/fa6";
@@ -22,6 +15,7 @@ import { Controller, useForm } from "react-hook-form";
 import useTasks from "@/hooks/react-query/useTasks";
 import { TaskComments } from "../taskcomment/TaskComments";
 import { useThemeStore } from "@/store/useThemeStore";
+import { SelectBox } from "@/components/shared/SelectBox";
 
 interface TaskInfoPanelProps {
   isTaskInfoPanelOpen: boolean;
@@ -185,11 +179,11 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     <div
       ref={panelRef}
       className={`
-    fixed top-14 right-0 h-full flex flex-col z-50
-    bg-[var(--bg-third)] shadow-[ -2px_0_6px_rgba(0,0,0,0.15)]
-    transition-transform duration-300 ease-in-out
-    ${isTaskInfoPanelOpen ? "translate-x-0" : "translate-x-full"}
-  `}
+        fixed top-14 right-0 h-full flex flex-col z-50
+        bg-[var(--bg-third)] shadow-[ -2px_0_6px_rgba(0,0,0,0.15)]
+        transition-transform duration-300 ease-in-out
+        ${isTaskInfoPanelOpen ? "translate-x-0" : "translate-x-full"}
+      `}
       style={{
         width: isMobile ? "100%" : `${panelWidth}px`,
       }}
@@ -223,21 +217,14 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
             <TbCircleDotted />
             <span className="text-sm sm:text-base">상태</span>
           </div>
-          <Select
-            value={columnKey}
-            onValueChange={(newStatus: Status) => handleUpdateStatus(newStatus)}
-          >
-            <SelectTrigger className="w-full py-6">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {ALL_STATUS.map((status) => (
-                <SelectItem key={status} value={status}>
-                  <KanbanColumnBadge columnKey={status} isDark={isDark} />
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <SelectBox
+            options={ALL_STATUS}
+            value={columnKey as Status}
+            onChange={(newStatus: Status) => handleUpdateStatus(newStatus)}
+            renderOption={(status) => (
+              <KanbanColumnBadge columnKey={status} isDark={isDark} />
+            )}
+          />
 
           {!isPersonal && (
             <>

@@ -63,8 +63,6 @@ export function UserSelectInput({
   }, [selectedIndex]);
 
   const toggleUser = (user: User) => {
-    // value: 현재값
-    // isAlreadySelected:해당 값이 선택 되어있는지 여부: 처음 선택 시 fasle ,한번더 선택시 true
     const isAlreadySelected = value.includes(user.id);
 
     if (isAlreadySelected) {
@@ -113,14 +111,22 @@ export function UserSelectInput({
   return (
     <div
       ref={containerRef}
-      className="relative w-full max-w-md border border-gray-300 rounded-md px-3 py-2 flex flex-wrap items-center gap-2 bg-white shadow-sm"
+      className={cn(
+        "relative w-full max-w-md rounded-md px-3 py-2 flex flex-wrap items-center gap-2 bg-white shadow-sm",
+        dropdownOpen
+          ? "border-2 border-blue-500 dark:border-blue-400"
+          : "border border-gray-300 dark:border-gray-600",
+        "dark:bg-gray-800 dark:text-gray-100",
+        "cursor-text"
+      )}
       onClick={() => inputRef.current?.focus()}
     >
       {/* 선택된 사용자들 */}
       {selectedUsers.map((user) => (
         <div
           key={user.id}
-          className="flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2 py-1 text-sm"
+          className="flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2 py-1 text-sm
+                     dark:bg-primary/20 dark:text-primary-light"
         >
           <UserAvatar
             src={user.profileImage ?? ""}
@@ -134,7 +140,7 @@ export function UserSelectInput({
               e.stopPropagation();
               toggleUser(user);
             }}
-            className="ml-1 text-xs hover:text-primary/70"
+            className="ml-1 text-xs hover:text-primary/70 dark:hover:text-primary/80"
             type="button"
           >
             ×
@@ -146,7 +152,8 @@ export function UserSelectInput({
       <input
         ref={inputRef}
         type="text"
-        className="flex-grow min-w-[60px] border-none outline-none bg-transparent py-1 text-sm"
+        className="flex-grow min-w-[60px] border-none outline-none bg-transparent py-1 text-sm placeholder-gray-400
+                   dark:placeholder-gray-400"
         value={inputValue}
         onChange={(e) => {
           setInputValue(e.target.value);
@@ -159,9 +166,14 @@ export function UserSelectInput({
 
       {/* 드롭다운 */}
       {dropdownOpen && (
-        <ul className="absolute left-0 top-full mt-1 w-full max-h-60 overflow-auto rounded-md border bg-white shadow-md z-50">
+        <ul
+          className="absolute left-0 top-full mt-1 w-full max-h-60 overflow-auto rounded-md border bg-white shadow-md z-50
+                       dark:bg-gray-900 dark:border-gray-700 dark:shadow-lg"
+        >
           {filteredUsers.length === 0 ? (
-            <li className="p-3 text-sm text-gray-500">사용자가 없습니다.</li>
+            <li className="p-3 text-sm text-gray-500 dark:text-gray-400">
+              사용자가 없습니다.
+            </li>
           ) : (
             filteredUsers.map((user, index) => {
               const isSelected = value.includes(user.id);
@@ -178,10 +190,10 @@ export function UserSelectInput({
                   aria-selected={isHighlighted}
                   className={cn(
                     "flex items-center gap-3 px-4 py-2 cursor-pointer transition-colors",
-                    isHighlighted ? "bg-gray-100" : "",
+                    isHighlighted ? "bg-gray-100 dark:bg-gray-700" : "",
                     isSelected
-                      ? "bg-primary/10 font-medium"
-                      : "hover:bg-gray-100"
+                      ? "bg-primary/10 font-medium dark:bg-primary/30"
+                      : "hover:bg-gray-100 dark:hover:bg-gray-700"
                   )}
                 >
                   <UserAvatar
@@ -191,10 +203,12 @@ export function UserSelectInput({
                   />
                   <div className="flex flex-col text-sm">
                     <span>{user.name}</span>
-                    <span className="text-xs text-gray-500">{user.userId}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {user.userId}
+                    </span>
                   </div>
                   {isSelected && (
-                    <Check className="ml-auto h-4 w-4 text-primary" />
+                    <Check className="ml-auto h-4 w-4 text-primary dark:text-primary-light" />
                   )}
                 </li>
               );
@@ -203,7 +217,7 @@ export function UserSelectInput({
         </ul>
       )}
       {error && (
-        <span className="text-sm text-red-500 mt-1">
+        <span className="text-sm text-red-500 mt-1 dark:text-red-400">
           최대 {maxSelectable}명까지 선택할 수 있어요.
         </span>
       )}
