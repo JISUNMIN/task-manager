@@ -14,6 +14,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  DragEndEvent,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -26,6 +27,7 @@ import useProjectMutations from "@/hooks/react-query/useProjectMutations";
 import { CardSkeleton } from "@/components/ui/extended/Skeleton/CardSkeleton";
 
 import { LABELS, LABEL_COLOR_MAP } from "@/app/constants/common";
+import { cn } from "@/lib/utils";
 
 const SortableItem = ({
   id,
@@ -38,16 +40,13 @@ const SortableItem = ({
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id, disabled });
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
+
   return (
     <div
       ref={setNodeRef}
-      style={style}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
       {...attributes}
-      {...(disabled ? {} : listeners)}
+      {...(!disabled && listeners)}
     >
       {children}
     </div>
@@ -67,6 +66,16 @@ const ProjectList = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedLabels, setSelectedLabels] = useState<string[]>([...LABELS]);
   const router = useRouter();
+  const filteredProjects = editableProjects.filter(
+    (project) =>
+      project.isPersonal || selectedLabels.includes(project.label ?? "feature")
+  );
+
+  const noTeamProjects =
+    listData?.length === 1 && listData[0].isPersonal && role !== "ADMIN";
+
+  const noFilteredProjects =
+    editableProjects.length > 0 && !filteredProjects.some((p) => !p.isPersonal);
 
   useEffect(() => {
     if (listData) {
@@ -76,15 +85,12 @@ const ProjectList = () => {
   }, [listData]);
 
   const toggleLabel = (label: string) => {
-    setSelectedLabels((prev) =>
-      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label]
-    );
+    setSelectedLabels((prev) => {
+      const newSet = new Set(prev);
+      newSet.has(label) ? newSet.delete(label) : newSet.add(label);
+      return [...newSet];
+    });
   };
-
-  const filteredProjects = editableProjects.filter((project) => {
-    if (project.isPersonal) return true;
-    return selectedLabels.includes(project.label ?? "feature");
-  });
 
   const onClickProject = (projectId: number) => {
     if (isEditing) return;
@@ -95,9 +101,12 @@ const ProjectList = () => {
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (active.id !== over?.id) {
+
+    if (!over) return;
+
+    if (active.id !== over.id) {
       const oldIndex = editableProjects.findIndex((p) => p.id === active.id);
       const newIndex = editableProjects.findIndex((p) => p.id === over.id);
       setEditableProjects((prev) => arrayMove(prev, oldIndex, newIndex));
@@ -120,9 +129,12 @@ const ProjectList = () => {
     <div className="flex gap-2 mb-4 flex-wrap">
       {LABELS.map((label) => {
         const isSelected = selectedLabels.includes(label);
-        const className = isSelected
-          ? LABEL_COLOR_MAP[label] + " cursor-pointer"
-          : "cursor-pointer border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400";
+        const className = cn(
+          "px-3 py-1 rounded-full text-sm font-semibold select-none transition-colors duration-200 cursor-pointer",
+          isSelected
+            ? LABEL_COLOR_MAP[label]
+            : "border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400"
+        );
 
         return (
           <span
@@ -162,31 +174,42 @@ const ProjectList = () => {
           </div>
         )}
 
-        {projectsToRender.map((project) =>
-          isEditing ? (
+        {projectsToRender.map((project) => {
+          const card = (
+            <ProjectCard
+              project={project}
+              disabled={isEditing && project.isPersonal}
+              onClick={() => onClickProject(project.id)}
+            />
+          );
+
+          return isEditing ? (
             <SortableItem
               key={project.id}
               id={project.id}
               disabled={project.isPersonal}
             >
-              <ProjectCard
-                project={project}
-                disabled={project.isPersonal}
-                onClick={() => onClickProject(project.id)}
-              />
+              {card}
             </SortableItem>
           ) : (
-            <div key={project.id}>
-              <ProjectCard
-                project={project}
-                onClick={() => onClickProject(project.id)}
-              />
-            </div>
-          )
-        )}
+            <div key={project.id}>{card}</div>
+          );
+        })}
       </div>
     );
   };
+
+  const renderActionButtons = () =>
+    isEditing ? (
+      <div className="space-x-2">
+        <Button onClick={onClickConfirmProjectOrder}>확인</Button>
+        <Button variant="secondary" onClick={onClickCancelProjectOrder}>
+          취소
+        </Button>
+      </div>
+    ) : (
+      <Button onClick={() => setIsEditing(true)}>프로젝트 순서 변경</Button>
+    );
 
   return (
     <FormProvider {...formInstance}>
@@ -195,43 +218,27 @@ const ProjectList = () => {
           <h1 className="text-3xl font-extrabold text-[var(--foreground)]">
             프로젝트 목록
           </h1>
-          {isEditing ? (
-            <div className="space-x-2">
-              <Button onClick={onClickConfirmProjectOrder}>확인</Button>
-              <Button variant="secondary" onClick={onClickCancelProjectOrder}>
-                취소
-              </Button>
-            </div>
-          ) : (
-            <Button onClick={() => setIsEditing(true)}>
-              프로젝트 순서 변경
-            </Button>
-          )}
+          {renderActionButtons()}
         </div>
 
         {/* 라벨 필터 UI */}
         {!isEditing && renderLabelFilters()}
 
         {/* 안내 메시지 */}
-        {!isEditing &&
-          listData?.length === 1 &&
-          listData[0].isPersonal &&
-          role !== "ADMIN" && (
-            <div className="text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded p-4 text-center mb-6">
-              현재 할당된 팀 프로젝트가 없습니다.
-              <br />
-              개인 프로젝트를 이용하시거나, 관리자에게 프로젝트 할당을 요청해
-              주세요.
-            </div>
-          )}
+        {!isEditing && noTeamProjects && (
+          <div className="text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded p-4 text-center mb-6">
+            현재 할당된 팀 프로젝트가 없습니다.
+            <br />
+            개인 프로젝트를 이용하시거나, 관리자에게 프로젝트 할당을 요청해
+            주세요.
+          </div>
+        )}
 
-        {!isEditing &&
-          editableProjects.length &&
-          !filteredProjects.filter((p) => !p.isPersonal).length && (
-            <p className="text-center text-gray-500 dark:text-gray-400 mb-6">
-              선택한 라벨에 해당하는 프로젝트가 없습니다.
-            </p>
-          )}
+        {!isEditing && noFilteredProjects && (
+          <p className="text-center text-gray-500 dark:text-gray-400 mb-6">
+            선택한 라벨에 해당하는 팀 프로젝트가 없습니다.
+          </p>
+        )}
 
         {!editableProjects.length ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
