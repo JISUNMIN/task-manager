@@ -82,7 +82,7 @@ export function UserSelectionModal({
                   >
                     <Avatar className="w-5 h-5" key={user?.userId}>
                       <AvatarImage
-                        src={user?.profileImage ?? ""}
+                        src={user?.profileImage || undefined}
                         alt={user?.name}
                       />
                       <AvatarFallback>
@@ -110,7 +110,7 @@ export function UserSelectionModal({
             {selectedUser ? (
               <div className="flex -space-x-2 overflow-hidden gap-3 items-center">
                 <UserAvatar
-                  src={selectedUser?.profileImage ?? ""}
+                  src={selectedUser?.profileImage || undefined}
                   alt={selectedUser?.name}
                 />
                 <div className="text-sm">{selectedUser.name}</div>

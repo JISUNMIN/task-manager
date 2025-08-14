@@ -93,7 +93,7 @@ export const TaskComments = ({ taskId }: Props) => {
       {/* 일반 댓글 입력창 */}
       <div className="flex items-start gap-2">
         <UserAvatar
-          src={user?.profileImage ?? ""}
+          src={user?.profileImage}
           alt={user?.name ?? "User"}
           className="mt-1"
         />

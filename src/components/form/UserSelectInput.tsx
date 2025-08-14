@@ -129,7 +129,7 @@ export function UserSelectInput({
                      dark:bg-primary/20 dark:text-primary-light"
         >
           <UserAvatar
-            src={user.profileImage ?? ""}
+            src={user.profileImage || undefined}
             alt={user.name}
             size="sm"
             className="mt-1"
@@ -197,7 +197,7 @@ export function UserSelectInput({
                   )}
                 >
                   <UserAvatar
-                    src={user.profileImage ?? ""}
+                    src={user.profileImage ?? null}
                     alt={user.name}
                     className="mt-1"
                   />

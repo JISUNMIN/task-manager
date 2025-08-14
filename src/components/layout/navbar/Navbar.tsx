@@ -69,7 +69,7 @@ const Navbar = () => {
         onClick={() => setAvatarMenuOpen(!avatarMenuOpen)}
       >
         <UserAvatar
-          src={user?.profileImage ?? ""}
+          src={user?.profileImage}
           alt={user?.userId}
           size="lg"
           className="mt-1"

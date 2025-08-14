@@ -1,10 +1,6 @@
 import { useRef } from "react";
 import Link from "next/link";
-import {
-  IoPersonCircle,
-  IoExitOutline,
-  IoGridOutline,
-} from "react-icons/io5";
+import { IoPersonCircle, IoExitOutline, IoGridOutline } from "react-icons/io5";
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
@@ -37,12 +33,11 @@ const UserMenu = ({ open, onOpenChange }: UserMenuProps) => {
         >
           <div className="py-2">
             {/* 사용자 정보 */}
-            <Link  href="/profile" className="flex items-center px-4 py-3 gap-3 border-b border-[var(--border)]">
-              <UserAvatar
-                src={user?.profileImage ?? ""}
-                alt={user?.name}
-                size="xl"
-              />
+            <Link
+              href="/profile"
+              className="flex items-center px-4 py-3 gap-3 border-b border-[var(--border)]"
+            >
+              <UserAvatar src={user?.profileImage} alt={user?.name} size="xl" />
               <div>
                 <p className="font-semibold">{user?.name}</p>
                 <p className="text-sm text-[var(--muted-foreground)] capitalize">

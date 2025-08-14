@@ -24,7 +24,7 @@ const colorClasses = {
 };
 
 export const UserAvatar = ({
-  src = "",
+  src,
   alt = "사용자",
   className = "",
   size = "md",

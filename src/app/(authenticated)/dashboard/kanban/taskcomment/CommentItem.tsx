@@ -109,7 +109,7 @@ export const CommentItem = ({
   return (
     <div className="flex gap-2">
       <UserAvatar
-        src={comment.user.profileImage ?? ""}
+        src={comment.user.profileImage}
         alt={comment.user.name}
         className="mt-1"
       />
@@ -189,7 +189,7 @@ export const CommentItem = ({
         {showReplyInput && (
           <div className="flex items-start gap-2 mt-3 ml-6">
             <UserAvatar
-              src={user?.profileImage ?? ""}
+              src={user?.profileImage ?? null}
               alt={user?.name ?? "User"}
               className="mt-1"
             />

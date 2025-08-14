@@ -210,7 +210,7 @@ const ProjectCard: FC<ProjectCardProps> = memo(
             <div className="text-sm text-[var(--foreground)] flex gap-1.5 items-center mt-1">
               담당자: {project?.manager?.name}
               <UserAvatar
-                src={project?.manager?.profileImage ?? ""}
+                src={project?.manager?.profileImage || undefined}
                 alt={project?.manager?.userId}
                 size="lg"
                 className="mt-1"
