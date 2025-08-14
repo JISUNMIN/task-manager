@@ -26,6 +26,8 @@ import { CSS } from "@dnd-kit/utilities";
 import useProjectMutations from "@/hooks/react-query/useProjectMutations";
 import { CardSkeleton } from "@/components/ui/extended/Skeleton/CardSkeleton";
 
+import { LABELS, LABEL_COLOR_MAP } from "@/app/constants/common";
+
 const SortableItem = ({
   id,
   children,
@@ -65,16 +67,28 @@ const ProjectList = () => {
   const [originalProjects, setOriginalProjects] = useState<ClientProject[]>([]);
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
   const router = useRouter();
+  // 라벨 필터 상태 (초기값: 모든 라벨 선택)
+  const [selectedLabels, setSelectedLabels] = useState<string[]>([...LABELS]);
 
   useEffect(() => {
     if (listData) {
-      const filtered = listData.filter((project) =>
-        project.isPersonal ? project.manager.id === user?.id : true
-      );
-      setEditableProjects(filtered);
-      setOriginalProjects(filtered);
+      setEditableProjects(listData);
+      setOriginalProjects(listData);
     }
   }, [listData]);
+
+  // 라벨 토글
+  const toggleLabel = (label: string) => {
+    setSelectedLabels((prev) =>
+      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label]
+    );
+  };
+
+  // 필터링된 프로젝트
+  const filteredProjects = editableProjects.filter((project) => {
+    if (project.isPersonal) return true;
+    return selectedLabels.includes(project.label ?? "feature");
+  });
 
   const onClickProject = (projectId: number) => {
     if (isEditing) return;
@@ -101,7 +115,26 @@ const ProjectList = () => {
     updateProjectOrder({ projectIds: editableProjects.map((p) => p.id) });
   };
 
-  if (!listData || isNavigating) return <Loading />;
+  const renderLabelFilters = () => (
+    <div className="flex gap-2 mb-4 flex-wrap">
+      {LABELS.map((label) => {
+        const isSelected = selectedLabels.includes(label);
+        const className = isSelected
+          ? LABEL_COLOR_MAP[label] + " cursor-pointer"
+          : "cursor-pointer border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400";
+
+        return (
+          <span
+            key={label}
+            className={`px-3 py-1 rounded-full text-sm font-semibold select-none transition-colors duration-200 ${className}`}
+            onClick={() => toggleLabel(label)}
+          >
+            {label}
+          </span>
+        );
+      })}
+    </div>
+  );
 
   const renderProjects = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -123,7 +156,7 @@ const ProjectList = () => {
         </div>
       )}
 
-      {editableProjects.map((project) =>
+      {filteredProjects.map((project) =>
         isEditing ? (
           <SortableItem
             key={project.id}
@@ -175,6 +208,9 @@ const ProjectList = () => {
           )}
         </div>
 
+        {/* 라벨 필터 UI */}
+        {renderLabelFilters()}
+
         {/* 안내 메시지 */}
         {listData?.length === 1 &&
           listData[0].isPersonal &&
@@ -186,7 +222,14 @@ const ProjectList = () => {
               주세요.
             </div>
           )}
-        {!editableProjects.length && !!listData.length ? (
+
+        {!filteredProjects.filter((p) => !p.isPersonal).length && (
+          <p className="text-center text-gray-500 dark:text-gray-400 mb-6">
+            선택한 라벨에 해당하는 프로젝트가 없습니다.
+          </p>
+        )}
+
+        {!editableProjects.length ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
               <CardSkeleton key={i} />
@@ -199,7 +242,7 @@ const ProjectList = () => {
             onDragEnd={handleDragEnd}
           >
             <SortableContext
-              items={editableProjects.map((p) => p.id)}
+              items={filteredProjects.map((p) => p.id)}
               strategy={rectSortingStrategy}
             >
               {renderProjects()}
