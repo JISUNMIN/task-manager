@@ -1,9 +1,8 @@
 "use client";
-import React, { useState, useEffect, ReactNode } from "react";
+import React, { useState, useEffect, ReactNode, useRef } from "react";
 import ProjectCard from "./ProjectCard";
 import useProjects, { ClientProject } from "@/hooks/react-query/useProjects";
 import { useRouter } from "next/navigation";
-import Loading from "@/app/loading";
 import NewProjectCard from "./NewProjectCard";
 import { useAuthStore } from "@/store/useAuthStore";
 import { FormProvider, useForm } from "react-hook-form";
@@ -61,30 +60,27 @@ const ProjectList = () => {
   const role = user?.role;
   const { listData } = useProjects();
   const { updateProjectOrder } = useProjectMutations();
+
+  const [editableProjects, setEditableProjects] = useState<ClientProject[]>([]);
+  const originalProjectsRef = useRef<ClientProject[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editableProjects, setEditableProjects] = useState<ClientProject[]>([]);
-  const [originalProjects, setOriginalProjects] = useState<ClientProject[]>([]);
-  const [isNavigating, setIsNavigating] = useState<boolean>(false);
-  const router = useRouter();
-  // 라벨 필터 상태 (초기값: 모든 라벨 선택)
   const [selectedLabels, setSelectedLabels] = useState<string[]>([...LABELS]);
+  const router = useRouter();
 
   useEffect(() => {
     if (listData) {
       setEditableProjects(listData);
-      setOriginalProjects(listData);
+      originalProjectsRef.current = listData;
     }
   }, [listData]);
 
-  // 라벨 토글
   const toggleLabel = (label: string) => {
     setSelectedLabels((prev) =>
       prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label]
     );
   };
 
-  // 필터링된 프로젝트
   const filteredProjects = editableProjects.filter((project) => {
     if (project.isPersonal) return true;
     return selectedLabels.includes(project.label ?? "feature");
@@ -92,7 +88,6 @@ const ProjectList = () => {
 
   const onClickProject = (projectId: number) => {
     if (isEditing) return;
-    setIsNavigating(true);
     router.push(`/dashboard/kanban?projectId=${projectId}`);
   };
 
@@ -110,9 +105,15 @@ const ProjectList = () => {
   };
 
   const onClickConfirmProjectOrder = () => {
-    setOriginalProjects(editableProjects);
+    originalProjectsRef.current = editableProjects;
     setIsEditing(false);
     updateProjectOrder({ projectIds: editableProjects.map((p) => p.id) });
+    setSelectedLabels([...LABELS]);
+  };
+
+  const onClickCancelProjectOrder = () => {
+    setEditableProjects(originalProjectsRef.current);
+    setIsEditing(false);
   };
 
   const renderLabelFilters = () => (
@@ -136,50 +137,56 @@ const ProjectList = () => {
     </div>
   );
 
-  const renderProjects = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      {!isEditing && role === "ADMIN" && (
-        <div
-          className="h-55 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 mb-3 cursor-pointer bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
-          onClick={() => setIsCreating(true)}
-        >
-          {isCreating ? (
-            <div onClick={(e) => e.stopPropagation()}>
-              <NewProjectCard
-                onCancel={() => setIsCreating(false)}
-                onCreated={() => setIsCreating(false)}
+  const renderProjects = () => {
+    const projectsToRender = isEditing ? editableProjects : filteredProjects;
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {!isEditing && role === "ADMIN" && (
+          <div
+            className="h-55 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 mb-3 cursor-pointer bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
+            onClick={() => setIsCreating(true)}
+          >
+            {isCreating ? (
+              <div onClick={(e) => e.stopPropagation()}>
+                <NewProjectCard
+                  onCancel={() => setIsCreating(false)}
+                  onCreated={() => setIsCreating(false)}
+                />
+              </div>
+            ) : (
+              <span className="text-2xl text-gray-500 dark:text-gray-300">
+                +
+              </span>
+            )}
+          </div>
+        )}
+
+        {projectsToRender.map((project) =>
+          isEditing ? (
+            <SortableItem
+              key={project.id}
+              id={project.id}
+              disabled={project.isPersonal}
+            >
+              <ProjectCard
+                project={project}
+                disabled={project.isPersonal}
+                onClick={() => onClickProject(project.id)}
+              />
+            </SortableItem>
+          ) : (
+            <div key={project.id}>
+              <ProjectCard
+                project={project}
+                onClick={() => onClickProject(project.id)}
               />
             </div>
-          ) : (
-            <span className="text-2xl text-gray-500 dark:text-gray-300">+</span>
-          )}
-        </div>
-      )}
-
-      {filteredProjects.map((project) =>
-        isEditing ? (
-          <SortableItem
-            key={project.id}
-            id={project.id}
-            disabled={project.isPersonal}
-          >
-            <ProjectCard
-              project={project}
-              disabled={project.isPersonal}
-              onClick={() => onClickProject(project.id)}
-            />
-          </SortableItem>
-        ) : (
-          <div key={project.id}>
-            <ProjectCard
-              project={project}
-              onClick={() => onClickProject(project.id)}
-            />
-          </div>
-        )
-      )}
-    </div>
-  );
+          )
+        )}
+      </div>
+    );
+  };
 
   return (
     <FormProvider {...formInstance}>
@@ -191,13 +198,7 @@ const ProjectList = () => {
           {isEditing ? (
             <div className="space-x-2">
               <Button onClick={onClickConfirmProjectOrder}>확인</Button>
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setEditableProjects(originalProjects);
-                  setIsEditing(false);
-                }}
-              >
+              <Button variant="secondary" onClick={onClickCancelProjectOrder}>
                 취소
               </Button>
             </div>
@@ -209,10 +210,11 @@ const ProjectList = () => {
         </div>
 
         {/* 라벨 필터 UI */}
-        {renderLabelFilters()}
+        {!isEditing && renderLabelFilters()}
 
         {/* 안내 메시지 */}
-        {listData?.length === 1 &&
+        {!isEditing &&
+          listData?.length === 1 &&
           listData[0].isPersonal &&
           role !== "ADMIN" && (
             <div className="text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded p-4 text-center mb-6">
@@ -223,11 +225,13 @@ const ProjectList = () => {
             </div>
           )}
 
-        {!filteredProjects.filter((p) => !p.isPersonal).length && (
-          <p className="text-center text-gray-500 dark:text-gray-400 mb-6">
-            선택한 라벨에 해당하는 프로젝트가 없습니다.
-          </p>
-        )}
+        {!isEditing &&
+          editableProjects.length &&
+          !filteredProjects.filter((p) => !p.isPersonal).length && (
+            <p className="text-center text-gray-500 dark:text-gray-400 mb-6">
+              선택한 라벨에 해당하는 프로젝트가 없습니다.
+            </p>
+          )}
 
         {!editableProjects.length ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
