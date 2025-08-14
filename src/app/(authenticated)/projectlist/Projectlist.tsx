@@ -28,7 +28,7 @@ import { CardSkeleton } from "@/components/ui/extended/Skeleton/CardSkeleton";
 
 import { LABELS, LABEL_COLOR_MAP } from "@/app/constants/common";
 import { cn } from "@/lib/utils";
-import { Loader2Icon } from "lucide-react";
+import { Filter, Loader2Icon } from "lucide-react";
 
 const SortableItem = ({
   id,
@@ -130,39 +130,45 @@ const ProjectList = () => {
     setSelectedLabels([...LABELS]);
   };
 
-  const renderLabelFilters = () => (
-    <div className="flex gap-2 mb-4 flex-wrap items-center">
-      {LABELS.map((label) => {
-        const isSelected = selectedLabels.includes(label);
-        const className = cn(
-          "px-3 py-1 rounded-full text-sm font-semibold select-none transition-colors duration-200 cursor-pointer",
-          isSelected
-            ? LABEL_COLOR_MAP[label]
-            : "border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400"
-        );
+const renderLabelFilters = () => (
+  <div className="flex gap-2 mb-4 flex-wrap items-center">
+    {/* 필터 아이콘 */}
+    <div className="p-2 rounded-full bg-gray-200 dark:bg-gray-700" >
+      <Filter className="w-4 h-4" />
+    </div>
 
-        return (
-          <span
-            key={label}
-            className={`
+    {LABELS.map((label) => {
+      const isSelected = selectedLabels.includes(label);
+      const className = cn(
+        "px-3 py-1 rounded-full text-sm font-semibold select-none transition-colors duration-200 cursor-pointer",
+        isSelected
+          ? LABEL_COLOR_MAP[label]
+          : "border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400"
+      );
+
+      return (
+        <span
+          key={label}
+          className={`
             rounded-full font-semibold select-none transition-colors duration-200
             px-2 py-0.5 text-xs        
             lg:px-3 lg:py-1 lg:text-sm ${className}`}
-            onClick={() => toggleLabel(label)}
-          >
-            {label}
-          </span>
-        );
-      })}
-      {/* Reset 버튼 */}
-      <Button
-        className="px-3 text-xs lg:py-1 lg:text-sm rounded-full  font-semibold select-none cursor-pointer border"
-        onClick={handleResetClick}
-      >
-        {isResetting ? <Loader2Icon className="animate-spin" /> : "⟳"}
-      </Button>
-    </div>
-  );
+          onClick={() => toggleLabel(label)}
+        >
+          {label}
+        </span>
+      );
+    })}
+
+    {/* Reset 버튼 */}
+    <Button
+      className="px-3 text-xs lg:py-1 lg:text-sm rounded-full font-semibold select-none cursor-pointer border"
+      onClick={handleResetClick}
+    >
+      {isResetting ? <Loader2Icon className="animate-spin" /> : "⟳"}
+    </Button>
+  </div>
+);
 
   const renderProjects = () => {
     const projectsToRender = isEditing ? editableProjects : filteredProjects;
