@@ -28,6 +28,7 @@ import { CardSkeleton } from "@/components/ui/extended/Skeleton/CardSkeleton";
 
 import { LABELS, LABEL_COLOR_MAP } from "@/app/constants/common";
 import { cn } from "@/lib/utils";
+import { Loader2Icon } from "lucide-react";
 
 const SortableItem = ({
   id,
@@ -65,6 +66,7 @@ const ProjectList = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedLabels, setSelectedLabels] = useState<string[]>([...LABELS]);
+  const [isResetting, setIsResetting] = useState(false);
   const router = useRouter();
   const filteredProjects = editableProjects.filter(
     (project) =>
@@ -76,13 +78,6 @@ const ProjectList = () => {
 
   const noFilteredProjects =
     editableProjects.length > 0 && !filteredProjects.some((p) => !p.isPersonal);
-
-  useEffect(() => {
-    if (listData) {
-      setEditableProjects(listData);
-      originalProjectsRef.current = listData;
-    }
-  }, [listData]);
 
   const toggleLabel = (label: string) => {
     setSelectedLabels((prev) => {
@@ -125,8 +120,18 @@ const ProjectList = () => {
     setIsEditing(false);
   };
 
+  const handleResetClick = () => {
+    setIsResetting(true);
+
+    setTimeout(() => {
+      setIsResetting(false);
+    }, 500);
+
+    setSelectedLabels([...LABELS]);
+  };
+
   const renderLabelFilters = () => (
-    <div className="flex gap-2 mb-4 flex-wrap">
+    <div className="flex gap-2 mb-4 flex-wrap items-center">
       {LABELS.map((label) => {
         const isSelected = selectedLabels.includes(label);
         const className = cn(
@@ -139,13 +144,23 @@ const ProjectList = () => {
         return (
           <span
             key={label}
-            className={`px-3 py-1 rounded-full text-sm font-semibold select-none transition-colors duration-200 ${className}`}
+            className={`
+            rounded-full font-semibold select-none transition-colors duration-200
+            px-2 py-0.5 text-xs        
+            lg:px-3 lg:py-1 lg:text-sm ${className}`}
             onClick={() => toggleLabel(label)}
           >
             {label}
           </span>
         );
       })}
+      {/* Reset 버튼 */}
+      <Button
+        className="px-3 text-xs lg:py-1 lg:text-sm rounded-full  font-semibold select-none cursor-pointer border"
+        onClick={handleResetClick}
+      >
+        {isResetting ? <Loader2Icon className="animate-spin" /> : "⟳"}
+      </Button>
     </div>
   );
 
@@ -198,7 +213,6 @@ const ProjectList = () => {
       </div>
     );
   };
-
   const renderActionButtons = () =>
     isEditing ? (
       <div className="space-x-2">
@@ -210,6 +224,13 @@ const ProjectList = () => {
     ) : (
       <Button onClick={() => setIsEditing(true)}>프로젝트 순서 변경</Button>
     );
+
+  useEffect(() => {
+    if (listData) {
+      setEditableProjects(listData);
+      originalProjectsRef.current = listData;
+    }
+  }, [listData]);
 
   return (
     <FormProvider {...formInstance}>
