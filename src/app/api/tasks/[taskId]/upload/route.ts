@@ -2,13 +2,15 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { prisma } from "@/lib/prisma";
 import { v4 as uuidv4 } from "uuid";
-import { FileType } from "@prisma/client"; // Prisma enum import
+import { FileType } from "@prisma/client";
 
 export async function POST(
   req: Request,
-  { params }: { params: { taskId: string } }
+  context: { params: Promise<{ taskId: string }> }
 ) {
   try {
+    const { taskId } = await context.params;
+
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
 
@@ -19,7 +21,7 @@ export async function POST(
     // 확장자 추출
     const fileExt = file.name.split(".").pop() || "";
     // 고유 파일명 생성
-    const fileName = `${params.taskId}_${uuidv4()}.${fileExt}`;
+    const fileName = `${taskId}_${uuidv4()}.${fileExt}`;
     // 폴더 경로 지정
     const filePath = file.type.startsWith("image/")
       ? `images/${fileName}`
@@ -35,10 +37,7 @@ export async function POST(
 
     if (uploadError) {
       console.error(uploadError);
-      return NextResponse.json(
-        { error: "파일 업로드 실패" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "파일 업로드 실패" }, { status: 500 });
     }
 
     // Public URL 생성
@@ -52,9 +51,7 @@ export async function POST(
       prismaFileType = FileType.IMAGE;
     } else if (fileExt.toLowerCase() === "pdf") {
       prismaFileType = FileType.PDF;
-    } else if (
-      ["xls", "xlsx", "csv"].includes(fileExt.toLowerCase())
-    ) {
+    } else if (["xls", "xlsx", "csv"].includes(fileExt.toLowerCase())) {
       prismaFileType = FileType.EXCEL;
     } else {
       prismaFileType = FileType.OTHER;
@@ -63,7 +60,7 @@ export async function POST(
     // TaskAttachment DB 저장
     const attachment = await prisma.taskAttachment.create({
       data: {
-        taskId: Number(params.taskId),
+        taskId: Number(taskId),
         fileName: file.name,
         fileUrl: publicUrl,
         fileType: prismaFileType,
