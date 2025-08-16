@@ -11,6 +11,7 @@ import Image from "@tiptap/extension-image";
 import styles from "./style.module.scss";
 import { Extension } from "@tiptap/core";
 import { FileCard } from "./FileCard";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SlashCommandKeyHandler = Extension.create({
   addKeyboardShortcuts() {
@@ -140,6 +141,7 @@ export default function Editor({
   content?: string;
   upload: (formData: FormData) => Promise<any>;
 }) {
+  const [uploading, setUploading] = useState(false);
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -151,7 +153,7 @@ export default function Editor({
         placeholder: "명령어 사용시에는 '/'를 누르세요...",
       }),
       SlashCommandKeyHandler,
-      Image.configure({ draggable: true }),
+      Image,
     ],
     content: content ?? "",
     onUpdate: ({ editor }) => {
@@ -178,50 +180,44 @@ export default function Editor({
     if (!editor || !event.target.files) return;
     const files = Array.from(event.target.files);
 
+    setUploading(true);
+
     for (const file of files) {
       try {
         const { fileUrl, fileName, fileType } = await uploadFile(file);
 
         if (fileType === "IMAGE") {
-          // 이미지와 새 줄을 한 번에 삽입
+          // 항상 맨 위에 이미지 + 새 줄 삽입
           editor
             .chain()
             .focus()
-            .insertContent([
-              {
-                type: "image",
-                attrs: { src: fileUrl },
-              },
-              {
-                type: "paragraph",
-              },
+            .insertContentAt(0, [
+              { type: "image", attrs: { src: fileUrl } },
+              { type: "paragraph" },
             ])
-            // 새 단락으로 커서 이동
-            .setTextSelection(editor.state.selection.to + 1)
+            .setTextSelection(1)
             .run();
         } else {
           const fileSizeText = formatFileSize(file.size);
           editor
             .chain()
             .focus()
-            .insertContentAt(editor.state.selection.to, {
-              type: "fileCard",
-              attrs: { fileName, fileUrl, fileSize: fileSizeText },
-            })
-            // 새 단락으로 커서 이동
-            .setTextSelection(editor.state.selection.to + 1)
+            .insertContentAt(0, [
+              {
+                type: "fileCard",
+                attrs: { fileName, fileUrl, fileSize: fileSizeText },
+              },
+              { type: "paragraph" },
+            ])
+            .setTextSelection(1)
             .run();
         }
-
-        // 삽입 후 커서를 새 블록 뒤로 이동
-        const endPos = editor.state.selection.to + 1;
-        editor.commands.setTextSelection(endPos);
-        editor.commands.focus();
       } catch {
         alert(`${file.name} 업로드 실패`);
       }
     }
 
+    setUploading(false);
     event.target.value = "";
   };
 
@@ -236,7 +232,7 @@ export default function Editor({
       {editor && <SlashCommands editor={editor} />}
 
       {/* 업로드 버튼 */}
-      <div className="mb-2 flex gap-2">
+      <div className="mb-2 flex gap-2 items-center">
         <label className="cursor-pointer px-3 py-1 bg-blue-500 text-white rounded">
           이미지/파일 업로드
           <input
@@ -244,10 +240,17 @@ export default function Editor({
             className="hidden"
             multiple
             onChange={handleFileChange}
+            disabled={uploading}
           />
         </label>
       </div>
 
+      {/* 업로드 중 스켈레톤 */}
+      {uploading && (
+        <div className="flex flex-col space-y-3">
+          <Skeleton className="h-[125px] w-full rounded-xl" />
+        </div>
+      )}
       <EditorContent
         editor={editor}
         className={`h-full ${styles.editorContent}`}

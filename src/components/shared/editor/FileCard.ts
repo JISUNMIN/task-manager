@@ -4,9 +4,9 @@ import { Node, mergeAttributes } from "@tiptap/core";
 export const FileCard = Node.create({
   name: "fileCard",
   group: "block",
-  atom: true, // 블록 하나를 통째로 취급 (인라인 편집 불가)
-  selectable: true, // 클릭 가능
-  draggable: true,  // 드래그 가
+  atom: true,
+  selectable: true, 
+  draggable: true,  
   addAttributes() {
     return {
       fileName: { default: null },
