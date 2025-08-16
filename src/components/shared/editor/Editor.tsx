@@ -6,7 +6,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 import Heading from "@tiptap/extension-heading";
 import BulletList from "@tiptap/extension-bullet-list";
 import ListItem from "@tiptap/extension-list-item";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "@tiptap/extension-image";
 import styles from "./style.module.scss";
 import { Extension } from "@tiptap/core";
@@ -109,11 +109,50 @@ const SlashCommands = ({ editor }: { editor: any }) => {
     }
   };
 
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (!showMenu) return;
+
+      let nextIndex = selectedIndex;
+      if (event.key === "ArrowDown") {
+        nextIndex = (selectedIndex + 1) % filtered.length;
+      }
+
+      if (event.key === "ArrowUp") {
+        nextIndex =
+          selectedIndex === 0 ? filtered.length - 1 : selectedIndex - 1;
+      }
+
+      const selectedItem = document.getElementById(`command-item-${nextIndex}`);
+      if (selectedItem) {
+        selectedItem.focus();
+      }
+
+      setSelectedIndex(nextIndex);
+
+      if (event.key === "Enter") {
+        event.preventDefault();
+        filtered[nextIndex]?.command();
+        setShowMenu(false);
+      }
+
+      if (event.key === "Escape") {
+        setShowMenu(false);
+      }
+    },
+    [showMenu, filtered, selectedIndex]
+  );
+
   useEffect(() => {
     if (!editor) return;
     editor.on("update", onUpdate);
-    return () => editor.off("update", onUpdate);
-  }, [editor]);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      editor.off("update", onUpdate);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [editor, handleKeyDown]);
 
   return showMenu ? (
     <div className="absolute bg-white border rounded shadow p-2 z-10">
@@ -123,6 +162,7 @@ const SlashCommands = ({ editor }: { editor: any }) => {
           className="cursor-pointer p-1 hover:bg-gray-100 focus:bg-gray-100"
           onClick={() => item.command()}
           tabIndex={0}
+          id={`command-item-${index}`}
         >
           {item.title}
         </div>
