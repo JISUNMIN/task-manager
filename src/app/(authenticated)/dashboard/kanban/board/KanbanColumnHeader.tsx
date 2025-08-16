@@ -9,6 +9,7 @@ interface KanbanColumnHeaderProps {
   isDark: boolean;
   columnIndex: number;
   onCreateTask: (status: Status, columnIndex: number) => void;
+  count?: number;
 }
 
 const KanbanColumnHeader = ({
@@ -16,10 +17,11 @@ const KanbanColumnHeader = ({
   isDark,
   columnIndex,
   onCreateTask,
+  count,
 }: KanbanColumnHeaderProps) => {
   return (
     <div className="flex justify-between items-center mb-4">
-      <KanbanColumnBadge columnKey={status} isDark={isDark} />
+      <KanbanColumnBadge columnKey={status} isDark={isDark} count={count} />
       <Button
         variant="outline"
         size="icon"
