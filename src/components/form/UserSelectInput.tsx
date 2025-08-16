@@ -197,7 +197,7 @@ export function UserSelectInput({
                   )}
                 >
                   <UserAvatar
-                    src={user.profileImage ?? null}
+                    src={user.profileImage || undefined}
                     alt={user.name}
                     className="mt-1"
                   />
