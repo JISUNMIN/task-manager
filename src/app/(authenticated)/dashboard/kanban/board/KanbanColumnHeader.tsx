@@ -21,12 +21,19 @@ const KanbanColumnHeader = ({
 }: KanbanColumnHeaderProps) => {
   return (
     <div className="flex justify-between items-center mb-4">
-      <KanbanColumnBadge columnKey={status} isDark={isDark} count={count} />
+      <div className="min-w-0">
+        <KanbanColumnBadge
+          columnKey={status}
+          isDark={isDark}
+          count={count}
+        />
+      </div>
+
       <Button
         variant="outline"
         size="icon"
         onClick={() => onCreateTask(status, columnIndex)}
-        className="w-8 h-8 shrink-0 bg-[var(--item-bg)] hover:bg-[var(--hover-bg)] text-[var(--text-base)] border-[var(--border)] hover:border-[var(--border)] rounded"
+           className="w-8 h-8 shrink-0 bg-[var(--item-bg)] hover:bg-[var(--hover-bg)] text-[var(--text-base)] border-[var(--border)] hover:border-[var(--border)] rounded"
       >
         <FaPlus />
       </Button>

@@ -20,16 +20,21 @@ const KanbanColumnBadge = ({
 
   return (
     <Badge
-      className={`${statusBgColor} rounded-2xl pr-3 pl-3 flex items-center gap-2`}
+      className={`${statusBgColor} rounded-2xl pr-3 pl-3 flex items-center gap-2 w-full
+                  text-sm md:text-lg 
+                  md:pr-3 md:pl-3  `}
     >
       <div
-        className={`w-3 h-3 ${dotColor} rounded-full border-2 border-solid ${dotColor}`}
+        className={`w-2 h-2 md:w-3 md:h-3 ${dotColor} rounded-full border-2 border-solid ${dotColor}`}
       ></div>
-      <span className="text-lg  font-semibold text-gray-100">{columnKey}</span>
+      <span className="font-semibold truncate">{columnKey}</span>
       {count !== undefined && (
-        <span className="ml-2 text-xs font-semibold bg-gray-100 text-gray-800 dark:bg-gray-300 rounded-full px-3 py-0.5 border border-gray-300">
-          {" "}
-          {count === 0 ? "-" : count}{" "}
+        <span
+          className="ml-1 md:ml-2 text-xs md:text-xs font-semibold 
+                     bg-gray-100 text-gray-800 dark:bg-gray-300 
+                     rounded-full px-2 md:px-3 py-0.5 border border-gray-300"
+        >
+          {count === 0 ? "-" : count}
         </span>
       )}
     </Badge>

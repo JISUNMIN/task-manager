@@ -31,9 +31,7 @@ interface TaskInfoPanelProps {
   >;
 }
 
-type FormData = {
-  assignees: number[];
-};
+type FormData = { assignees: number[] };
 
 const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   isTaskInfoPanelOpen,
@@ -49,12 +47,12 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const isDark = theme === "dark";
   const { updateTask, columns, moveTask } = useKanbanStore();
   const { updateTaskMutate, moveTaskMutate } = useTasks();
-  
+
   const [columnKey, itemIndexStr] = focusedInputKey.split("-");
   const taskIndex = Number(itemIndexStr);
   const resizing = useRef(false);
   const panelRef = useRef<HTMLDivElement>(null);
-  
+
   const task = useMemo(
     () => columns[columnKey as Status]?.[taskIndex],
     [columns, columnKey, taskIndex]
@@ -64,9 +62,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const isMobile = useMediaQuery("(max-width: 767px)");
 
   const { control, setValue } = useForm<FormData>({
-    defaultValues: {
-      assignees: [],
-    },
+    defaultValues: { assignees: [] },
   });
 
   const debouncedUpdateTitle = useMemo(
@@ -99,57 +95,42 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   ) => {
     const value = typeof e === "string" ? e : e.target.value;
     updateTask(columnKey as Status, taskIndex, { [target]: value });
-
-    if (target === "title") debouncedUpdateTitle(task.id, value);
-    else debouncedUpdateDesc(task.id, value);
+    target === "title"
+      ? debouncedUpdateTitle(task.id, value)
+      : debouncedUpdateDesc(task.id, value);
   };
 
   const handleUpdateStatus = (newStatus: Status) => {
     moveTask(columnKey as Status, newStatus as Status, taskIndex, 0);
     handleFocusedInputKey(newStatus, taskIndex);
-    moveTaskMutate({
-      id: task?.id,
-      toColumn: newStatus,
-      toIndex: 0,
-    });
+    moveTaskMutate({ id: task?.id, toColumn: newStatus, toIndex: 0 });
   };
 
   useEffect(() => {
-    if (task && task.assignees) {
-      const ids = (task.assignees as any[]).map((a) =>
+    if (task?.assignees) {
+      const ids = task.assignees.map((a: any) =>
         typeof a === "number" ? a : a.id
       );
       setValue("assignees", ids);
-    } else {
-      setValue("assignees", []);
-    }
+    } else setValue("assignees", []);
   }, [task, setValue]);
 
-  // 패널 외부 클릭 시 닫기 (드래그 중이면 제외, 그리고 TaskItem input 클릭 시 제외)
+  // 패널 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (resizing.current) return;
-
       const target = event.target as Node;
-
       if (
         panelRef.current?.contains(target) ||
-        // inputRefs 내 ref 중 클릭 대상 포함 여부 체크
-        Object.values(inputRefs?.current ?? {}).some(
-          (el) => el && el.contains(target)
+        Object.values(inputRefs?.current ?? {}).some((el) =>
+          el?.contains(target)
         )
-      ) {
-        // 패널 내부 또는 input 클릭 시 닫지 않음
+      )
         return;
-      }
-
       closePanel();
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [closePanel, inputRefs]);
 
   // 패널 resize 핸들
@@ -157,17 +138,13 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     resizing.current = true;
     e.preventDefault();
   };
-
   const handleMouseMove = (e: MouseEvent) => {
     if (!resizing.current) return;
-    const newWidth = window.innerWidth - e.clientX;
-    setPanelWidth(Math.min(Math.max(newWidth, 400), 800));
+    setPanelWidth(Math.min(Math.max(window.innerWidth - e.clientX, 400), 800));
   };
-
   const handleMouseUp = () => {
     resizing.current = false;
   };
-
   useEffect(() => {
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
@@ -182,19 +159,18 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       ref={panelRef}
       className={`
         fixed top-14 right-0 h-full flex flex-col z-50
-        bg-[var(--bg-third)] shadow-[ -2px_0_6px_rgba(0,0,0,0.15)]
+        bg-[var(--bg-third)] shadow-[-2px_0_6px_rgba(0,0,0,0.15)]
         transition-transform duration-300 ease-in-out
         ${isTaskInfoPanelOpen ? "translate-x-0" : "translate-x-full"}
       `}
-      style={{
-        width: isMobile ? "100%" : `${panelWidth}px`,
-      }}
+      style={{ width: isMobile ? "100%" : `${panelWidth}px` }}
     >
-      {/* resize 핸들 */}
-      <div
-        className="absolute top-0 bottom-0 -left-[6px] w-[6px] cursor-col-resize z-[60]"
-        onMouseDown={handleMouseDown}
-      />
+      {!isMobile && (
+        <div
+          className="absolute top-0 bottom-0 -left-[6px] w-[6px] cursor-col-resize z-[60]"
+          onMouseDown={handleMouseDown}
+        />
+      )}
 
       <Button
         variant="ghost"
@@ -205,24 +181,25 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         <FaAngleDoubleRight className="w-6 h-6" />
       </Button>
 
-      <div className="pl-4">
+      <div className="pl-2 sm:pl-4">
         <TextareaAutosize
-          style={{ fontSize: "20px" }}
           maxRows={2}
-          className="w-full p-2 resize-none"
+          className="w-full p-2 resize-none text-sm sm:text-base"
+          style={{ fontSize: 16 }}
           placeholder="제목을 입력하세요"
           onChange={(e) => handleUpdateTask(e, "title")}
           value={task?.title}
         />
-        <Grid className="grid grid-cols-1 sm:grid-cols-[1fr_6fr] gap-y-3 px-5">
+
+        <Grid className="grid grid-cols-1 sm:grid-cols-[1fr_6fr] gap-y-3 px-2 sm:px-5">
           <div className="flex items-center gap-1 whitespace-nowrap">
-            <TbCircleDotted />
+            <TbCircleDotted className="w-4 h-4 sm:w-5 sm:h-5" />
             <span className="text-sm sm:text-base">상태</span>
           </div>
           <SelectBox
             options={ALL_STATUS}
             value={columnKey as Status}
-            onChange={(newStatus: Status) => handleUpdateStatus(newStatus)}
+            onChange={handleUpdateStatus}
             renderOption={(status) => (
               <KanbanColumnBadge columnKey={status} isDark={isDark} />
             )}
@@ -231,7 +208,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           {!isPersonal && (
             <>
               <div className="flex items-center gap-1 whitespace-nowrap">
-                <FaPeopleGroup />
+                <FaPeopleGroup className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="text-sm sm:text-base">할당자</span>
               </div>
               <Controller
@@ -256,12 +233,12 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         </Grid>
       </div>
 
-      <div className="p-4 h-full flex flex-col overflow-y-auto">
+      <div className="p-2 sm:p-4 h-full flex flex-col overflow-y-auto">
         <TaskComments taskId={task?.id} />
         <Editor
           onChange={(e) => handleUpdateTask(e, "desc")}
           content={task?.desc}
-          upload={upload} 
+          upload={upload}
         />
       </div>
     </div>
