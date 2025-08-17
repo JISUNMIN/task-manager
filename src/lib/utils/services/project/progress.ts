@@ -2,12 +2,18 @@
 import { prisma } from "@/lib/prisma";
 
 export async function updateProjectProgress(projectId: number) {
-  const total = await prisma.task.count({ where: { projectId } });
-  const completed = await prisma.task.count({
-    where: {
-      projectId,
-      status: "Completed",
-    },
+  const result = await prisma.task.groupBy({
+    by: ["status"],
+    where: { projectId },
+    _count: { status: true },
+  });
+
+  let total = 0;
+  let completed = 0;
+
+  result.forEach((r) => {
+    total += r._count.status;
+    if (r.status === "Completed") completed = r._count.status;
   });
 
   const progress = total === 0 ? 0 : Math.floor((completed / total) * 100);

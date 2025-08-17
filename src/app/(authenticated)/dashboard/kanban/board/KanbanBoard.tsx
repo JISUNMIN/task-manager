@@ -65,6 +65,7 @@ const KanbanBoard = () => {
     moveTask,
     removeColumn,
     replaceTempTask,
+    progress,
   } = useKanbanStore();
 
   // 전체 개수 계산
@@ -190,7 +191,7 @@ const KanbanBoard = () => {
           projectName={detailData?.projectName}
           managerName={detailData?.manager.name}
           deadline={detailData?.deadline}
-          progress={detailData?.progress}
+          progress={progress}
           isPersonal={isPersonal}
           completedCount={completedCount}
           totalCount={totalCount}
