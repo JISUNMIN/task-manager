@@ -15,13 +15,13 @@ const Navbar = () => {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 w-full flex h-14 items-center p-6 shadow-sm bg-[var(--item-bg)] text-[var(--foreground)] gap-2 mx-auto transition-colors duration-300">
       {/* 메뉴 토글 버튼 (모바일) */}
-      <button
+      {/* <button
         id="vertical-nav-toggle-btn"
         className="btn-icon lg:hidden -ms-3"
         onClick={() => setMenuOpen(!menuOpen)}
       >
         <Menu2 size={26} />
-      </button>
+      </button> */}
 
       {/* 검색 */}
       {/* <div className="flex items-center cursor-pointer -ms-3 select-none">
