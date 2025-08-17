@@ -39,9 +39,9 @@ body {
   --hover-bg: oklch(0.92 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
-  --btn-bg: #f3f4f6;
+  --btn-bg: #f0f9ff;
   --btn-border: #d1d5db;
-  --btn-hover-bg: #e5e7eb;
+  --btn-hover-bg: #d0efff;
   --btn-hover-border: #9ca3af;
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);

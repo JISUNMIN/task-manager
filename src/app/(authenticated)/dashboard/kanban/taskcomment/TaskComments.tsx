@@ -3,7 +3,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/ui/extended/UserAvatar";
-import { HiOutlinePaperClip } from "react-icons/hi";
+// import { HiOutlinePaperClip } from "react-icons/hi";
 import { IoMdSend } from "react-icons/io";
 import { DeleteDialog } from "@/components/ui/extended/DeleteDialog";
 import { CommentItem } from "./CommentItem";
@@ -93,7 +93,7 @@ export const TaskComments = ({ taskId }: Props) => {
       {/* 일반 댓글 입력창 */}
       <div className="flex items-start gap-2">
         <UserAvatar
-          src={user?.profileImage ?? ""}
+          src={user?.profileImage}
           alt={user?.name ?? "User"}
           className="mt-1"
         />
@@ -113,9 +113,9 @@ export const TaskComments = ({ taskId }: Props) => {
           />
 
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
-            <Button variant="ghost" size="icon" disabled={isCreating}>
+            {/* <Button variant="ghost" size="icon" disabled={isCreating}>
               <HiOutlinePaperClip className="w-5 h-5 text-gray-600" />
-            </Button>
+            </Button> */}
             <Button
               variant="ghost"
               size="icon"

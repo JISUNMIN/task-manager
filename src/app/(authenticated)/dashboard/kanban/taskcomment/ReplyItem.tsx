@@ -26,7 +26,9 @@ export const ReplyItem = ({
   const setEditReplyId = useCommentStore((state) => state.setEditReplyId);
 
   const editReplyContent = useCommentStore((state) => state.editReplyContent);
-  const setEditReplyContent = useCommentStore((state) => state.setEditReplyContent);
+  const setEditReplyContent = useCommentStore(
+    (state) => state.setEditReplyContent
+  );
 
   const resetEditReply = useCommentStore((state) => state.resetEditReply);
 
@@ -57,7 +59,7 @@ export const ReplyItem = ({
   return (
     <div className="flex gap-2 mt-3">
       <UserAvatar
-        src={reply.user.profileImage ?? ""}
+        src={reply.user.profileImage}
         alt={reply.user.name}
         className="mt-1"
       />
@@ -86,11 +88,7 @@ export const ReplyItem = ({
               autoFocus
             />
             <div className="absolute right-2 top-1.5 flex gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={resetEditReply}
-              >
+              <Button variant="ghost" size="icon" onClick={resetEditReply}>
                 <AiOutlineClose className="w-5 h-5" />
               </Button>
               <Button

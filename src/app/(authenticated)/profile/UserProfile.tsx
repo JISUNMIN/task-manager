@@ -6,7 +6,7 @@ import React, { useState } from "react";
 import { FormProvider, Resolver, useForm } from "react-hook-form";
 import * as yup from "yup";
 import useUser from "@/hooks/react-query/useUser";
-import { ImageUploader } from "@/components/shared/editor/ImageUploader";
+import { ProfileImageUploader } from "@/components/shared/editor/ProfileImageUploader";
 
 type FormData = {
   profileImage?: File | null;
@@ -98,7 +98,7 @@ export default function UserProfile() {
         >
           {/* 프로필 영역 */}
           <div className="flex flex-col items-center space-y-2">
-            <ImageUploader
+            <ProfileImageUploader
               initialImageUrl={profileImage}
               onFileChange={onFileChange}
               alt="프로필 이미지"

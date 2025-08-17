@@ -67,7 +67,11 @@ const useProjectMutations = (targetId?: string | number) => {
         label,
       });
     },
-    onSuccess: () => {},
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["projects", "list"],
+      });
+    },
     onError: () => {},
   });
 

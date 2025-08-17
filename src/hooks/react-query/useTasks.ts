@@ -62,7 +62,12 @@ const useTasks = () => {
       return response.data;
     },
     onSuccess: (updatedTask) => {
-      updateTask(updatedTask.status as Status, updatedTask.id, updatedTask);
+      const columnTasks =
+        useKanbanStore.getState().columns[updatedTask.status as Status];
+      const index = columnTasks.findIndex((t) => t.id === updatedTask.id);
+      if (index >= 0) {
+        updateTask(updatedTask.status as Status, index, updatedTask);
+      }
     },
     onError: () => {},
   });

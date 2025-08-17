@@ -15,6 +15,9 @@ export async function GET(req: NextRequest) {
 
     if (role === "ADMIN") {
       projects = await prisma.project.findMany({
+        where: {
+          OR: [{ isPersonal: false }, { isPersonal: true, managerId: id }],
+        },
         include: {
           manager: true,
         },

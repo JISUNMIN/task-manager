@@ -67,6 +67,18 @@ const KanbanBoard = () => {
     replaceTempTask,
   } = useKanbanStore();
 
+  // 전체 개수 계산
+  const totalCount = useMemo(
+    () => Object.values(columns).reduce((acc, arr) => acc + arr.length, 0),
+    [columns]
+  );
+
+  // 완료 개수
+  const completedCount = useMemo(
+    () => columns["Completed"]?.length ?? 0,
+    [columns]
+  );
+
   const debouncedUpdate = (taskId: number, newTitle: string) => {
     if (!debouncedUpdateMap.current[taskId]) {
       debouncedUpdateMap.current[taskId] = debounce((title: string) => {
@@ -180,6 +192,8 @@ const KanbanBoard = () => {
           deadline={detailData?.deadline}
           progress={detailData?.progress}
           isPersonal={isPersonal}
+          completedCount={completedCount}
+          totalCount={totalCount}
         />
 
         {isDetailLoading ? (
@@ -196,6 +210,7 @@ const KanbanBoard = () => {
                 const keys = Object.keys(columns);
                 const columnIndex = keys.indexOf(status);
                 const { kanbanBoardBg } = getStatusColors(status, isDark);
+                const count = columns[status].length;
 
                 return (
                   <div
@@ -206,6 +221,7 @@ const KanbanBoard = () => {
                       status={status}
                       isDark={isDark}
                       columnIndex={columnIndex}
+                      count={count}
                       onCreateTask={(status, columnIndex) =>
                         handleCreateTask(status, columnIndex, "top")
                       }
