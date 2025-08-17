@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { Progress } from "@/components/ui/progress";
 import { ProjectLabel } from "@prisma/client";
-import { convertDateToString } from "@/lib/utils/helpers";
+import { convertDateToString, getDeadlineStatus } from "@/lib/utils/helpers";
 import { useAuthStore } from "@/store/useAuthStore";
 import { ClientProject } from "@/hooks/react-query/useProjects";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +17,11 @@ import { GoVerified } from "react-icons/go";
 import { cn } from "@/lib/utils";
 import { ActionDropdownMenu } from "@/components/ui/extended/ActionDropdownMenu";
 import { Calendar, Trash, User as UserIcon } from "lucide-react";
-import { LABEL_COLOR_MAP, LABELS } from "@/app/constants/common";
+import {
+  DEADLINE_COLOR_MAP,
+  LABEL_COLOR_MAP,
+  LABELS,
+} from "@/app/constants/common";
 import { DeleteDialog } from "@/components/ui/extended/DeleteDialog";
 import { UserSelectionModal } from "@/components/ui/extended/UserSelectionModal ";
 import { DeadlineModal } from "@/components/ui/extended/DeadlineModal";
@@ -81,6 +85,9 @@ const ProjectCard: FC<ProjectCardProps> = memo(
       useState(false);
     const [isDeadlineModalOpen, setIsDeadlineModalOpen] = useState(false);
     const { managerId, deadline } = useWatch({ control });
+    const { status: deadlineStatus, text: deadlineText } = getDeadlineStatus(
+      new Date(project.deadline)
+    );
 
     const canDeleteProject =
       !project.isPersonal && (role === "ADMIN" || project.managerId === userId);
@@ -208,7 +215,13 @@ const ProjectCard: FC<ProjectCardProps> = memo(
             </div>
 
             <div className="text-sm text-[var(--foreground)] flex gap-1.5 items-center mt-1">
-              담당자: {project?.manager?.name}
+              담당자:
+              <span className="flex items-center gap-1 font-medium">
+                {project?.manager?.name}
+                <span className="text-xs text-gray-500 dark:text-gray-300">
+                  ({project?.manager?.userId})
+                </span>
+              </span>
               <UserAvatar
                 src={project?.manager?.profileImage || undefined}
                 alt={project?.manager?.userId}
@@ -218,9 +231,12 @@ const ProjectCard: FC<ProjectCardProps> = memo(
             </div>
 
             {!project.isPersonal && (
-              <p className="text-sm text-[var(--text-blur)] mb-1">
-                마감일: {convertDateToString(new Date(project.deadline), "-")}
-              </p>
+              <div className="flex items-center gap-2 mb-1">
+                <Calendar className="w-4 h-4 text-[var(--text-blur)]" />
+                <p className="text-sm text-[var(--text-blur)]">
+                  마감일: {convertDateToString(new Date(project.deadline), "-")}
+                </p>
+              </div>
             )}
 
             <div className="flex justify-between items-center">
@@ -242,11 +258,19 @@ const ProjectCard: FC<ProjectCardProps> = memo(
                 개인용
               </Badge>
             ) : (
-              label && (
-                <Badge variant="secondary" className={labelClass}>
-                  {label}
+              <div className="flex justify-between items-center w-full">
+                <Badge
+                  variant="outline"
+                  className={`text-xs px-2 py-0.5 flex items-center gap-1 ${DEADLINE_COLOR_MAP[deadlineStatus]}`}
+                >
+                  {deadlineText}
                 </Badge>
-              )
+                {label && (
+                  <Badge variant="secondary" className={labelClass}>
+                    {label}
+                  </Badge>
+                )}
+              </div>
             )}
           </div>
         </div>

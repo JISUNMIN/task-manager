@@ -313,3 +313,18 @@ export function getTimeAgo(date: Date | string): string {
     day: "numeric",
   });
 }
+
+export type DeadlineStatus = "past" | "soon" | "normal";
+
+export function getDeadlineStatus(deadline: Date): {
+  status: DeadlineStatus;
+  text: string;
+} {
+  const now = new Date();
+  const diffTime = deadline.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // 남은 일수
+
+  if (diffDays < 0) return { status: "past", text: `만료 D+${-diffDays}` }; // 이미 마감
+  if (diffDays <= 30) return { status: "soon", text: `마감까지 D-${diffDays}` }; // 한 달 이내 마감
+  return { status: "normal", text: `마감까지 D-${diffDays}` }; // 일반
+}

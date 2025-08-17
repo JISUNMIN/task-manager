@@ -1,3 +1,5 @@
+import { DeadlineStatus } from "@/lib/utils/helpers/helpers";
+
 // labelColors
 export const LABEL_COLOR_MAP: Record<string, string> = {
   feature: "bg-green-200 text-green-900 dark:bg-green-700 dark:text-green-100",
@@ -20,3 +22,11 @@ export const LABELS = [
   "internal", // 내부 개선 및 사내 업무
   "maintenance", // 시스템 유지보수
 ] as const;
+
+
+// calendar deadline color
+export const DEADLINE_COLOR_MAP: Record<DeadlineStatus, string> = {
+  past: "bg-red-50 text-red-700 dark:bg-red-900 dark:text-red-200",
+  soon: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+  normal: "bg-[var(--background)] text-[var(--text-blur)]",
+};

@@ -10,4 +10,5 @@ export {
   getDateWithoutTime,
   formatDateToUtc,
   getTimeAgo,
+  getDeadlineStatus,
 } from './helpers';
