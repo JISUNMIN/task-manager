@@ -32,7 +32,7 @@ const KanbanBoard = () => {
   const trigger = useMemo(() => <SidebarTrigger />, []);
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
-  const [isColumnsInitialized, setColumnsInitialized] = useState(false);
+  const prevProjectIdRef = useRef<string | undefined>(undefined);
 
   // TaskInfoPanel 열림/닫힘
   const [isTaskInfoPanelOpen, setTaskInfoPanelOpen] = useState(false);
@@ -168,7 +168,7 @@ const KanbanBoard = () => {
   }, [focusedInputKey]);
 
   useEffect(() => {
-    if (detailData?.tasks && !isColumnsInitialized) {
+    if (detailData?.tasks && prevProjectIdRef.current !== projectId) {
       const sortedTasks = detailData.tasks
         .map((task) => ({
           ...task,
@@ -178,9 +178,10 @@ const KanbanBoard = () => {
         .sort((a, b) => a.order - b.order);
 
       initializeColumns(sortedTasks);
-      setColumnsInitialized(true);
+
+      prevProjectIdRef.current = projectId;
     }
-  }, [detailData, initializeColumns, isColumnsInitialized]);
+  }, [detailData, initializeColumns, projectId]);
   return (
     <SidebarProvider className={`bg-[var(--bg-fourth)] relative`}>
       {sidebar}

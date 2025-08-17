@@ -77,9 +77,13 @@ export const useKanbanStore = create<{
         setProgress: (value) => set({ progress: value }),
         recalcProgress: () => {
           const cols = get().columns;
-          const total = Object.values(cols).reduce((acc, arr) => acc + arr.length, 0);
+          const total = Object.values(cols).reduce(
+            (acc, arr) => acc + arr.length,
+            0
+          );
           const completed = cols["Completed"].length;
-          const newProgress = total === 0 ? 0 : Math.floor((completed / total) * 100);
+          const newProgress =
+            total === 0 ? 0 : Math.floor((completed / total) * 100);
           set({ progress: newProgress });
         },
         initializeColumns: (tasks) => {
@@ -104,79 +108,80 @@ export const useKanbanStore = create<{
           });
 
           set({ columns: newColumns });
-          get().recalcProgress(); 
+          get().recalcProgress();
         },
-        addTask: (index, orderType = "bottom", tempId) =>
-          set((state) => {
-            const columnKeys = Object.keys(state.columns) as Status[];
-            const columnKey = columnKeys[index];
-            if (!columnKey) return state;
+        addTask: (index, orderType = "bottom", tempId) => {
+          const columnKeys = Object.keys(get().columns) as Status[];
+          const columnKey = columnKeys[index];
+          if (!columnKey) return;
 
-            const newTask = { id: tempId, title: "", desc: "", assignees: [] };
-            const updatedColumn =
-              orderType === "top"
-                ? [newTask, ...state.columns[columnKey]]
-                : [...state.columns[columnKey], newTask];
-
-            const newState = {
-              columns: { ...state.columns, [columnKey]: updatedColumn },
-            };
-            get().recalcProgress(); 
-            return newState;
-          }),
-        replaceTempTask: (columnKey, tempId, realTask) =>
-          set((state) => {
-            const updatedColumn = state.columns[columnKey].map((t) =>
-              String(t.id) === tempId ? realTask : t
-            );
-            const newState = { columns: { ...state.columns, [columnKey]: updatedColumn } };
-            get().recalcProgress(); 
-            return newState;
-          }),
-        updateTask: (columnName, index, updatedFields) =>
+          const newTask = { id: tempId, title: "", desc: "", assignees: [] };
+          set((state) => ({
+            columns: {
+              ...state.columns,
+              [columnKey]:
+                orderType === "top"
+                  ? [newTask, ...state.columns[columnKey]]
+                  : [...state.columns[columnKey], newTask],
+            },
+          }));
+          get().recalcProgress();
+        },
+        replaceTempTask: (columnKey, tempId, realTask) => {
+          set((state) => ({
+            columns: {
+              ...state.columns,
+              [columnKey]: state.columns[columnKey].map((t) =>
+                String(t.id) === tempId ? realTask : t
+              ),
+            },
+          }));
+          get().recalcProgress();
+        },
+        updateTask: (columnName, index, updatedFields) => {
           set((state) => {
             const updatedColumn = [...state.columns[columnName]];
             updatedColumn[index] = {
               ...updatedColumn[index],
               ...updatedFields,
             };
-            const newState = { columns: { ...state.columns, [columnName]: updatedColumn } };
-            get().recalcProgress(); 
-            return newState;
-          }),
-        moveTask: (fromColumn, toColumn, fromIndex, toIndex) =>
+            return {
+              columns: { ...state.columns, [columnName]: updatedColumn },
+            };
+          });
+          get().recalcProgress();
+        },
+        moveTask: (fromColumn, toColumn, fromIndex, toIndex) => {
           set((state) => {
             const fromTasks = [...state.columns[fromColumn]];
             const taskToMove = fromTasks.splice(fromIndex, 1)[0];
             if (!taskToMove) return state;
 
+            const newColumns = { ...state.columns };
             if (fromColumn === toColumn) {
               fromTasks.splice(toIndex, 0, taskToMove);
-              const newState = { columns: { ...state.columns, [fromColumn]: fromTasks } };
-              get().recalcProgress();
-              return newState;
+              newColumns[fromColumn] = fromTasks;
             } else {
               const toTasks = [...state.columns[toColumn]];
               toTasks.splice(toIndex, 0, taskToMove);
-              const newState = {
-                columns: { ...state.columns, [fromColumn]: fromTasks, [toColumn]: toTasks },
-              };
-              get().recalcProgress();
-              return newState;
+              newColumns[fromColumn] = fromTasks;
+              newColumns[toColumn] = toTasks;
             }
-          }),
-        removeColumn: (columnKey, index) =>
+
+            return { columns: newColumns };
+          });
+          get().recalcProgress();
+        },
+        removeColumn: (columnKey, index) => {
           set((state) => {
             const newColumns = { ...state.columns };
             if (newColumns[columnKey]) newColumns[columnKey].splice(index, 1);
-            const newState = { columns: newColumns };
-            get().recalcProgress();
-            return newState;
-          }),
+            return { columns: newColumns };
+          });
+          get().recalcProgress();
+        },
       }),
-      {
-        name: "kanban-store",
-      }
+      { name: "kanban-store" }
     )
   )
 );

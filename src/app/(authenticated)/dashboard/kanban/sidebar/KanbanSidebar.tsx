@@ -19,14 +19,17 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import React, { useEffect, useRef } from "react";
 import { CardSkeleton } from "@/components/ui/extended/Skeleton/CardSkeleton";
+import { useKanbanStore } from "@/store/useKanbanStore";
 
 export function KanbanSidebar() {
   const router = useRouter();
+  const { progress } = useKanbanStore();
 
   const { listData, isListLoading } = useProjects();
   const { user } = useAuthStore();
   const searchParams = useSearchParams();
   const selectedProjectId = searchParams.get("projectId");
+  const prevProjectIdRef = useRef<string | null>(null);
 
   // 개인 프로젝트는 본인 것만 필터링
   const filteredProjects = listData?.filter((project) => {
@@ -57,15 +60,18 @@ export function KanbanSidebar() {
     if (selectedIndex !== -1) {
       const element = buttonRefs.current[selectedIndex];
       if (element) {
-        element.focus({ preventScroll: true }); // 포커스 이동
-        // 스크롤 이동 (가장 가까운 스크롤 가능 영역에 맞게)
+        element.focus({ preventScroll: true });
         element.scrollIntoView({
           behavior: "auto",
           block: "nearest",
         });
       }
     }
-  }, []);
+  }, [filteredProjects, selectedProjectId]);
+
+  useEffect(() => {
+    prevProjectIdRef.current = selectedProjectId;
+  }, [selectedProjectId]);
 
   return (
     <Sidebar className="pt-14">
@@ -81,7 +87,7 @@ export function KanbanSidebar() {
                     src={logo}
                     alt="Logo"
                     priority
-                    className="cursor-pointer  w-[100px] md:w-[120px]  lg:w-[150px]"
+                    className="cursor-pointer w-[100px] md:w-[120px] lg:w-[150px]"
                   />
                 </Link>
               </div>
@@ -102,6 +108,9 @@ export function KanbanSidebar() {
                 ) : (
                   filteredProjects?.map((project, index) => {
                     const isSelected = selectedProjectId === String(project.id);
+                    const isProjectChanged =
+                      prevProjectIdRef.current !== selectedProjectId;
+
                     return (
                       <SidebarMenuButton
                         key={project.id}
@@ -129,7 +138,13 @@ export function KanbanSidebar() {
                           👤 담당자: {project.manager.name}
                         </p>
                         <p className="text-sm">
-                          📊 진행률: {project.progress}%
+                          📊 진행률:{" "}
+                          {isSelected
+                            ? isProjectChanged
+                              ? project.progress
+                              : progress
+                            : project.progress}
+                          %
                         </p>
                         {!project.isPersonal && (
                           <p className="text-xs sm:text-sm lg:text-base">

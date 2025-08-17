@@ -39,21 +39,19 @@ export async function PATCH(
           targetTasks.find((orig) => orig.id === t.id)?.order !== t.newOrder
       );
 
-    // 4. 트랜잭션으로 업데이트 (이동 task + 변경된 task들)
-    const updates: any[] = [
-      prisma.task.update({
+    await prisma.$transaction(async (tx) => {
+      await tx.task.update({
         where: { id },
         data: { status: toColumn, order: toIndex },
-      }),
-      ...tasksToUpdate.map((t) =>
-        prisma.task.update({ where: { id: t.id }, data: { order: t.newOrder } })
-      ),
-    ];
+      });
+      await Promise.all(
+        tasksToUpdate.map((t) =>
+          tx.task.update({ where: { id: t.id }, data: { order: t.newOrder } })
+        )
+      );
 
-    await prisma.$transaction(updates);
-
-    // 5. 프로젝트 진행률 계산은 비동기로 처리
-    updateProjectProgress(projectId).catch((err) => console.error(err));
+      await updateProjectProgress(projectId, tx);
+    });
 
     return NextResponse.json({ success: true });
   } catch (err) {
