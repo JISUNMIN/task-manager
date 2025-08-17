@@ -1,5 +1,6 @@
 // app/api/projects/route.ts
 import { authenticate } from "@/lib/auth";
+import { AuthError } from "@/lib/error";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -46,6 +47,12 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(projects);
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status }
+      );
+    }
     return NextResponse.json(
       {
         error: "프로젝트 목록을 불러오는데 오류가 발생했습니다.",

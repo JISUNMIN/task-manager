@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { error: "사용자를 찾을 수 없습니다." },
-        { status: 401 }
+        { status: 400 }
       );
     }
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     if (!isValid) {
       return NextResponse.json(
         { error: "비밀번호가 일치하지 않습니다." },
-        { status: 401 }
+        { status: 400 }
       );
     }
 
