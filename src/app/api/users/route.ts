@@ -9,6 +9,7 @@ export async function GET() {
         name: true,
         role: true,
         userId: true,
+        profileImage: true,
       },
     });
 

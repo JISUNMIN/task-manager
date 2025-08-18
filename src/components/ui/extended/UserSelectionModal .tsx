@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Plus, Send } from "lucide-react";
+import { Check } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Button } from "../button";
 
 import {
@@ -80,15 +79,10 @@ export function UserSelectionModal({
                       }
                     }}
                   >
-                    <Avatar className="w-5 h-5" key={user?.userId}>
-                      <AvatarImage
-                        src={user?.profileImage || undefined}
-                        alt={user?.name}
-                      />
-                      <AvatarFallback>
-                        <IoPersonCircle style={{ width: 24, height: 24 }} />
-                      </AvatarFallback>
-                    </Avatar>
+                    <UserAvatar
+                      src={user?.profileImage || undefined}
+                      alt={user?.name}
+                    />
 
                     <div className="ml-2">
                       <p className="text-sm font-medium leading-none">
@@ -108,12 +102,14 @@ export function UserSelectionModal({
           </Command>
           <DialogFooter className="flex items-center border-t p-4 sm:justify-between">
             {selectedUser ? (
-              <div className="flex -space-x-2 overflow-hidden gap-3 items-center">
+              <div className="flex overflow-hidden gap-3 items-center">
                 <UserAvatar
                   src={selectedUser?.profileImage || undefined}
                   alt={selectedUser?.name}
                 />
-                <div className="text-sm">{selectedUser.name}</div>
+                <div className="text-sm">
+                  {selectedUser.name} ({selectedUser.userId})
+                </div>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
