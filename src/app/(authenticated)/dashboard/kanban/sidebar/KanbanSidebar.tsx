@@ -67,11 +67,10 @@ export function KanbanSidebar() {
         });
       }
     }
-  }, [filteredProjects, selectedProjectId]);
-
+  }, []);
   useEffect(() => {
     prevProjectIdRef.current = selectedProjectId;
-  }, [selectedProjectId]);
+  }, [filteredProjects, selectedProjectId]);
 
   return (
     <Sidebar className="pt-14">
@@ -110,7 +109,6 @@ export function KanbanSidebar() {
                     const isSelected = selectedProjectId === String(project.id);
                     const isProjectChanged =
                       prevProjectIdRef.current !== selectedProjectId;
-
                     return (
                       <SidebarMenuButton
                         key={project.id}
