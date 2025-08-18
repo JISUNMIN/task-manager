@@ -3,10 +3,11 @@
 import React from "react";
 import { Progress } from "@/components/ui/progress";
 import { convertDateToString } from "@/lib/utils/helpers";
+import { User } from "@prisma/client";
 
 interface ProjectInfoCardProps {
   projectName?: string;
-  managerName?: string;
+  manager?: User;
   deadline?: string;
   progress?: number;
   isPersonal?: boolean;
@@ -16,7 +17,7 @@ interface ProjectInfoCardProps {
 
 const ProjectInfoCard = ({
   projectName,
-  managerName,
+  manager,
   deadline,
   progress = 0,
   isPersonal,
@@ -31,7 +32,10 @@ const ProjectInfoCard = ({
       {/* 담당자 + 마감일 */}
       <div className="text-sm text-[var(--sub-text)] flex flex-wrap items-center gap-x-1 mb-4">
         <span>
-          담당자: <span className="font-medium">{managerName}</span>
+          담당자: <span className="font-medium">{manager?.name}</span>{" "}
+          <span className="text-xs text-gray-500 dark:text-gray-300">
+            ({manager?.userId})
+          </span>
         </span>
         {!isPersonal && deadline && (
           <>

@@ -191,7 +191,7 @@ const KanbanBoard = () => {
       <div className="p-8 w-[80%]">
         <ProjectInfoCard
           projectName={detailData?.projectName}
-          managerName={detailData?.manager.name}
+          manager={detailData?.manager}
           deadline={detailData?.deadline}
           progress={progress}
           isPersonal={isPersonal}

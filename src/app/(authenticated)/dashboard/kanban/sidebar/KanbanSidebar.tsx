@@ -135,7 +135,10 @@ export function KanbanSidebar() {
                           📌 프로젝트명: {project.projectName}
                         </p>
                         <p className="text-sm">
-                          👤 담당자: {project.manager.name}
+                          👤 담당자: {project.manager.name}{" "}
+                          <span className="text-xs text-gray-500 dark:text-gray-300">
+                            ({project?.manager?.userId})
+                          </span>
                         </p>
                         <p className="text-sm">
                           📊 진행률:{" "}
