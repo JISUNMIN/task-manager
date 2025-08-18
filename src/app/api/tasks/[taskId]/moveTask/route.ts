@@ -1,8 +1,6 @@
 // app/api/tasks/[taskId]/move/route.ts
-
 import { prisma } from "@/lib/prisma";
 import { updateProjectProgress } from "@/lib/utils/services/project";
-import { updateProjectProgressTx } from "@/lib/utils/services/project/progress";
 import { NextRequest, NextResponse } from "next/server";
 
 // PATCH /api/tasks/[taskId]/moveTask
@@ -13,7 +11,6 @@ export async function PATCH(
   try {
     const { taskId } = await context.params;
     const { toColumn, toIndex } = await req.json();
-
     const id = Number(taskId);
 
     const task = await prisma.task.findUnique({ where: { id } });
@@ -21,7 +18,7 @@ export async function PATCH(
 
     const projectId = task.projectId;
 
-    // 1. 같은 컬럼의 task 불러오기
+    // 1. 같은 컬럼의 task 불러오기 (정렬)
     const targetTasks = await prisma.task.findMany({
       where: { status: toColumn, projectId },
       orderBy: { order: "asc" },
@@ -31,30 +28,20 @@ export async function PATCH(
     const filteredTasks = targetTasks.filter((t) => t.id !== id);
     filteredTasks.splice(toIndex, 0, task);
 
-    // 3. 실제로 order가 바뀐 task만 업데이트
-    const tasksToUpdate = filteredTasks
-      .map((t, index) => ({ id: t.id, newOrder: index }))
-      .filter(
-        (t) =>
-          t.id !== id &&
-          targetTasks.find((orig) => orig.id === t.id)?.order !== t.newOrder
-      );
-    await prisma.$transaction(
-      async (tx) => {
-        await tx.task.update({
-          where: { id },
-          data: { status: toColumn, order: toIndex },
-        });
-        await Promise.all(
-          tasksToUpdate.map((t) =>
-            tx.task.update({ where: { id: t.id }, data: { order: t.newOrder } })
-          )
-        );
+    // 3. 이전/다음 task order 계산
+    const prevOrder = filteredTasks[toIndex - 1]?.order ?? 0;
+    const nextOrder = filteredTasks[toIndex + 1]?.order ?? prevOrder + 2;
 
-        await updateProjectProgressTx(projectId, tx);
-      },
-      { timeout: 100000 }
-    );
+    // 새로운 order는 prev와 next 사이의 중간값
+    const newOrder = (prevOrder + nextOrder) / 2;
+
+    // 4. 이동 task만 업데이트
+    await prisma.task.update({
+      where: { id },
+      data: { status: toColumn, order: newOrder },
+    });
+
+    await updateProjectProgress(projectId);
 
     return NextResponse.json({ success: true });
   } catch (err) {
