@@ -73,7 +73,7 @@ export function ActionDropdownMenu({
           variant="ghost"
           size="sm"
           className={cn(
-            "hover:bg-gray-200 dark:hover:bg-gray-600",
+            "hover:bg-gray-200 dark:hover:bg-gray-600 p-2",
             isOnLightBackground && "dark:hover:bg-gray-400"
           )}
         >
