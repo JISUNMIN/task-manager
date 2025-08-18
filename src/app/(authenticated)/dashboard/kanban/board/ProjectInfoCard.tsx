@@ -27,7 +27,9 @@ const ProjectInfoCard = ({
   return (
     <div className="bg-[var(--box-bg)] p-5 rounded-xl mb-6 border border-[var(--border)] shadow-sm transition-all">
       {/* 프로젝트 제목 */}
-      <h2 className="text-2xl font-bold mb-3">{projectName}</h2>
+      <h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-3">
+        {projectName}
+      </h2>
 
       {/* 담당자 + 마감일 */}
       <div className="text-sm text-[var(--sub-text)] flex flex-wrap items-center gap-x-1 mb-4">

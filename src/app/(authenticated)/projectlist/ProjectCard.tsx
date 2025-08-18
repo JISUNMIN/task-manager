@@ -29,6 +29,11 @@ import { UserAvatar } from "@/components/ui/extended/UserAvatar";
 import { useThemeStore } from "@/store/useThemeStore";
 import useProjectMutations from "@/hooks/react-query/useProjectMutations";
 import { useFormContext, useWatch } from "react-hook-form";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ProjectCardProps {
   project: ClientProject;
@@ -71,6 +76,40 @@ const darkOverlayStyle: CSSProperties = {
   backgroundRepeat: "no-repeat",
   filter: "brightness(0.5) opacity(0.5)",
 };
+
+const ProjectTitle: FC<{ title: string; className?: string }> = ({
+  title,
+  className,
+}) => {
+  const ref = useRef<HTMLHeadingElement>(null);
+  const [isOverflowed, setIsOverflowed] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (el) {
+      setIsOverflowed(el.scrollWidth > el.offsetWidth);
+    }
+  }, [title]);
+
+  if (!isOverflowed)
+    return (
+      <h3 ref={ref} className={className}>
+        {title}
+      </h3>
+    );
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <h3 ref={ref} className={className}>
+          {title}
+        </h3>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-xs break-words">{title}</TooltipContent>
+    </Tooltip>
+  );
+};
+
 const ProjectCard: FC<ProjectCardProps> = memo(
   ({ project, onClick, disabled }) => {
     const { control } = useFormContext();
@@ -201,9 +240,11 @@ const ProjectCard: FC<ProjectCardProps> = memo(
 
           <div className="relative z-10">
             <div className="flex justify-between">
-              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                {project.projectName}
-              </h3>
+              <ProjectTitle
+                title={project.projectName}
+                className="text-lg font-semibold text-gray-800 dark:text-gray-200 truncate"
+              />
+
               {canDeleteProject && (
                 <ActionDropdownMenu
                   items={items}

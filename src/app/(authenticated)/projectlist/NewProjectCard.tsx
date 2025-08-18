@@ -63,10 +63,14 @@ const NewProjectCard = ({ onCancel, onCreated }: Props) => {
         <label className="text-sm font-medium">프로젝트명</label>
         <div className="inputDivStyle-noFocus">
           <input
+            maxLength={50}
             className="bg-[var(--input)]"
             {...register("projectName", { required: true })}
           />
         </div>
+        <p className="text-xs text-[var(--text-base)]">
+          최대 50글자까지 입력 가능합니다.
+        </p>
       </div>
 
       <div className="mb-3 ">
