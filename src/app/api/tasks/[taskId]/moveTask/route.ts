@@ -1,6 +1,7 @@
 // app/api/tasks/[taskId]/move/route.ts
 
 import { prisma } from "@/lib/prisma";
+import { updateProjectProgress } from "@/lib/utils/services/project";
 import { updateProjectProgressTx } from "@/lib/utils/services/project/progress";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -38,22 +39,22 @@ export async function PATCH(
           t.id !== id &&
           targetTasks.find((orig) => orig.id === t.id)?.order !== t.newOrder
       );
-
-    await prisma.$transaction(async (tx) => {
-      await tx.task.update({
-        where: { id },
-        data: { status: toColumn, order: toIndex },
-      });
-
-      for (const t of tasksToUpdate) {
+    await prisma.$transaction(
+      async (tx) => {
         await tx.task.update({
-          where: { id: t.id },
-          data: { order: t.newOrder },
+          where: { id },
+          data: { status: toColumn, order: toIndex },
         });
-      }
+        await Promise.all(
+          tasksToUpdate.map((t) =>
+            tx.task.update({ where: { id: t.id }, data: { order: t.newOrder } })
+          )
+        );
 
-      await updateProjectProgressTx(projectId, tx);
-    });
+        await updateProjectProgressTx(projectId, tx);
+      },
+      { timeout: 100000 }
+    );
 
     return NextResponse.json({ success: true });
   } catch (err) {
