@@ -38,7 +38,9 @@ const useTasks = () => {
       const res = await axios.post(TASK_PROJECT_API_PATH, data);
       return res.data;
     },
-    onSuccess: () => {},
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
+    },
     onError: () => {},
   });
 
