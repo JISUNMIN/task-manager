@@ -18,7 +18,6 @@ const UserMenu = ({ open, onOpenChange }: UserMenuProps) => {
 
   const handleLogout = () => {
     onOpenChange(false);
-    logout();
     router.replace("/auth/login");
   };
 
