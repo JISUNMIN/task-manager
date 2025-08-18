@@ -39,6 +39,7 @@ interface ProjectCardProps {
   project: ClientProject;
   onClick: () => void;
   disabled?: boolean;
+  isEditing?: boolean;
 }
 
 const containerStyle: CSSProperties = {
@@ -111,7 +112,7 @@ const ProjectTitle: FC<{ title: string; className?: string }> = ({
 };
 
 const ProjectCard: FC<ProjectCardProps> = memo(
-  ({ project, onClick, disabled }) => {
+  ({ project, onClick, disabled, isEditing }) => {
     const { control } = useFormContext();
     const { user } = useAuthStore();
     const userId = user?.id;
@@ -245,7 +246,7 @@ const ProjectCard: FC<ProjectCardProps> = memo(
                 className="text-lg font-semibold text-gray-800 dark:text-gray-200 truncate"
               />
 
-              {canDeleteProject && (
+              {canDeleteProject && !isEditing && (
                 <ActionDropdownMenu
                   items={items}
                   labels={LABELS}
