@@ -86,5 +86,10 @@
 ## 💡 향후 개선 아이디어
 
 - **Editor 개선**: TipTap 한계 보완, Drag & Drop으로 블록 단위 이미지/파일 편집
-- **알림(Notification) 시스템**:Task 관련 이벤트 발생 시 실시간 알림 제공 (생성/담당자 지정, 댓글/대댓글 작성, 상태 변경(Completed), 마감일 임박, 기한 변경
+- **알림(Notification) 시스템**: Task 관련 이벤트 발생 시 실시간 알림 제공  
+  - Task 생성 및 담당자 지정  
+  - 댓글 / 대댓글 작성  
+  - 상태 변경(`Completed`)  
+  - 마감일 임박  
+  - 기한 변경
 - Task / Project 검색 기능
