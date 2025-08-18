@@ -44,11 +44,13 @@ export async function PATCH(
         where: { id },
         data: { status: toColumn, order: toIndex },
       });
-      await Promise.all(
-        tasksToUpdate.map((t) =>
-          tx.task.update({ where: { id: t.id }, data: { order: t.newOrder } })
-        )
-      );
+
+      for (const t of tasksToUpdate) {
+        await tx.task.update({
+          where: { id: t.id },
+          data: { order: t.newOrder },
+        });
+      }
 
       await updateProjectProgress(projectId, tx);
     });
