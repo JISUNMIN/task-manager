@@ -1,7 +1,7 @@
 // app/api/tasks/[taskId]/move/route.ts
 
 import { prisma } from "@/lib/prisma";
-import { updateProjectProgress } from "@/lib/utils/services/project";
+import { updateProjectProgressTx } from "@/lib/utils/services/project/progress";
 import { NextRequest, NextResponse } from "next/server";
 
 // PATCH /api/tasks/[taskId]/moveTask
@@ -52,7 +52,7 @@ export async function PATCH(
         });
       }
 
-      await updateProjectProgress(projectId, tx);
+      await updateProjectProgressTx(projectId, tx);
     });
 
     return NextResponse.json({ success: true });
