@@ -72,6 +72,7 @@
 
 - **Next.js 15 (App Router)**
 - **Prisma (ORM) + Supabase (DB)**
+- **Supabase Storage**: 사용자 프로필, 댓글 이미지/파일 보관
 - **React Hook Form**
 - **Zustand**(전역 상태 관리)
 - **React Query (TanStack Query)**(데이터 fetching 및 캐싱)
