@@ -11,7 +11,7 @@ import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
 import useProjects from "@/hooks/react-query/useProjects";
 import { useSearchParams } from "next/navigation";
 import { debounce } from "lodash";
-import useTasks, { BatchMoveItem } from "@/hooks/react-query/useTasks";
+import useTasks from "@/hooks/react-query/useTasks";
 import { useAuthStore } from "@/store/useAuthStore";
 import { getStatusColors } from "@/lib/utils/colors";
 import { CardSkeleton } from "@/components/ui/extended/Skeleton/CardSkeleton";
@@ -34,10 +34,6 @@ const KanbanBoard = () => {
   const isDark = theme === "dark";
   const prevProjectIdRef = useRef<string | undefined>(undefined);
 
-  const [pendingMoves, setPendingMoves] = useState<BatchMoveItem[]>([]);
-  const [queue, setQueue] = useState<BatchMoveItem[][]>([]);
-  const isProcessingRef = useRef(false);
-
   // TaskInfoPanel 열림/닫힘
   const [isTaskInfoPanelOpen, setTaskInfoPanelOpen] = useState(false);
   const closePanel = () => setTaskInfoPanelOpen(false);
@@ -57,7 +53,7 @@ const KanbanBoard = () => {
     createTaskMutate,
     deleteTaskMutate,
     updateTaskMutate,
-    moveTasksMutate,
+    moveTaskMutate,
   } = useTasks();
   const isPersonal = detailData?.isPersonal;
   const { user } = useAuthStore();
@@ -93,7 +89,6 @@ const KanbanBoard = () => {
     }
     debouncedUpdateMap.current[taskId](newTitle);
   };
-
   const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result;
     if (!destination) return;
@@ -105,25 +100,86 @@ const KanbanBoard = () => {
 
     const sourceStatus = source.droppableId as Status;
     const destinationStatus = destination.droppableId as Status;
-
-    // 이동할 Task 가져오기
     const task = columns[sourceStatus][source.index];
 
-    // 1) 로컬 상태 바로 변경
-    moveTask(sourceStatus, destinationStatus, source.index, destination.index);
+    // 1️⃣ 프론트에서 order 계산
+    const destTasks = [...columns[destinationStatus]];
+    const tempTasks = [...destTasks];
+    tempTasks.splice(destination.index, 0, task);
+
+    let prevTask: typeof task | null = null;
+    let nextTask: typeof task | null = null;
+
+    if (destination.index === 0) {
+      // 맨 위
+      prevTask = null;
+      nextTask = tempTasks[1] ?? null;
+    } else if (destination.index >= tempTasks.length - 1) {
+      // 맨 아래
+      prevTask = tempTasks[tempTasks.length - 2] ?? null;
+      nextTask = null;
+    } else {
+      // 중간
+      prevTask = tempTasks[destination.index - 1];
+      nextTask = tempTasks[destination.index + 1];
+    }
+
+    const prevOrder = prevTask?.order ?? 0;
+    console.log("🚀 ~ handleDragEnd ~ prevOrder:", prevOrder);
+    const nextOrder = nextTask?.order ?? 0;
+    console.log("🚀 ~ handleDragEnd ~ nextOrder:", nextOrder);
+
+    const newOrder =
+      prevOrder === null && nextOrder === null
+        ? 0
+        : prevOrder === null
+          ? nextOrder - 1
+          : nextOrder === null
+            ? prevOrder + 1
+            : (prevOrder + nextOrder) / 2;
+
+    // 2️⃣ 프론트 상태 업데이트 (order 반영)
+    moveTask(
+      sourceStatus,
+      destinationStatus,
+      source.index,
+      destination.index,
+      newOrder
+    );
+
+    // 3️⃣ 서버에 단일 업데이트 호출
+    moveTaskMutate({
+      id: task.id,
+      toColumn: destinationStatus,
+      newOrder,
+    });
+
+    // 4️⃣ 포커스 유지
     setFocusedInputKey(`${destinationStatus}-${destination.index}`);
-
-    // 2) pendingMoves에 추가
-    setPendingMoves((prev) => [
-      ...prev,
-      {
-        taskId: task.id,
-        toColumn: destinationStatus,
-        toIndex: destination.index,
-      },
-    ]);
   };
+  // const handleDragEnd = (result: DropResult) => {
+  //   const { source, destination } = result;
+  //   if (!destination) return;
+  //   if (
+  //     source.droppableId === destination.droppableId &&
+  //     source.index === destination.index
+  //   )
+  //     return;
 
+  //   const sourceStatus = source.droppableId as Status;
+  //   const destinationStatus = destination.droppableId as Status;
+  //   const task = columns[sourceStatus][source.index];
+
+  //   moveTask(sourceStatus, destinationStatus, source.index, destination.index);
+
+  //   moveTaskMutate({
+  //     id: task.id,
+  //     toColumn: destinationStatus,
+  //     toIndex: destination.index,
+  //   });
+
+  //   setFocusedInputKey(`${destinationStatus}-${destination.index}`);
+  // };
   const handleFocusedInputKey = (columnKey: string, itemIndex: number) => {
     setFocusedInputKey(`${columnKey}-${itemIndex}`);
   };
@@ -174,34 +230,6 @@ const KanbanBoard = () => {
   };
 
   useEffect(() => {
-    if (pendingMoves.length === 0) return;
-
-    const timer = setTimeout(() => {
-      setQueue((prev) => [...prev, pendingMoves]);
-      setPendingMoves([]); // 초기화
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [pendingMoves]);
-
-  useEffect(() => {
-    if (isProcessingRef.current || queue.length === 0) return;
-
-    isProcessingRef.current = true;
-    const [firstBatch, ...rest] = queue;
-
-    moveTasksMutate(
-      { batch: firstBatch },
-      {
-        onSettled: () => {
-          isProcessingRef.current = false;
-          setQueue(rest);
-        },
-      }
-    );
-  }, [queue, moveTasksMutate]);
-
-  useEffect(() => {
     const ref = inputRefs.current[focusedInputKey];
     if (ref) ref.focus();
   }, [focusedInputKey]);
@@ -221,7 +249,6 @@ const KanbanBoard = () => {
       prevProjectIdRef.current = projectId;
     }
   }, [detailData, initializeColumns, projectId]);
-
   return (
     <SidebarProvider className={`bg-[var(--bg-fourth)] relative`}>
       {sidebar}

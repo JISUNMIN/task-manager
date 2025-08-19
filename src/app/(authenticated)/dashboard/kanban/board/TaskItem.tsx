@@ -50,7 +50,6 @@ const TaskItem = ({
           <div className="text-right">
             <ActionDropdownMenu items={items} />
           </div>
-
           <TextareaAutosize
             ref={(el) => {
               inputRefs.current[`${columnKey}-${itemIndex}`] = el;

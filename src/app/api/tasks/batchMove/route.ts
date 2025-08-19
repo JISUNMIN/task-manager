@@ -85,6 +85,7 @@ async function processBatchMove(batch: BatchMoveItem[]) {
     if (!task) return;
 
     // 타겟 컬럼의 task만 뽑기
+    // TODO: 미리 테스크의 속성별로 리스트가 별도로 정리돼있으면 여기서 계쏙 전체를 다시계산할 필요없음
     const targetTasks = allTasks
       .filter((t) => t.status === toColumn && t.id !== taskId)
       .sort((a, b) => a.order! - b.order!);
@@ -100,9 +101,12 @@ async function processBatchMove(batch: BatchMoveItem[]) {
         orig.status = t.status;
       }
     });
+    console.log("🚀 ~ processBatchMove ~ targetTasks:", targetTasks);
   });
 
   // DB에 bulk update
+  console.log("🚀 ~ processBatchMove ~ allTasks:", allTasks);
+
   await Promise.all(
     allTasks.map((t) =>
       prisma.task.update({

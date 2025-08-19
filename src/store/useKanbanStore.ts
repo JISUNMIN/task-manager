@@ -59,7 +59,8 @@ export const useKanbanStore = create<{
     fromColumn: Status,
     toColumn: Status,
     fromIndex: number,
-    toIndex: number
+    toIndex: number,
+    newOrder: number
   ) => void;
   removeColumn: (columnKey: Status, index: number) => void;
 }>()(
@@ -151,11 +152,19 @@ export const useKanbanStore = create<{
           });
           get().recalcProgress();
         },
-        moveTask: (fromColumn, toColumn, fromIndex, toIndex) => {
+        moveTask: (
+          fromColumn: Status,
+          toColumn: Status,
+          fromIndex: number,
+          toIndex: number,
+          newOrder: number // 추가
+        ) => {
           set((state) => {
             const fromTasks = [...state.columns[fromColumn]];
             const taskToMove = fromTasks.splice(fromIndex, 1)[0];
             if (!taskToMove) return state;
+
+            taskToMove.order = newOrder; // order 반영
 
             const newColumns = { ...state.columns };
             if (fromColumn === toColumn) {
@@ -170,6 +179,7 @@ export const useKanbanStore = create<{
 
             return { columns: newColumns };
           });
+
           get().recalcProgress();
         },
         removeColumn: (columnKey, index) => {
