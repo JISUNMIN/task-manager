@@ -80,20 +80,20 @@ const useTasks = () => {
     onError: () => {},
   });
 
-  // const { mutate: moveTaskMutate } = useMutation<void, Error, MoveTaskParams>({
-  //   mutationFn: async ({ id, toColumn, toIndex }) => {
-  //     await axios.patch(`${TASK_PROJECT_API_PATH}/${id}/moveTask`, {
-  //       toColumn,
-  //       toIndex,
-  //     });
-  //   },
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
-  //   },
-  //   onError: (error) => {
-  //     console.error("이동 실패:", error);
-  //   },
-  // });
+  const { mutate: moveTaskMutate } = useMutation<void, Error, MoveTaskParams>({
+    mutationFn: async ({ id, toColumn, toIndex }) => {
+      await axios.patch(`${TASK_PROJECT_API_PATH}/${id}/moveTask`, {
+        toColumn,
+        toIndex,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
+    },
+    onError: (error) => {
+      console.error("이동 실패:", error);
+    },
+  });
 
   // useMutation 배치 처리
   const { mutate: moveTasksMutate } = useMutation<
@@ -129,7 +129,7 @@ const useTasks = () => {
   return {
     createTaskMutate,
     updateTaskMutate,
-    // moveTaskMutate,
+    moveTaskMutate,
     moveTasksMutate,
     deleteTaskMutate,
   };
