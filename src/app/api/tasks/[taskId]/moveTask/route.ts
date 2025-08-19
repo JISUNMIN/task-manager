@@ -1,46 +1,46 @@
-// app/api/tasks/[taskId]/move/route.ts
+// app/api/tasks/batchMove/route.ts
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { updateProjectProgress } from "@/lib/utils/services/project/progress";
 
-export async function PATCH(
-  req: NextRequest,
-  context: { params: Promise<{ taskId: string }> }
-) {
+interface BatchMoveItem {
+  taskId: number;
+  toColumn: string;
+  toIndex: number;
+}
+
+export async function PATCH(req: NextRequest) {
   const startTime = Date.now();
 
   try {
-    const { taskId } = await context.params;
-    const { toColumn, toIndex } = await req.json();
-    const id = Number(taskId);
+    const { batch }: { batch: BatchMoveItem[] } = await req.json();
 
-    // 🔥 핵심: 2초 내 완료 안되면 즉시 응답
+    if (!batch || batch.length === 0) {
+      return NextResponse.json(
+        { error: "배치 이동 데이터 없음" },
+        { status: 400 }
+      );
+    }
+
+    // 2초 안에 처리되는지 확인
     const timeoutPromise = new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error("timeout")), 2000)
     );
 
     try {
-      // 빠른 처리 시도
-      const result = await Promise.race([
-        processTaskMove(id, toColumn, toIndex),
-        timeoutPromise,
-      ]);
+      // 🔹 순차 처리
+      const result = await Promise.race([processBatchMoveSequential(batch), timeoutPromise]);
 
       const totalTime = Date.now() - startTime;
-      console.log(`⚡ 빠른 처리 완료: ${totalTime}ms`);
-
       return NextResponse.json({
         success: true,
-        newOrder: result.newOrder,
+        results: result,
         mode: "fast",
         time: totalTime,
       });
     } catch (error) {
-      // 느리면 백그라운드로 처리하고 즉시 응답
-      console.log(`🔄 백그라운드 처리로 전환`);
-
-      processTaskMoveBackground(id, toColumn, toIndex);
-
+      // 느리면 백그라운드 처리
+      processBatchMoveBackground(batch);
       return NextResponse.json({
         success: true,
         message: "처리 중입니다...",
@@ -50,19 +50,30 @@ export async function PATCH(
     }
   } catch (err) {
     return NextResponse.json(
-      { error: "이동 실패", detail: String(err) },
+      { error: "배치 이동 실패", detail: String(err) },
       { status: 500 }
     );
   }
 }
 
-// 일반 처리 함수 (기존 로직 그대로)
+// -------------------
+// 배치 순차 처리
+async function processBatchMoveSequential(batch: BatchMoveItem[]) {
+  const results = [];
+  for (const item of batch) {
+    const res = await processTaskMove(item.taskId, item.toColumn, item.toIndex);
+    results.push({ taskId: item.taskId, newOrder: res.newOrder });
+  }
+  return results;
+}
+
+// -------------------
+// 기존 단일 이동 함수 그대로
 async function processTaskMove(id: number, toColumn: string, toIndex: number) {
   const task = await prisma.task.findUnique({
     where: { id },
     select: { id: true, projectId: true, status: true, order: true },
   });
-
   if (!task) throw new Error("Task not found");
 
   const targetTasks = await prisma.task.findMany({
@@ -91,30 +102,25 @@ async function processTaskMove(id: number, toColumn: string, toIndex: number) {
   return { newOrder };
 }
 
-// 백그라운드 처리 (에러 발생해도 상관없음)
-function processTaskMoveBackground(
-  id: number,
-  toColumn: string,
-  toIndex: number
-) {
+// -------------------
+// 백그라운드 처리
+function processBatchMoveBackground(batch: BatchMoveItem[]) {
   setTimeout(async () => {
     try {
-      const result = await processTaskMove(id, toColumn, toIndex);
-      console.log(`✅ 백그라운드 처리 완료: Task ${id}`);
-
-      // 기존 utils 함수 사용해서 Progress 업데이트
-      const task = await prisma.task.findUnique({
-        where: { id },
-        select: { projectId: true },
-      });
-
-      if (task) {
-        const progress = await updateProjectProgress(task.projectId);
-        console.log(`📊 Progress 업데이트 완료: ${progress}%`);
+      await processBatchMoveSequential(batch);
+      // 필요 시 프로젝트 Progress 업데이트
+      const projectIds = Array.from(new Set(batch.map((b) => b.taskId)));
+      for (const id of projectIds) {
+        const task = await prisma.task.findUnique({
+          where: { id },
+          select: { projectId: true },
+        });
+        if (task?.projectId) {
+          await updateProjectProgress(task.projectId);
+        }
       }
-    } catch (error) {
-      console.error(`❌ 백그라운드 처리 실패:`, error);
-      // 실패해도 사용자는 이미 성공 응답 받음
+    } catch (err) {
+      console.error("❌ 백그라운드 배치 처리 실패:", err);
     }
   }, 0);
 }
