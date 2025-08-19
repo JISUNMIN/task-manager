@@ -1,6 +1,5 @@
 // app/api/tasks/[taskId]/move/route.ts
 import { prisma } from "@/lib/prisma";
-import { updateProjectProgress } from "@/lib/utils/services/project";
 import { NextRequest, NextResponse } from "next/server";
 
 // PATCH /api/tasks/[taskId]/move
@@ -13,6 +12,7 @@ export async function PATCH(
     const { toColumn, toIndex } = await req.json();
     const id = Number(taskId);
 
+    // 1. 최소 데이터만 조회
     const task = await prisma.task.findUnique({
       where: { id },
       select: { id: true, projectId: true, status: true, order: true },
@@ -21,18 +21,17 @@ export async function PATCH(
 
     const projectId = task.projectId;
 
-    // 1. 같은 컬럼의 task 최소 데이터만 불러오기
+    // 2. 같은 컬럼 task 조회 (order 기준)
     const targetTasks = await prisma.task.findMany({
       where: { status: toColumn, projectId },
       orderBy: { order: "asc" },
       select: { id: true, order: true },
     });
 
-    // 2. 이동할 task 제외 후 새로운 순서 계산
+    // 3. 이동 후 순서 계산
     const filteredTasks = targetTasks.filter((t) => t.id !== id);
     filteredTasks.splice(toIndex, 0, task);
 
-    // 3. 이전/다음 order 계산
     const prevOrder = filteredTasks[toIndex - 1]?.order ?? null;
     const nextOrder = filteredTasks[toIndex + 1]?.order ?? null;
 
@@ -43,15 +42,29 @@ export async function PATCH(
     else newOrder = (prevOrder! + nextOrder!) / 2;
 
     // 4. 이동 task만 업데이트
-    const update = await prisma.task.update({
+    await prisma.task.update({
       where: { id },
       data: { status: toColumn, order: newOrder },
     });
 
-    // 5. progress 계산은 비동기 처리 (응답 먼저)
-    updateProjectProgress(projectId).catch((err) =>
-      console.error("Progress update failed:", err)
-    );
+    // 5. Progress 계산은 비동기 처리
+    (async () => {
+      try {
+        const total = await prisma.task.count({ where: { projectId } });
+        const completed = await prisma.task.count({
+          where: { projectId, status: "Completed" },
+        });
+        const progress =
+          total === 0 ? 0 : Math.floor((completed / total) * 100);
+
+        await prisma.project.update({
+          where: { id: projectId },
+          data: { progress },
+        });
+      } catch (err) {
+        console.error("Progress update failed:", err);
+      }
+    })();
 
     return NextResponse.json({ success: true, newOrder });
   } catch (err) {
