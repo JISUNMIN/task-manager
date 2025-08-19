@@ -9,16 +9,16 @@ export async function POST(req: NextRequest) {
     const status = body.status;
     const projectId = Number(body.projectId);
     const orderType = body.orderType;
-    const index = body.index ?? null; // 중간에 삽입할 경우 사용
+    const index = body.index ?? null; // 중간 삽입
 
-    let newOrder: number;
-
-    // 같은 컬럼의 최소/최대 task order만 조회
+    // 1. 같은 컬럼의 task 최소 데이터만 조회
     const tasks = await prisma.task.findMany({
       where: { status, projectId },
       orderBy: { order: "asc" },
       select: { id: true, order: true },
     });
+
+    let newOrder: number;
 
     if (tasks.length === 0) {
       newOrder = 0;
@@ -27,12 +27,13 @@ export async function POST(req: NextRequest) {
     } else if (orderType === "bottom") {
       newOrder = tasks[tasks.length - 1].order! + 1;
     } else if (index !== null) {
-      // 중간에 삽입
       const prevOrder = tasks[index - 1]?.order ?? 0;
       const nextOrder = tasks[index]?.order ?? prevOrder + 2;
-      newOrder = (prevOrder + nextOrder) / 2;
+      newOrder =
+        prevOrder === nextOrder
+          ? prevOrder + 0.0001
+          : (prevOrder + nextOrder) / 2;
     } else {
-      // 기본 맨 아래
       newOrder = tasks[tasks.length - 1].order! + 1;
     }
 
