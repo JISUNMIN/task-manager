@@ -33,7 +33,10 @@ const KanbanBoard = () => {
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
   const prevProjectIdRef = useRef<string | undefined>(undefined);
+
   const [pendingMoves, setPendingMoves] = useState<BatchMoveItem[]>([]);
+  const [queue, setQueue] = useState<BatchMoveItem[][]>([]);
+  const isProcessingRef = useRef(false);
 
   // TaskInfoPanel 열림/닫힘
   const [isTaskInfoPanelOpen, setTaskInfoPanelOpen] = useState(false);
@@ -91,9 +94,8 @@ const KanbanBoard = () => {
     debouncedUpdateMap.current[taskId](newTitle);
   };
 
-  // handleDragEnd 예시 (단일 이동도 배열로 처리)
   const handleDragEnd = (result: DropResult) => {
-    const { source, destination, combine } = result;
+    const { source, destination } = result;
     if (!destination) return;
     if (
       source.droppableId === destination.droppableId &&
@@ -175,12 +177,29 @@ const KanbanBoard = () => {
     if (pendingMoves.length === 0) return;
 
     const timer = setTimeout(() => {
-      moveTasksMutate({ batch: pendingMoves });
+      setQueue((prev) => [...prev, pendingMoves]);
       setPendingMoves([]); // 초기화
     }, 1000);
 
     return () => clearTimeout(timer);
   }, [pendingMoves]);
+
+  useEffect(() => {
+    if (isProcessingRef.current || queue.length === 0) return;
+
+    isProcessingRef.current = true;
+    const [firstBatch, ...rest] = queue;
+
+    moveTasksMutate(
+      { batch: firstBatch },
+      {
+        onSettled: () => {
+          isProcessingRef.current = false;
+          setQueue(rest);
+        },
+      }
+    );
+  }, [queue, moveTasksMutate]);
 
   useEffect(() => {
     const ref = inputRefs.current[focusedInputKey];
@@ -202,6 +221,7 @@ const KanbanBoard = () => {
       prevProjectIdRef.current = projectId;
     }
   }, [detailData, initializeColumns, projectId]);
+
   return (
     <SidebarProvider className={`bg-[var(--bg-fourth)] relative`}>
       {sidebar}
