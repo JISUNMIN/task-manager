@@ -1,0 +1,9 @@
+{
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "maxDuration": 25,
+      "regions": ["icn1"],
+      "memory": 512
+    }
+  }
+}
