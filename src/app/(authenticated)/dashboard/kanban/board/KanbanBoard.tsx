@@ -53,7 +53,7 @@ const KanbanBoard = () => {
     createTaskMutate,
     deleteTaskMutate,
     updateTaskMutate,
-    moveTaskMutate,
+    moveTasksMutate,
   } = useTasks();
   const isPersonal = detailData?.isPersonal;
   const { user } = useAuthStore();
@@ -90,6 +90,7 @@ const KanbanBoard = () => {
     debouncedUpdateMap.current[taskId](newTitle);
   };
 
+  // handleDragEnd 예시 (단일 이동도 배열로 처리)
   const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result;
     if (!destination) return;
@@ -101,14 +102,20 @@ const KanbanBoard = () => {
 
     const sourceStatus = source.droppableId as Status;
     const destinationStatus = destination.droppableId as Status;
+
     const task = columns[sourceStatus][source.index];
 
     moveTask(sourceStatus, destinationStatus, source.index, destination.index);
 
-    moveTaskMutate({
-      id: task.id,
-      toColumn: destinationStatus,
-      toIndex: destination.index,
+    // 단일 이동도 배열로 감싸서 배치 API 호출
+    moveTasksMutate({
+      batch: [
+        {
+          taskId: task.id,
+          toColumn: destinationStatus,
+          toIndex: destination.index,
+        },
+      ],
     });
 
     setFocusedInputKey(`${destinationStatus}-${destination.index}`);

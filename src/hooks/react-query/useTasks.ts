@@ -22,6 +22,12 @@ type MoveTaskParams = {
   toIndex: number;
 };
 
+type BatchMoveItem = {
+  taskId: number;
+  toColumn: Status;
+  toIndex: number;
+};
+
 const TASK_PROJECT_API_PATH = "/tasks";
 
 const useTasks = () => {
@@ -74,18 +80,35 @@ const useTasks = () => {
     onError: () => {},
   });
 
-  const { mutate: moveTaskMutate } = useMutation<void, Error, MoveTaskParams>({
-    mutationFn: async ({ id, toColumn, toIndex }) => {
-      await axios.patch(`${TASK_PROJECT_API_PATH}/${id}/moveTask`, {
-        toColumn,
-        toIndex,
-      });
+  // const { mutate: moveTaskMutate } = useMutation<void, Error, MoveTaskParams>({
+  //   mutationFn: async ({ id, toColumn, toIndex }) => {
+  //     await axios.patch(`${TASK_PROJECT_API_PATH}/${id}/moveTask`, {
+  //       toColumn,
+  //       toIndex,
+  //     });
+  //   },
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
+  //   },
+  //   onError: (error) => {
+  //     console.error("이동 실패:", error);
+  //   },
+  // });
+
+  // useMutation 배치 처리
+  const { mutate: moveTasksMutate } = useMutation<
+    void,
+    Error,
+    { batch: BatchMoveItem[] }
+  >({
+    mutationFn: async ({ batch }) => {
+      await axios.patch(`${TASK_PROJECT_API_PATH}/batchMove`, { batch });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
     },
     onError: (error) => {
-      console.error("이동 실패:", error);
+      console.error("배치 이동 실패:", error);
     },
   });
 
@@ -106,7 +129,8 @@ const useTasks = () => {
   return {
     createTaskMutate,
     updateTaskMutate,
-    moveTaskMutate,
+    // moveTaskMutate,
+    moveTasksMutate,
     deleteTaskMutate,
   };
 };
