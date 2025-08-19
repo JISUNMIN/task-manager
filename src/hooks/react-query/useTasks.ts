@@ -22,7 +22,7 @@ type MoveTaskParams = {
   toIndex: number;
 };
 
-type BatchMoveItem = {
+export type BatchMoveItem = {
   taskId: number;
   toColumn: Status;
   toIndex: number;

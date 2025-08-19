@@ -11,7 +11,7 @@ import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
 import useProjects from "@/hooks/react-query/useProjects";
 import { useSearchParams } from "next/navigation";
 import { debounce } from "lodash";
-import useTasks from "@/hooks/react-query/useTasks";
+import useTasks, { BatchMoveItem } from "@/hooks/react-query/useTasks";
 import { useAuthStore } from "@/store/useAuthStore";
 import { getStatusColors } from "@/lib/utils/colors";
 import { CardSkeleton } from "@/components/ui/extended/Skeleton/CardSkeleton";
@@ -33,6 +33,7 @@ const KanbanBoard = () => {
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
   const prevProjectIdRef = useRef<string | undefined>(undefined);
+  const [pendingMoves, setPendingMoves] = useState<BatchMoveItem[]>([]);
 
   // TaskInfoPanel 열림/닫힘
   const [isTaskInfoPanelOpen, setTaskInfoPanelOpen] = useState(false);
@@ -92,7 +93,7 @@ const KanbanBoard = () => {
 
   // handleDragEnd 예시 (단일 이동도 배열로 처리)
   const handleDragEnd = (result: DropResult) => {
-    const { source, destination } = result;
+    const { source, destination, combine } = result;
     if (!destination) return;
     if (
       source.droppableId === destination.droppableId &&
@@ -103,23 +104,24 @@ const KanbanBoard = () => {
     const sourceStatus = source.droppableId as Status;
     const destinationStatus = destination.droppableId as Status;
 
+    // 이동할 Task 가져오기
     const task = columns[sourceStatus][source.index];
 
+    // 1) 로컬 상태 바로 변경
     moveTask(sourceStatus, destinationStatus, source.index, destination.index);
-
-    // 단일 이동도 배열로 감싸서 배치 API 호출
-    moveTasksMutate({
-      batch: [
-        {
-          taskId: task.id,
-          toColumn: destinationStatus,
-          toIndex: destination.index,
-        },
-      ],
-    });
-
     setFocusedInputKey(`${destinationStatus}-${destination.index}`);
+
+    // 2) pendingMoves에 추가
+    setPendingMoves((prev) => [
+      ...prev,
+      {
+        taskId: task.id,
+        toColumn: destinationStatus,
+        toIndex: destination.index,
+      },
+    ]);
   };
+
   const handleFocusedInputKey = (columnKey: string, itemIndex: number) => {
     setFocusedInputKey(`${columnKey}-${itemIndex}`);
   };
@@ -168,6 +170,17 @@ const KanbanBoard = () => {
       debouncedUpdate(task.id, value);
     }
   };
+
+  useEffect(() => {
+    if (pendingMoves.length === 0) return;
+
+    const timer = setTimeout(() => {
+      moveTasksMutate({ batch: pendingMoves });
+      setPendingMoves([]); // 초기화
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [pendingMoves]);
 
   useEffect(() => {
     const ref = inputRefs.current[focusedInputKey];

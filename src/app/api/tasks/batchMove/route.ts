@@ -14,123 +14,85 @@ export async function PATCH(req: NextRequest) {
 
   try {
     const { batch }: { batch: BatchMoveItem[] } = await req.json();
-
-    if (!batch || !Array.isArray(batch) || batch.length === 0) {
+    if (!batch || batch.length === 0) {
       return NextResponse.json(
         { error: "배치 이동 데이터 없음" },
         { status: 400 }
       );
     }
 
-    // 2초 안에 처리되는지 확인하는 Promise
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("timeout")), 2000)
-    );
+    // 모든 Task의 projectId 가져오기 (같은 프로젝트 가정)
+    const projectId = (
+      await prisma.task.findUnique({
+        where: { id: batch[0].taskId },
+        select: { projectId: true },
+      })
+    )?.projectId;
 
-    try {
-      // 모든 Task를 병렬 처리
-      const result = await Promise.race([
-        Promise.all(
-          batch.map(({ taskId, toColumn, toIndex }) =>
-            processTaskMove(taskId, toColumn, toIndex)
-          )
-        ),
-        timeoutPromise,
-      ]);
+    if (!projectId) throw new Error("프로젝트를 찾을 수 없음");
 
-      const totalTime = Date.now() - startTime;
-      console.log(`⚡ 빠른 처리 완료: ${totalTime}ms`);
+    // 1️⃣ 해당 프로젝트의 모든 Task 가져오기
+    const allTasks = await prisma.task.findMany({
+      where: { projectId },
+      orderBy: { order: "asc" },
+    });
 
-      return NextResponse.json({
-        success: true,
-        results: result,
-        mode: "fast",
-        time: totalTime,
-      });
-    } catch (error) {
-      console.log("🔄 백그라운드 처리로 전환");
-      processBatchMoveBackground(batch);
-      return NextResponse.json({
-        success: true,
-        message: "처리 중입니다...",
-        mode: "background",
-        time: Date.now() - startTime,
+    // 2️⃣ 컬럼별로 Task 그룹화
+    const columnsMap: Record<string, any[]> = {};
+    for (const task of allTasks) {
+      if (!columnsMap[task.status]) columnsMap[task.status] = [];
+      columnsMap[task.status].push(task);
+    }
+
+    // 3️⃣ batch 이동 적용
+    for (const move of batch) {
+      const task = allTasks.find((t) => t.id === move.taskId);
+      if (!task) continue;
+
+      // 원래 컬럼에서 제거
+      columnsMap[task.status] = columnsMap[task.status].filter(
+        (t) => t.id !== task.id
+      );
+
+      // 새 컬럼에 삽입
+      if (!columnsMap[move.toColumn]) columnsMap[move.toColumn] = [];
+      columnsMap[move.toColumn].splice(move.toIndex, 0, {
+        ...task,
+        status: move.toColumn,
       });
     }
+
+    // 4️⃣ 새 order 계산
+    const updates: { id: number; status: string; order: number }[] = [];
+    for (const [status, tasks] of Object.entries(columnsMap)) {
+      tasks.forEach((task, index) => {
+        updates.push({ id: task.id, status, order: index });
+      });
+    }
+
+    // 5️⃣ 트랜잭션으로 한 번에 업데이트
+    await prisma.$transaction(
+      updates.map((u) =>
+        prisma.task.update({
+          where: { id: u.id },
+          data: { status: u.status, order: u.order },
+        })
+      )
+    );
+
+    // 6️⃣ Progress 업데이트
+    const progress = await updateProjectProgress(projectId);
+
+    const totalTime = Date.now() - startTime;
+    return NextResponse.json({
+      success: true,
+      time: totalTime,
+      progress,
+    });
   } catch (err) {
     return NextResponse.json(
       { error: "배치 이동 실패", detail: String(err) },
       { status: 500 }
     );
   }
-}
-
-// 단일 Task 이동 함수 (기존과 동일)
-async function processTaskMove(id: number, toColumn: string, toIndex: number) {
-  const task = await prisma.task.findUnique({
-    where: { id },
-    select: { id: true, projectId: true, status: true, order: true },
-  });
-
-  if (!task) throw new Error(`Task ${id} not found`);
-
-  const targetTasks = await prisma.task.findMany({
-    where: { status: toColumn, projectId: task.projectId },
-    orderBy: { order: "asc" },
-    select: { id: true, order: true },
-  });
-
-  const filteredTasks = targetTasks.filter((t) => t.id !== id);
-  filteredTasks.splice(toIndex, 0, task);
-
-  const prevOrder = filteredTasks[toIndex - 1]?.order ?? null;
-  const nextOrder = filteredTasks[toIndex + 1]?.order ?? null;
-
-  let newOrder: number;
-  if (prevOrder === null && nextOrder === null) newOrder = 0;
-  else if (prevOrder === null && nextOrder !== null) newOrder = nextOrder - 1;
-  else if (prevOrder !== null && nextOrder === null) newOrder = prevOrder + 1;
-  else newOrder = (prevOrder! + nextOrder!) / 2;
-
-  await prisma.task.update({
-    where: { id },
-    data: { status: toColumn, order: newOrder },
-  });
-
-  return { taskId: id, newOrder };
-}
-
-// 백그라운드 배치 처리
-function processBatchMoveBackground(batch: BatchMoveItem[]) {
-  setTimeout(async () => {
-    try {
-      await Promise.all(
-        batch.map(({ taskId, toColumn, toIndex }) =>
-          processTaskMove(taskId, toColumn, toIndex)
-        )
-      );
-
-      // 관련 프로젝트 Progress 업데이트
-      const projectIds = Array.from(
-        new Set(batch.map(({ taskId }) => taskId))
-      ).map(async (id) => {
-        const task = await prisma.task.findUnique({
-          where: { id },
-          select: { projectId: true },
-        });
-        return task?.projectId;
-      });
-
-      for await (const projectId of projectIds) {
-        if (projectId) {
-          const progress = await updateProjectProgress(projectId);
-          console.log(`📊 Progress 업데이트 완료: ${progress}%`);
-        }
-      }
-
-      console.log("✅ 백그라운드 배치 처리 완료");
-    } catch (err) {
-      console.error("❌ 백그라운드 배치 처리 실패:", err);
-    }
-  }, 0);
 }
