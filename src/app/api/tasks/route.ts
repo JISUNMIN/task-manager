@@ -47,24 +47,24 @@ export async function PATCH(
       data: { status: toColumn, order: newOrder },
     });
 
-    // 5. Progress 계산은 비동기 처리
-    (async () => {
-      try {
-        const total = await prisma.task.count({ where: { projectId } });
-        const completed = await prisma.task.count({
-          where: { projectId, status: "Completed" },
-        });
-        const progress =
-          total === 0 ? 0 : Math.floor((completed / total) * 100);
+    // // 5. Progress 계산은 비동기 처리
+    // (async () => {
+    //   try {
+    //     const total = await prisma.task.count({ where: { projectId } });
+    //     const completed = await prisma.task.count({
+    //       where: { projectId, status: "Completed" },
+    //     });
+    //     const progress =
+    //       total === 0 ? 0 : Math.floor((completed / total) * 100);
 
-        await prisma.project.update({
-          where: { id: projectId },
-          data: { progress },
-        });
-      } catch (err) {
-        console.error("Progress update failed:", err);
-      }
-    })();
+    //     await prisma.project.update({
+    //       where: { id: projectId },
+    //       data: { progress },
+    //     });
+    //   } catch (err) {
+    //     console.error("Progress update failed:", err);
+    //   }
+    // })();
 
     return NextResponse.json({ success: true, newOrder });
   } catch (err) {
