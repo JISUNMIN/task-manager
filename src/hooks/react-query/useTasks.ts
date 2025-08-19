@@ -36,7 +36,7 @@ const useTasks = () => {
   const { updateTask } = useKanbanStore();
 
   // task create
-  const { mutate: createTaskMutate } = useMutation<
+  const { mutateAsync: createTaskMutate } = useMutation<
     Task,
     Error,
     TaskCreateParams
@@ -46,7 +46,7 @@ const useTasks = () => {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
+      // queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
     },
     onError: () => {},
   });
@@ -83,7 +83,7 @@ const useTasks = () => {
 
   const { mutate: moveTaskMutate } = useMutation<void, Error, MoveTaskParams>({
     mutationFn: async ({ id, toColumn, newOrder }) => {
-      console.log("🚀 ~ useTasks ~ newOrder:", newOrder)
+      console.log("🚀 ~ useTasks ~ newOrder:", newOrder);
       await axios.patch(`${TASK_PROJECT_API_PATH}/${id}/moveTask`, {
         toColumn,
         order: newOrder, // 프론트에서 계산한 order 그대로 사용

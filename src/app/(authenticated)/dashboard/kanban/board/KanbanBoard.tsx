@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { KanbanSidebar } from "../sidebar/KanbanSidebar";
@@ -28,6 +29,7 @@ const TaskInfoPanel = dynamic(
 );
 
 const KanbanBoard = () => {
+  const queryClient = useQueryClient();
   const sidebar = useMemo(() => <KanbanSidebar />, []);
   const trigger = useMemo(() => <SidebarTrigger />, []);
   const { theme } = useThemeStore();
@@ -184,7 +186,7 @@ const KanbanBoard = () => {
     setFocusedInputKey(`${columnKey}-${itemIndex}`);
   };
 
-  const handleCreateTask = (
+  const handleCreateTask = async (
     columnKey: Status,
     columnIndex: number,
     orderType: "top" | "bottom" = "bottom"
@@ -192,7 +194,7 @@ const KanbanBoard = () => {
     const tempId = `temp-${Date.now()}`;
     addTask(columnIndex, orderType, tempId);
 
-    createTaskMutate(
+    const result = await createTaskMutate(
       {
         title: "",
         desc: "",
@@ -203,11 +205,12 @@ const KanbanBoard = () => {
         orderType,
       },
       {
-        onSuccess: (realTask) => {
-          replaceTempTask(columnKey, tempId, realTask);
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
         },
       }
     );
+    replaceTempTask(columnKey, tempId, result);
   };
 
   const handleDeleteTask = (columnKey: Status, itemIndex: number) => {
