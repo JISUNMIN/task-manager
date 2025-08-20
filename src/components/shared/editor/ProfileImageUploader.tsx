@@ -1,6 +1,7 @@
 import { ImageIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
+import { IoPerson } from "react-icons/io5";
 
 type ProfileImageUploaderProps = {
   initialImageUrl?: string;
@@ -13,12 +14,12 @@ type ProfileImageUploaderProps = {
 export function ProfileImageUploader({
   initialImageUrl,
   onFileChange,
-  alt = "이미지",
+  alt = "프로필 이미지",
   className,
   name,
 }: ProfileImageUploaderProps) {
-  const [previewUrl, setPreviewUrl] = useState(
-    initialImageUrl || "/default-profile.png"
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    initialImageUrl ?? null
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
@@ -41,6 +42,8 @@ export function ProfileImageUploader({
         setPreviewUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
+    } else {
+      setPreviewUrl(null);
     }
   };
 
@@ -49,23 +52,31 @@ export function ProfileImageUploader({
   };
 
   useEffect(() => {
-    setPreviewUrl(initialImageUrl || "/default-profile.png");
+    setPreviewUrl(initialImageUrl ?? null);
   }, [initialImageUrl]);
 
   return (
     <>
       <div
-        className={`relative w-32 h-32 rounded-full overflow-hidden border-4 cursor-pointer group border-[var(--primary)] ${className}`}
+        className={`relative w-32 h-32 rounded-full overflow-hidden border-2 cursor-pointer group border-gray-300 shadow-sm ${className}`}
         onClick={onClickImage}
       >
-        <img
-          src={previewUrl}
-          alt={alt}
-          className="w-full h-full object-cover rounded-full"
-        />
-        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <ImageIcon className="w-8 h-8 text-white" />
+        {previewUrl ? (
+          <img
+            src={previewUrl}
+            alt={alt}
+            className="w-full h-full object-cover rounded-full transition-transform duration-300 group-hover:scale-105"
+            onError={() => setPreviewUrl(null)}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-full">
+            <IoPerson className="w-16 h-16 text-gray-400" />
+          </div>
+        )}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full">
+          <ImageIcon className="w-7 h-7 text-white" />
         </div>
+
         <input
           type="file"
           accept="image/*"
