@@ -18,8 +18,8 @@ type TaskCreateParams = {
 
 type MoveTaskParams = {
   id: number;
+  projectId:number;
   toColumn: Status;
-  toIndex?: number;
   newOrder: number;
 };
 
@@ -34,9 +34,10 @@ const TASK_PROJECT_API_PATH = "/tasks";
 const useTasks = () => {
   const queryClient = useQueryClient();
   const { updateTask } = useKanbanStore();
+  const {progress}=useKanbanStore();
 
   // task create
-  const { mutate: createTaskMutate } = useMutation<
+  const { mutateAsync: createTaskMutate } = useMutation<
     Task,
     Error,
     TaskCreateParams
@@ -45,9 +46,7 @@ const useTasks = () => {
       const res = await axios.post(TASK_PROJECT_API_PATH, data);
       return res.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
-    },
+    onSuccess: () => {},
     onError: () => {},
   });
 
@@ -82,11 +81,12 @@ const useTasks = () => {
   });
 
   const { mutate: moveTaskMutate } = useMutation<void, Error, MoveTaskParams>({
-    mutationFn: async ({ id, toColumn, newOrder }) => {
-      console.log("🚀 ~ useTasks ~ newOrder:", newOrder)
+    mutationFn: async ({ id,projectId, toColumn, newOrder }) => {
       await axios.patch(`${TASK_PROJECT_API_PATH}/${id}/moveTask`, {
+        projectId,
         toColumn,
-        order: newOrder, // 프론트에서 계산한 order 그대로 사용
+        order: newOrder, // 프론트에서 계산한 order
+        progress,
       });
     },
     onSuccess: () => {
@@ -94,37 +94,6 @@ const useTasks = () => {
     },
     onError: (error) => {
       console.error("이동 실패:", error);
-    },
-  });
-  // const { mutate: moveTaskMutate } = useMutation<void, Error, MoveTaskParams>({
-  //   mutationFn: async ({ id, toColumn, toIndex }) => {
-  //     await axios.patch(`${TASK_PROJECT_API_PATH}/${id}/moveTask`, {
-  //       toColumn,
-  //       toIndex,
-  //     });
-  //   },
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
-  //   },
-  //   onError: (error) => {
-  //     console.error("이동 실패:", error);
-  //   },
-  // });
-
-  // useMutation 배치 처리
-  const { mutate: moveTasksMutate } = useMutation<
-    void,
-    Error,
-    { batch: BatchMoveItem[] }
-  >({
-    mutationFn: async ({ batch }) => {
-      await axios.patch(`${TASK_PROJECT_API_PATH}/batchMove`, { batch });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
-    },
-    onError: (error) => {
-      console.error("배치 이동 실패:", error);
     },
   });
 
@@ -146,7 +115,6 @@ const useTasks = () => {
     createTaskMutate,
     updateTaskMutate,
     moveTaskMutate,
-    moveTasksMutate,
     deleteTaskMutate,
   };
 };

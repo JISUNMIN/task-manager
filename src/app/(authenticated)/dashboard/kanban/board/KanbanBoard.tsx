@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { KanbanSidebar } from "../sidebar/KanbanSidebar";
@@ -28,6 +29,7 @@ const TaskInfoPanel = dynamic(
 );
 
 const KanbanBoard = () => {
+  const queryClient = useQueryClient();
   const sidebar = useMemo(() => <KanbanSidebar />, []);
   const trigger = useMemo(() => <SidebarTrigger />, []);
   const { theme } = useThemeStore();
@@ -102,9 +104,12 @@ const KanbanBoard = () => {
     const destinationStatus = destination.droppableId as Status;
     const task = columns[sourceStatus][source.index];
 
-    // 1️⃣ 프론트에서 order 계산
-    const destTasks = [...columns[destinationStatus]];
-    const tempTasks = [...destTasks];
+    // 프론트에서 order 계산
+    const tempTasks = [...columns[destinationStatus]];
+    if (sourceStatus === destinationStatus) {
+      // 같은 컬럼이면 원래 자리에서 제거
+      tempTasks.splice(source.index, 1);
+    }
     tempTasks.splice(destination.index, 0, task);
 
     let prevTask: typeof task | null = null;
@@ -124,21 +129,22 @@ const KanbanBoard = () => {
       nextTask = tempTasks[destination.index + 1];
     }
 
-    const prevOrder = prevTask?.order ?? 0;
-    console.log("🚀 ~ handleDragEnd ~ prevOrder:", prevOrder);
-    const nextOrder = nextTask?.order ?? 0;
-    console.log("🚀 ~ handleDragEnd ~ nextOrder:", nextOrder);
+    const prevOrder = prevTask?.order;
+    const nextOrder = nextTask?.order;
 
-    const newOrder =
-      prevOrder === null && nextOrder === null
-        ? 0
-        : prevOrder === null
-          ? nextOrder - 1
-          : nextOrder === null
-            ? prevOrder + 1
-            : (prevOrder + nextOrder) / 2;
+    let newOrder: number;
 
-    // 2️⃣ 프론트 상태 업데이트 (order 반영)
+    if (prevOrder == null && nextOrder == null) {
+      newOrder = 0;
+    } else if (prevOrder == null) {
+      newOrder = nextOrder! - 1;
+    } else if (nextOrder == null) {
+      newOrder = prevOrder + 1;
+    } else {
+      newOrder = (prevOrder + nextOrder) / 2;
+    }
+
+    // 프론트 상태 업데이트 (order 반영)
     moveTask(
       sourceStatus,
       destinationStatus,
@@ -147,44 +153,22 @@ const KanbanBoard = () => {
       newOrder
     );
 
-    // 3️⃣ 서버에 단일 업데이트 호출
+    // 서버 업데이트 호출
     moveTaskMutate({
       id: task.id,
+      projectId: Number(projectId),
       toColumn: destinationStatus,
       newOrder,
     });
 
-    // 4️⃣ 포커스 유지
+    // 포커스 유지
     setFocusedInputKey(`${destinationStatus}-${destination.index}`);
   };
-  // const handleDragEnd = (result: DropResult) => {
-  //   const { source, destination } = result;
-  //   if (!destination) return;
-  //   if (
-  //     source.droppableId === destination.droppableId &&
-  //     source.index === destination.index
-  //   )
-  //     return;
-
-  //   const sourceStatus = source.droppableId as Status;
-  //   const destinationStatus = destination.droppableId as Status;
-  //   const task = columns[sourceStatus][source.index];
-
-  //   moveTask(sourceStatus, destinationStatus, source.index, destination.index);
-
-  //   moveTaskMutate({
-  //     id: task.id,
-  //     toColumn: destinationStatus,
-  //     toIndex: destination.index,
-  //   });
-
-  //   setFocusedInputKey(`${destinationStatus}-${destination.index}`);
-  // };
   const handleFocusedInputKey = (columnKey: string, itemIndex: number) => {
     setFocusedInputKey(`${columnKey}-${itemIndex}`);
   };
 
-  const handleCreateTask = (
+  const handleCreateTask = async (
     columnKey: Status,
     columnIndex: number,
     orderType: "top" | "bottom" = "bottom"
@@ -192,7 +176,7 @@ const KanbanBoard = () => {
     const tempId = `temp-${Date.now()}`;
     addTask(columnIndex, orderType, tempId);
 
-    createTaskMutate(
+    const result = await createTaskMutate(
       {
         title: "",
         desc: "",
@@ -203,11 +187,12 @@ const KanbanBoard = () => {
         orderType,
       },
       {
-        onSuccess: (realTask) => {
-          replaceTempTask(columnKey, tempId, realTask);
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
         },
       }
     );
+    replaceTempTask(columnKey, tempId, result);
   };
 
   const handleDeleteTask = (columnKey: Status, itemIndex: number) => {
