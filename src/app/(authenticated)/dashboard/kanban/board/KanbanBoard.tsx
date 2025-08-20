@@ -216,11 +216,6 @@ const KanbanBoard = () => {
         orderType,
         newOrder,
       },
-      {
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
-        },
-      }
     );
     setCreatingColumns((prev) => {
       const newSet = new Set(prev);
