@@ -23,12 +23,6 @@ type MoveTaskParams = {
   newOrder: number;
 };
 
-export type BatchMoveItem = {
-  taskId: number;
-  toColumn: Status;
-  toIndex: number;
-};
-
 const TASK_PROJECT_API_PATH = "/tasks";
 
 const useTasks = () => {
@@ -106,7 +100,7 @@ const useTasks = () => {
       mutationFn: async (data) => {
         const { id } = data;
         await axios.delete(`${TASK_PROJECT_API_PATH}/${id}`, {
-           data: { progress }
+          data: { progress },
         });
       },
       onSuccess: () => {
