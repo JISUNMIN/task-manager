@@ -218,22 +218,15 @@ const KanbanBoard = () => {
       },
       {
         onSuccess: () => {
-          setCreatingColumns((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(columnKey);
-            return newSet;
-          });
           queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
-        },
-        onError: () => {
-          setCreatingColumns((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(columnKey);
-            return newSet;
-          });
         },
       }
     );
+    setCreatingColumns((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(columnKey);
+      return newSet;
+    });
     replaceTempTask(columnKey, tempId, result);
   };
 
