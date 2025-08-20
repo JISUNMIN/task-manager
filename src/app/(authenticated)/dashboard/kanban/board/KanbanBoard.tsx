@@ -205,18 +205,16 @@ const KanbanBoard = () => {
     const tempId = `temp-${Date.now()}`;
     addTask(columnIndex, orderType, tempId);
 
-    const result = await createTaskMutate(
-      {
-        title: "",
-        desc: "",
-        status: columnKey,
-        projectId: Number(projectId),
-        userId: user?.id ?? 1,
-        managerId: user?.id ?? 1,
-        orderType,
-        newOrder,
-      },
-    );
+    const result = await createTaskMutate({
+      title: "",
+      desc: "",
+      status: columnKey,
+      projectId: Number(projectId),
+      userId: user?.id ?? 1,
+      managerId: user?.id ?? 1,
+      orderType,
+      newOrder,
+    });
     setCreatingColumns((prev) => {
       const newSet = new Set(prev);
       newSet.delete(columnKey);

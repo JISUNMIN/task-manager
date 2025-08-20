@@ -133,7 +133,7 @@ export const useKanbanStore = create<{
             columns: {
               ...state.columns,
               [columnKey]: state.columns[columnKey].map((t) =>
-                String(t.id) === tempId ? realTask : t
+                String(t.id) === tempId ? { ...t, id: realTask.id } : t
               ),
             },
           }));
