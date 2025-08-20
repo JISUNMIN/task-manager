@@ -18,7 +18,7 @@ type TaskCreateParams = {
 
 type MoveTaskParams = {
   id: number;
-  projectId:number;
+  projectId: number;
   toColumn: Status;
   newOrder: number;
 };
@@ -34,7 +34,7 @@ const TASK_PROJECT_API_PATH = "/tasks";
 const useTasks = () => {
   const queryClient = useQueryClient();
   const { updateTask } = useKanbanStore();
-  const {progress}=useKanbanStore();
+  const { progress } = useKanbanStore();
 
   // task create
   const { mutateAsync: createTaskMutate } = useMutation<
@@ -43,7 +43,10 @@ const useTasks = () => {
     TaskCreateParams
   >({
     mutationFn: async (data) => {
-      const res = await axios.post(TASK_PROJECT_API_PATH, data);
+      const res = await axios.post(TASK_PROJECT_API_PATH, {
+        progress,
+        ...data,
+      });
       return res.data;
     },
     onSuccess: () => {},
@@ -81,7 +84,7 @@ const useTasks = () => {
   });
 
   const { mutate: moveTaskMutate } = useMutation<void, Error, MoveTaskParams>({
-    mutationFn: async ({ id,projectId, toColumn, newOrder }) => {
+    mutationFn: async ({ id, projectId, toColumn, newOrder }) => {
       await axios.patch(`${TASK_PROJECT_API_PATH}/${id}/moveTask`, {
         projectId,
         toColumn,
@@ -102,7 +105,9 @@ const useTasks = () => {
     {
       mutationFn: async (data) => {
         const { id } = data;
-        await axios.delete(`${TASK_PROJECT_API_PATH}/${id}`);
+        await axios.delete(`${TASK_PROJECT_API_PATH}/${id}`, {
+           data: { progress }
+        });
       },
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["projects", "list"] });

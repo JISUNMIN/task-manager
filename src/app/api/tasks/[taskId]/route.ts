@@ -11,11 +11,12 @@ export async function DELETE(
 ) {
   try {
     const { taskId } = await context.params;
+    const { progress } = await req.json();
 
     const newTask = await prisma.task.delete({
       where: { id: Number(taskId) },
     });
-    await updateProjectProgress(newTask.projectId);
+    await updateProjectProgress(newTask.projectId, progress);
     return NextResponse.json(
       { message: "Task가 삭제되었습니다." },
       { status: 200 }

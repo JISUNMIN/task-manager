@@ -10,6 +10,7 @@ export async function POST(req: NextRequest) {
     const projectId = Number(body.projectId);
     const orderType = body.orderType;
     const index = body.index ?? null; // 중간 삽입
+    const progress = body.progress;
 
     // 1. 같은 컬럼의 task 최소 데이터만 조회
     const tasks = await prisma.task.findMany({
@@ -49,7 +50,7 @@ export async function POST(req: NextRequest) {
     });
 
     // progress는 비동기 처리
-    updateProjectProgress(projectId).catch(console.error);
+    updateProjectProgress(projectId, progress).catch(console.error);
 
     return NextResponse.json(newTask, { status: 201 });
   } catch (error) {
