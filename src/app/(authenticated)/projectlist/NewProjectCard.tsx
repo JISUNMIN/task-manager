@@ -99,10 +99,10 @@ const NewProjectCard = ({ onCancel, onCreated }: Props) => {
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="사용자 선택" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-100 overflow-auto">
                 {users.map((item) => (
                   <SelectItem key={item.id} value={String(item.id)}>
-                    {item.name}
+                    {item.name} ({item?.userId})
                   </SelectItem>
                 ))}
               </SelectContent>

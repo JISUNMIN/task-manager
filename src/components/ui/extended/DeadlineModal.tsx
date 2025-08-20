@@ -56,7 +56,7 @@ export function DeadlineModal({
               setSelectedDate(date);
               setValue(name, date);
             }}
-            className="rounded-md border shadow-sm"
+            className="rounded-md border shadow-sm bg-[var(--box-bg)]"
             captionLayout="dropdown"
           />
         </div>

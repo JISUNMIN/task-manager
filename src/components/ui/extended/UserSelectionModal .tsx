@@ -61,7 +61,7 @@ export function UserSelectionModal({
               변경할 프로젝트 담당자를 선택하세요.
             </DialogDescription>
           </DialogHeader>
-          <Command className="overflow-hidden rounded-t-none border-t bg-transparent">
+          <Command className="overflow-hidden rounded-t-none border-t bg-[var(--box-bg)]">
             <CommandInput placeholder="사용자 검색" />
             <CommandList>
               <CommandEmpty>사용자가 없습니다.</CommandEmpty>
