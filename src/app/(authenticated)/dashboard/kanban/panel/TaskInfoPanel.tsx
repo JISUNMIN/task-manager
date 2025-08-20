@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ALL_STATUS, Status, useKanbanStore } from "@/store/useKanbanStore";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
 import KanbanColumnBadge from "../board/KanbanColumnBadge";
@@ -44,6 +44,8 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   setPanelWidth,
   inputRefs,
 }) => {
+  const [localTitle, setLocalTitle] = useState("");
+  const [localDesc, setLocalDesc] = useState("");
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
   const { updateTask, columns, moveTask } = useKanbanStore();
@@ -55,7 +57,6 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const panelRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId") ?? undefined;
-
   const task = useMemo(
     () => columns[columnKey as Status]?.[taskIndex],
     [columns, columnKey, taskIndex]
@@ -97,10 +98,16 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     target: "title" | "desc"
   ) => {
     const value = typeof e === "string" ? e : e.target.value;
-    updateTask(columnKey as Status, taskIndex, { [target]: value });
-    target === "title"
-      ? debouncedUpdateTitle(task.id, value)
-      : debouncedUpdateDesc(task.id, value);
+
+    if (target === "title") {
+      setLocalTitle(value);
+      updateTask(columnKey as Status, taskIndex, { title: value });
+      debouncedUpdateTitle(task.id, value);
+    } else {
+      setLocalDesc(value);
+      updateTask(columnKey as Status, taskIndex, { desc: value });
+      debouncedUpdateDesc(task.id, value);
+    }
   };
 
   const handleUpdateStatus = (newStatus: Status) => {
@@ -131,6 +138,13 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
 
     handleFocusedInputKey(newStatus, taskIndex);
   };
+
+  useEffect(() => {
+    if (task) {
+      setLocalTitle(task.title ?? "");
+      setLocalDesc(task.desc ?? "");
+    }
+  }, [task?.id, task?.title]);
 
   useEffect(() => {
     if (task?.assignees) {
@@ -214,7 +228,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           style={{ fontSize: 16 }}
           placeholder="제목을 입력하세요"
           onChange={(e) => handleUpdateTask(e, "title")}
-          value={task?.title}
+          value={localTitle}
         />
 
         <Grid className="grid grid-cols-1 sm:grid-cols-[1fr_6fr] gap-y-3 px-2 sm:px-5">
@@ -263,7 +277,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         <TaskComments taskId={task?.id} />
         <Editor
           onChange={(e) => handleUpdateTask(e, "desc")}
-          content={task?.desc}
+          content={localDesc}
           upload={upload}
         />
       </div>
