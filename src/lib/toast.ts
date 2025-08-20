@@ -10,6 +10,7 @@ export enum ToastMode {
 
 // Toast 액션 타입 정의 (필요한 액션들)
 type SuccessAction =
+  | "CREATE"
   | "SAVE"
   | "UPDATE"
   | "DELETE"
@@ -23,6 +24,7 @@ type SuccessAction =
   | "REJECT"
   | "CHANGE";
 type ErrorAction =
+  | "CREATE"
   | "SAVE"
   | "UPDATE"
   | "DELETE"
@@ -62,6 +64,7 @@ type ToastMessages = {
 // Toast 메시지 상수
 const TOAST_MESSAGES: ToastMessages = {
   [ToastMode.SUCCESS]: {
+    CREATE: "생성이 완료되었습니다.",
     SAVE: "저장이 완료되었습니다.",
     UPDATE: "수정이 완료되었습니다.",
     DELETE: "삭제가 완료되었습니다.",
@@ -76,6 +79,7 @@ const TOAST_MESSAGES: ToastMessages = {
     CHANGE: "변경이 완료되었습니다.",
   },
   [ToastMode.ERROR]: {
+    CREATE: "생성 중 오류가 발생했습니다.",
     SAVE: "저장 중 오류가 발생했습니다.",
     UPDATE: "수정 중 오류가 발생했습니다.",
     DELETE: "삭제 중 오류가 발생했습니다.",

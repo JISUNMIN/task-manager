@@ -1,5 +1,5 @@
 import { Toaster } from "react-hot-toast";
 
-const Toast = () => <Toaster position="bottom-left" reverseOrder={false} />;
+const Toast = () => <Toaster position="top-center" reverseOrder={false} />;
 
 export default Toast;

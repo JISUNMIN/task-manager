@@ -29,9 +29,18 @@ const useProjectMutations = (targetId?: string | number) => {
         await axios.post(PROJECT_API_PATH, data);
       },
       onSuccess: () => {
+        showToast({
+          type: ToastMode.SUCCESS,
+          action: "CREATE",
+        });
         queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
       },
-      onError: () => {},
+      onError: () => {
+        showToast({
+          type: ToastMode.ERROR,
+          action: "CREATE",
+        });
+      },
     });
 
   // project order update
@@ -123,9 +132,18 @@ const useProjectMutations = (targetId?: string | number) => {
       await axios.delete(`${PROJECT_API_PATH}/${targetId}`);
     },
     onSuccess: () => {
+      showToast({
+        type: ToastMode.SUCCESS,
+        action: "DELETE",
+      });
       queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
     },
-    onError: () => {},
+    onError: () => {
+      showToast({
+        type: ToastMode.ERROR,
+        action: "DELETE",
+      });
+    },
   });
 
   return {
