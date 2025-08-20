@@ -20,6 +20,7 @@ import { useThemeStore } from "@/store/useThemeStore";
 import TaskItem from "./TaskItem";
 import ProjectInfoCard from "./ProjectInfoCard";
 import ColumnHeader from "./KanbanColumnHeader";
+import { cn } from "@/lib/utils";
 
 const TaskInfoPanel = dynamic(
   () => import("@/app/(authenticated)/dashboard/kanban/panel/TaskInfoPanel"),
@@ -50,6 +51,9 @@ const KanbanBoard = () => {
   const { detailData, isDetailLoading } = useProjects(projectId);
   const debouncedUpdateMap = useRef<Record<number, (title: string) => void>>(
     {}
+  );
+  const [creatingColumns, setCreatingColumns] = useState<Set<Status>>(
+    new Set()
   );
   const {
     createTaskMutate,
@@ -173,6 +177,9 @@ const KanbanBoard = () => {
     columnIndex: number,
     orderType: "top" | "bottom" = "bottom"
   ) => {
+    if (creatingColumns.has(columnKey)) return;
+
+    setCreatingColumns((prev) => new Set(prev).add(columnKey));
     const tempId = `temp-${Date.now()}`;
     addTask(columnIndex, orderType, tempId);
 
@@ -188,7 +195,19 @@ const KanbanBoard = () => {
       },
       {
         onSuccess: () => {
+          setCreatingColumns((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(columnKey);
+            return newSet;
+          });
           queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
+        },
+        onError: () => {
+          setCreatingColumns((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(columnKey);
+            return newSet;
+          });
         },
       }
     );
@@ -280,6 +299,7 @@ const KanbanBoard = () => {
                       onCreateTask={(status, columnIndex) =>
                         handleCreateTask(status, columnIndex, "top")
                       }
+                      isDisabled={creatingColumns.has(status)}
                     />
 
                     <Droppable droppableId={columnKey}>
@@ -312,7 +332,13 @@ const KanbanBoard = () => {
                             onClick={() =>
                               handleCreateTask(status, columnIndex, "bottom")
                             }
-                            className="bg-[var(--btn-bg)] border-2 border-dashed border-[var(--btn-border)] hover:bg-[var(--btn-hover-bg)] hover:border-[var(--btn-hover-border)] hover:text-[var(--foreground)] rounded-lg p-3 text-center text-[var(--text-blur)] cursor-pointer transition-all duration-200  mt-3"
+                            disabled={creatingColumns.has(status)}
+                            className={cn(
+                              "bg-[var(--btn-bg)] border-2 border-dashed border-[var(--btn-border)] rounded-lg p-3 text-center text-[var(--text-blur)] transition-all duration-200 mt-3",
+                              creatingColumns.has(status)
+                                ? "opacity-50 cursor-not-allowed"
+                                : "hover:bg-[var(--btn-hover-bg)] hover:border-[var(--btn-hover-border)] hover:text-[var(--foreground)] cursor-pointer"
+                            )}
                           >
                             + 새 작업 추가
                           </button>
