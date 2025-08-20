@@ -128,6 +128,7 @@ const ProjectCard: FC<ProjectCardProps> = memo(
     const { status: deadlineStatus, text: deadlineText } = getDeadlineStatus(
       new Date(project.deadline)
     );
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const canDeleteProject =
       !project.isPersonal && (role === "ADMIN" || project.managerId === userId);
@@ -147,7 +148,6 @@ const ProjectCard: FC<ProjectCardProps> = memo(
     const containerRef = useRef<HTMLDivElement>(null);
     const overlayRef = useRef<HTMLDivElement>(null);
 
-    // 드롭다운 아이템 구성
     const items = [
       ...(role === "ADMIN"
         ? [
@@ -171,7 +171,6 @@ const ProjectCard: FC<ProjectCardProps> = memo(
       },
     ];
 
-    // 라벨 변경 핸들러
     const handleSelectedLabel = (value: ProjectLabel) => {
       setLabel(value);
       updateProjectLabel({ label: value });
@@ -182,14 +181,16 @@ const ProjectCard: FC<ProjectCardProps> = memo(
     };
 
     const onClickDelete = () => {
-      deleteProjectMutate();
+      setIsDeleting(true);
+      deleteProjectMutate(undefined, {
+        onSettled: () => setIsDeleting(false),
+      });
     };
 
     const onClickConfirmDeadline = () => {
       updateProjecDeadline({ deadline });
     };
 
-    // 마우스 배경 애니메이션
     useEffect(() => {
       if (disabled) return;
       const container = containerRef.current;
@@ -245,7 +246,6 @@ const ProjectCard: FC<ProjectCardProps> = memo(
                 title={project.projectName}
                 className="text-lg font-semibold text-gray-800 dark:text-gray-200 truncate"
               />
-
               {canDeleteProject && !isEditing && (
                 <ActionDropdownMenu
                   items={items}
@@ -315,6 +315,35 @@ const ProjectCard: FC<ProjectCardProps> = memo(
               </div>
             )}
           </div>
+
+          {/* 삭제 중 오버레이 */}
+          {isDeleting && (
+            <div className="absolute inset-0 z-20 bg-gray-900/30 dark:bg-black/40 flex flex-col items-center justify-center rounded-lg backdrop-blur-sm">
+              <svg
+                className="animate-spin h-8 w-8 text-white mb-2"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                ></path>
+              </svg>
+              <span className="text-white font-semibold text-lg">
+                삭제 중...
+              </span>
+            </div>
+          )}
         </div>
 
         {/* 모달들 */}
