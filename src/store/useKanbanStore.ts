@@ -157,14 +157,14 @@ export const useKanbanStore = create<{
           toColumn: Status,
           fromIndex: number,
           toIndex: number,
-          newOrder: number // 추가
+          newOrder: number
         ) => {
           set((state) => {
             const fromTasks = [...state.columns[fromColumn]];
             const taskToMove = fromTasks.splice(fromIndex, 1)[0];
             if (!taskToMove) return state;
 
-            taskToMove.order = newOrder; // order 반영
+            taskToMove.order = newOrder;
 
             const newColumns = { ...state.columns };
             if (fromColumn === toColumn) {

@@ -17,6 +17,7 @@ import { TaskComments } from "../taskcomment/TaskComments";
 import { useThemeStore } from "@/store/useThemeStore";
 import { SelectBox } from "@/components/shared/SelectBox";
 import useUpload from "@/hooks/react-query/useUpload";
+import { useSearchParams } from "next/navigation";
 
 interface TaskInfoPanelProps {
   isTaskInfoPanelOpen: boolean;
@@ -52,6 +53,8 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const taskIndex = Number(itemIndexStr);
   const resizing = useRef(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get("projectId") ?? undefined;
 
   const task = useMemo(
     () => columns[columnKey as Status]?.[taskIndex],
@@ -101,37 +104,31 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   };
 
   const handleUpdateStatus = (newStatus: Status) => {
-    // 1️⃣ 프론트에서 order 계산
-    const destTasks = [...columns[newStatus]];
-    const tempTasks = [...destTasks];
+    if (columnKey === newStatus) return;
+
+    // 1️ 프론트에서 order 계산
+    const tempTasks = [...columns[newStatus]];
     tempTasks.splice(0, 0, task);
 
-    let prevTask: typeof task | null = null;
     let nextTask: typeof task | null = null;
 
     // 맨 위
-    // prevTask = null;
     nextTask = tempTasks[1] ?? null;
 
-    // const prevOrder = prevTask?.order ?? 0;
-    // console.log("🚀 ~ handleDragEnd ~ prevOrder:", prevOrder);
     const nextOrder = nextTask?.order ?? 0;
-    console.log("🚀 ~ handleDragEnd ~ nextOrder:", nextOrder);
-
     const newOrder = nextOrder - 1;
 
-    // 2️⃣ 프론트 상태 업데이트 (order 반영)
+    //  프론트 상태 업데이트 (order 반영)
     moveTask(columnKey as Status, newStatus as Status, taskIndex, 0, newOrder);
 
-    // 3️⃣ 서버에 단일 업데이트 호출
+    //  서버 업데이트 호출
     moveTaskMutate({
       id: task.id,
+      projectId: Number(projectId),
       toColumn: newStatus,
       newOrder,
     });
 
-    // moveTask(columnKey as Status, newStatus as Status, taskIndex, 0,0);
-    // moveTaskMutate({ id: task?.id, toColumn: newStatus, toIndex: 0 });
     handleFocusedInputKey(newStatus, taskIndex);
   };
 
