@@ -14,6 +14,7 @@ type TaskCreateParams = {
   managerId?: number;
   assignees?: number[];
   orderType?: "top" | "bottom";
+  newOrder?: number;
 };
 
 type MoveTaskParams = {
@@ -37,7 +38,9 @@ const useTasks = () => {
     TaskCreateParams
   >({
     mutationFn: async (data) => {
+      const { newOrder } = data;
       const res = await axios.post(TASK_PROJECT_API_PATH, {
+        order: newOrder,
         progress,
         ...data,
       });

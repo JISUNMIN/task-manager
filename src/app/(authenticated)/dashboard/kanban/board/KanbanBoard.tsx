@@ -172,6 +172,21 @@ const KanbanBoard = () => {
     setFocusedInputKey(`${columnKey}-${itemIndex}`);
   };
 
+  const calculateNewTaskOrder = (
+    tasks: any[],
+    orderType: "top" | "bottom"
+  ): number => {
+    if (tasks.length === 0) {
+      return 0;
+    }
+
+    if (orderType === "top") {
+      return tasks[0].order - 1;
+    }
+
+    // orderType === "bottom"
+    return tasks[tasks.length - 1].order + 1;
+  };
   const handleCreateTask = async (
     columnKey: Status,
     columnIndex: number,
@@ -180,6 +195,13 @@ const KanbanBoard = () => {
     if (creatingColumns.has(columnKey)) return;
 
     setCreatingColumns((prev) => new Set(prev).add(columnKey));
+
+    // 현재 컬럼의 tasks 가져오기
+    const currentColumnTasks = columns[columnKey] || [];
+
+    // 프론트엔드에서 order 계산
+    const newOrder = calculateNewTaskOrder(currentColumnTasks, orderType);
+
     const tempId = `temp-${Date.now()}`;
     addTask(columnIndex, orderType, tempId);
 
@@ -192,6 +214,7 @@ const KanbanBoard = () => {
         userId: user?.id ?? 1,
         managerId: user?.id ?? 1,
         orderType,
+        newOrder,
       },
       {
         onSuccess: () => {
