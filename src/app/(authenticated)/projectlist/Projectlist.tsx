@@ -16,12 +16,7 @@ import {
   useSensors,
   DragEndEvent,
 } from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  rectSortingStrategy,
-  useSortable,
-} from "@dnd-kit/sortable";
+import { arrayMove, SortableContext, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import useProjectMutations from "@/hooks/react-query/useProjectMutations";
 import { CardSkeleton } from "@/components/ui/extended/Skeleton/CardSkeleton";
@@ -39,8 +34,10 @@ const SortableItem = ({
   children: ReactNode;
   disabled?: boolean;
 }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id, disabled });
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id,
+    disabled,
+  });
 
   return (
     <div
@@ -69,12 +66,13 @@ const ProjectList = () => {
   const [isResetting, setIsResetting] = useState(false);
   const router = useRouter();
   const filteredProjects = editableProjects.filter(
-    (project) =>
-      project.isPersonal || selectedLabels.includes(project.label ?? "feature")
+    (project) => project.isPersonal || selectedLabels.includes(project.label ?? "feature"),
   );
 
-  const noTeamProjects =
-    listData?.length === 1 && listData[0].isPersonal && role !== "ADMIN";
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [navigatingProjectId, setNavigatingProjectId] = useState<number | null>(null);
+
+  const noTeamProjects = listData?.length === 1 && listData[0].isPersonal && role !== "ADMIN";
 
   const noFilteredProjects =
     editableProjects.length > 0 && !filteredProjects.some((p) => !p.isPersonal);
@@ -89,12 +87,14 @@ const ProjectList = () => {
 
   const onClickProject = (projectId: number) => {
     if (isEditing) return;
+    if (isNavigating) return;
+
+    setIsNavigating(true);
+    setNavigatingProjectId(projectId);
     router.push(`/dashboard/kanban?projectId=${projectId}`);
   };
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
-  );
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -143,7 +143,7 @@ const ProjectList = () => {
           "px-3 py-1 rounded-full text-sm font-semibold select-none transition-colors duration-200 cursor-pointer",
           isSelected
             ? LABEL_COLOR_MAP[label]
-            : "border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400"
+            : "border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400",
         );
 
         return (
@@ -188,9 +188,7 @@ const ProjectList = () => {
                 />
               </div>
             ) : (
-              <span className="text-2xl text-gray-500 dark:text-gray-300">
-                +
-              </span>
+              <span className="text-2xl text-gray-500 dark:text-gray-300">+</span>
             )}
           </div>
         )}
@@ -202,15 +200,12 @@ const ProjectList = () => {
               isEditing={isEditing}
               disabled={isEditing && project.isPersonal}
               onClick={() => onClickProject(project.id)}
+              isNavigating={navigatingProjectId === project.id}
             />
           );
 
           return isEditing ? (
-            <SortableItem
-              key={project.id}
-              id={project.id}
-              disabled={project.isPersonal}
-            >
+            <SortableItem key={project.id} id={project.id} disabled={project.isPersonal}>
               {card}
             </SortableItem>
           ) : (
@@ -243,9 +238,7 @@ const ProjectList = () => {
     <FormProvider {...formInstance}>
       <div className="mx-auto max-w-screen-xl p-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-2 mb-4">
-          <h1 className="text-3xl font-extrabold text-[var(--foreground)]">
-            프로젝트 목록
-          </h1>
+          <h1 className="text-3xl font-extrabold text-[var(--foreground)]">프로젝트 목록</h1>
           {renderActionButtons()}
         </div>
 
@@ -257,8 +250,7 @@ const ProjectList = () => {
           <div className="text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded p-4 text-center mb-6">
             현재 할당된 팀 프로젝트가 없습니다.
             <br />
-            개인 프로젝트를 이용하시거나, 관리자에게 프로젝트 할당을 요청해
-            주세요.
+            개인 프로젝트를 이용하시거나, 관리자에게 프로젝트 할당을 요청해 주세요.
           </div>
         )}
 

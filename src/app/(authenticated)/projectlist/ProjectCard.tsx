@@ -1,12 +1,4 @@
-import React, {
-  CSSProperties,
-  FC,
-  memo,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { CSSProperties, FC, memo, useEffect, useMemo, useRef, useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { ProjectLabel } from "@prisma/client";
 import { convertDateToString, getDeadlineStatus } from "@/lib/utils/helpers";
@@ -17,11 +9,7 @@ import { GoVerified } from "react-icons/go";
 import { cn } from "@/lib/utils";
 import { ActionDropdownMenu } from "@/components/ui/extended/ActionDropdownMenu";
 import { Calendar, Trash, User as UserIcon } from "lucide-react";
-import {
-  DEADLINE_COLOR_MAP,
-  LABEL_COLOR_MAP,
-  LABELS,
-} from "@/app/constants/common";
+import { DEADLINE_COLOR_MAP, LABEL_COLOR_MAP, LABELS } from "@/app/constants/common";
 import { DeleteDialog } from "@/components/ui/extended/DeleteDialog";
 import { UserSelectionModal } from "@/components/ui/extended/UserSelectionModal ";
 import { DeadlineModal } from "@/components/ui/extended/DeadlineModal";
@@ -29,17 +17,14 @@ import { UserAvatar } from "@/components/ui/extended/UserAvatar";
 import { useThemeStore } from "@/store/useThemeStore";
 import useProjectMutations from "@/hooks/react-query/useProjectMutations";
 import { useFormContext, useWatch } from "react-hook-form";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ProjectCardProps {
   project: ClientProject;
   onClick: () => void;
   disabled?: boolean;
   isEditing?: boolean;
+  isNavigating?: boolean;
 }
 
 const containerStyle: CSSProperties = {
@@ -78,10 +63,7 @@ const darkOverlayStyle: CSSProperties = {
   filter: "brightness(0.5) opacity(0.5)",
 };
 
-const ProjectTitle: FC<{ title: string; className?: string }> = ({
-  title,
-  className,
-}) => {
+const ProjectTitle: FC<{ title: string; className?: string }> = ({ title, className }) => {
   const ref = useRef<HTMLHeadingElement>(null);
   const [isOverflowed, setIsOverflowed] = useState(false);
 
@@ -112,7 +94,7 @@ const ProjectTitle: FC<{ title: string; className?: string }> = ({
 };
 
 const ProjectCard: FC<ProjectCardProps> = memo(
-  ({ project, onClick, disabled, isEditing }) => {
+  ({ project, onClick, disabled, isEditing, isNavigating }) => {
     const { control } = useFormContext();
     const { user } = useAuthStore();
     const userId = user?.id;
@@ -121,12 +103,11 @@ const ProjectCard: FC<ProjectCardProps> = memo(
     const [label, setLabel] = useState(project?.label ?? "feature");
     const labelClass = LABEL_COLOR_MAP[label];
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-    const [isUserSelectionModalOpen, setIsUserSelectionModalOpen] =
-      useState(false);
+    const [isUserSelectionModalOpen, setIsUserSelectionModalOpen] = useState(false);
     const [isDeadlineModalOpen, setIsDeadlineModalOpen] = useState(false);
     const { managerId, deadline } = useWatch({ control });
     const { status: deadlineStatus, text: deadlineText } = getDeadlineStatus(
-      new Date(project.deadline)
+      new Date(project.deadline),
     );
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -135,15 +116,11 @@ const ProjectCard: FC<ProjectCardProps> = memo(
 
     const overlayStyle = useMemo(
       () => (theme === "light" ? lightOverlayStyle : darkOverlayStyle),
-      [theme]
+      [theme],
     );
 
-    const {
-      deleteProjectMutate,
-      updateProjectLabel,
-      updateProjectManager,
-      updateProjecDeadline,
-    } = useProjectMutations(project.id);
+    const { deleteProjectMutate, updateProjectLabel, updateProjectManager, updateProjecDeadline } =
+      useProjectMutations(project.id);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const overlayRef = useRef<HTMLDivElement>(null);
@@ -220,15 +197,15 @@ const ProjectCard: FC<ProjectCardProps> = memo(
       <>
         <div
           ref={containerRef}
-          onClick={disabled ? undefined : onClick}
+          onClick={disabled || isNavigating ? undefined : onClick}
           className={cn(
             "relative h-55 rounded-lg p-6 shadow-md mb-3 transition-all duration-100 bg-[var(--bg-seonday)]",
             project.isPersonal
               ? "border-4 border-blue-400"
               : "border border-stone-300 dark:border-gray-600",
-            !disabled &&
-              "hover:bg-gray-100 dark:hover:bg-gray-700 hover:scale-105 cursor-pointer",
-            disabled && "cursor-not-allowed opacity-80"
+            !disabled && "hover:bg-gray-100 dark:hover:bg-gray-700 hover:scale-105 cursor-pointer",
+            disabled && "cursor-not-allowed opacity-80",
+            isNavigating && "pointer-events-none opacity-90",
           )}
           style={containerStyle}
         >
@@ -283,19 +260,14 @@ const ProjectCard: FC<ProjectCardProps> = memo(
 
             <div className="flex justify-between items-center">
               <p className="text-sm text-[var(--text-blur)] mb-1">진행률</p>
-              <span className="text-sm text-[var(--text-base)]">
-                {project.progress}%
-              </span>
+              <span className="text-sm text-[var(--text-base)]">{project.progress}%</span>
             </div>
             <Progress value={project.progress} />
           </div>
 
           <div className="flex justify-end mt-5 relative z-10">
             {project.isPersonal ? (
-              <Badge
-                variant="secondary"
-                className="bg-blue-500 text-white dark:bg-blue-600"
-              >
+              <Badge variant="secondary" className="bg-blue-500 text-white dark:bg-blue-600">
                 <GoVerified />
                 개인용
               </Badge>
@@ -333,15 +305,32 @@ const ProjectCard: FC<ProjectCardProps> = memo(
                   stroke="currentColor"
                   strokeWidth="4"
                 ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v8H4z"
-                ></path>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
               </svg>
-              <span className="text-white font-semibold text-lg">
-                삭제 중...
-              </span>
+              <span className="text-white font-semibold text-lg">삭제 중...</span>
+            </div>
+          )}
+
+          {/* 이동 중 오버레이 */}
+          {isNavigating && !isDeleting && (
+            <div className="absolute inset-0 z-20 bg-gray-900/20 dark:bg-black/30 flex flex-col items-center justify-center rounded-lg backdrop-blur-sm">
+              <svg
+                className="animate-spin h-8 w-8 text-white mb-2"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+              <span className="text-white font-semibold text-lg">이동 중...</span>
             </div>
           )}
         </div>
@@ -368,7 +357,7 @@ const ProjectCard: FC<ProjectCardProps> = memo(
         />
       </>
     );
-  }
+  },
 );
 
 export default ProjectCard;

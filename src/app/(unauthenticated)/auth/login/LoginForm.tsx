@@ -32,10 +32,9 @@ interface LoginFormInputs {
 }
 
 export default function LoginForm() {
-  const { loginMutation } = useLogin();
+  const { loginMutation, isPending } = useLogin();
   const router = useRouter();
 
-  // react-hook-form을 사용한 폼 상태 관리
   const {
     register,
     handleSubmit,
@@ -73,7 +72,7 @@ export default function LoginForm() {
                     {...register("userId")}
                     placeholder="아이디"
                     defaultValue="admin"
-                    className=""
+                    disabled={isPending}
                   />
                 </div>
                 {errors.userId && (
@@ -86,9 +85,10 @@ export default function LoginForm() {
                 placeholder="비밀번호"
                 defaultValue="123123"
                 errors={errors}
+                disabled={isPending}
               />
-              <Button type="submit" className="w-full">
-                로그인
+              <Button type="submit" className="w-full" disabled={isPending}>
+                {isPending ? "로그인 중..." : "로그인"}
               </Button>
               <p className="text-sm text-center mt-4 text-gray-600 dark:text-gray-400">
                 계정이 없으신가요?{" "}

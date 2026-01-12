@@ -8,6 +8,7 @@ interface PasswordInputProps {
   name: string;
   placeholder?: string;
   defaultValue?: string;
+  disabled?: boolean;
 }
 
 export function PasswordInput({
@@ -16,15 +17,13 @@ export function PasswordInput({
   name,
   placeholder,
   defaultValue,
+  disabled,
 }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="flex flex-col gap-1 ">
-      <label
-        htmlFor={name}
-        className="text-sm text-gray-600 dark:text-gray-300"
-      >
+      <label htmlFor={name} className="text-sm text-gray-600 dark:text-gray-300">
         {placeholder}
       </label>
       <div className="inputDivStyle">
@@ -35,6 +34,7 @@ export function PasswordInput({
           placeholder={placeholder}
           className="flex-1 border-none p-0 focus:outline-none focus:ring-0 bg-transparent"
           defaultValue={defaultValue}
+          disabled={disabled}
         />
         <button
           type="button"
@@ -46,9 +46,7 @@ export function PasswordInput({
         </button>
       </div>
       {errors[name] && (
-        <p className="text-sm text-red-500 -mt-1">
-          {errors[name]?.message as string}
-        </p>
+        <p className="text-sm text-red-500 -mt-1">{errors[name]?.message as string}</p>
       )}
     </div>
   );
