@@ -40,12 +40,8 @@ export const CommentItem = ({
   const editCommentId = useCommentStore((state) => state.editCommentId);
   const setEditCommentId = useCommentStore((state) => state.setEditCommentId);
 
-  const editCommentContent = useCommentStore(
-    (state) => state.editCommentContent
-  );
-  const setEditCommentContent = useCommentStore(
-    (state) => state.setEditCommentContent
-  );
+  const editCommentContent = useCommentStore((state) => state.editCommentContent);
+  const setEditCommentContent = useCommentStore((state) => state.setEditCommentContent);
 
   const resetEdit = useCommentStore((state) => state.resetEdit);
 
@@ -59,8 +55,7 @@ export const CommentItem = ({
   const isEditing = editCommentId === comment.id;
 
   // 권한 체크
-  const canEdit =
-    user?.id === Number(comment.user.userId) || user?.role === "ADMIN";
+  const canEdit = user?.id === Number(comment.user.userId) || user?.role === "ADMIN";
   const canDelete = canEdit;
 
   // 댓글 수정 저장
@@ -108,11 +103,7 @@ export const CommentItem = ({
 
   return (
     <div className="flex gap-2">
-      <UserAvatar
-        src={comment.user.profileImage}
-        alt={comment.user.name}
-        className="mt-1"
-      />
+      <UserAvatar src={comment.user.profileImage} alt={comment.user.name} className="mt-1" />
       <div className="flex-1">
         <div className="flex justify-between items-center">
           <span className="text-sm font-medium">{comment.user.name}</span>
@@ -152,7 +143,7 @@ export const CommentItem = ({
             </div>
           </div>
         ) : (
-          <p className="text-sm text-gray-800 mt-1">{comment.comment}</p>
+          <p className="text-sm mt-1">{comment.comment}</p>
         )}
 
         <Button
@@ -165,13 +156,8 @@ export const CommentItem = ({
 
         {comment.replies && comment.replies.length > 0 && (
           <div className="mt-2 ml-6">
-            <button
-              className="text-xs text-gray-500"
-              onClick={() => toggleShowReply(comment.id)}
-            >
-              {!isVisible
-                ? `▶ 대댓글 보기 (${comment.replies.length}개)`
-                : "▼ 대댓글 숨기기"}
+            <button className="text-xs text-gray-500" onClick={() => toggleShowReply(comment.id)}>
+              {!isVisible ? `▶ 대댓글 보기 (${comment.replies.length}개)` : "▼ 대댓글 숨기기"}
             </button>
 
             {isVisible &&

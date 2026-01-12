@@ -34,8 +34,8 @@ export const DeleteDialog = ({
           )}
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>취소</AlertDialogCancel>
-          <AlertDialogAction onClick={onDelete}>삭제</AlertDialogAction>
+          <AlertDialogCancel data-ignore-panel-outside>취소</AlertDialogCancel>
+          <AlertDialogAction onClick={onDelete} data-ignore-panel-outside>삭제</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

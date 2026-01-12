@@ -27,9 +27,7 @@ interface TaskInfoPanelProps {
   isPersonal?: boolean;
   panelWidth: number;
   setPanelWidth: (w: number) => void;
-  inputRefs?: React.MutableRefObject<
-    Record<string, HTMLTextAreaElement | null>
-  >;
+  inputRefs?: React.MutableRefObject<Record<string, HTMLTextAreaElement | null>>;
 }
 
 type FormData = { assignees: number[] };
@@ -59,7 +57,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const projectId = searchParams.get("projectId") ?? undefined;
   const task = useMemo(
     () => columns[columnKey as Status]?.[taskIndex],
-    [columns, columnKey, taskIndex]
+    [columns, columnKey, taskIndex],
   );
   const { upload } = useUpload(task?.id);
 
@@ -74,7 +72,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       debounce((taskId: number, value: string) => {
         updateTaskMutate({ id: taskId, title: value });
       }, 500),
-    [updateTaskMutate]
+    [updateTaskMutate],
   );
 
   const debouncedUpdateDesc = useMemo(
@@ -82,7 +80,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       debounce((taskId: number, value: string) => {
         updateTaskMutate({ id: taskId, desc: value });
       }, 500),
-    [updateTaskMutate]
+    [updateTaskMutate],
   );
 
   const debouncedUpdateAssignees = useMemo(
@@ -90,12 +88,12 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       debounce((taskId: number, assignees: number[]) => {
         updateTaskMutate({ id: taskId, assignees });
       }, 500),
-    [updateTaskMutate]
+    [updateTaskMutate],
   );
 
   const handleUpdateTask = (
     e: React.ChangeEvent<HTMLTextAreaElement> | string,
-    target: "title" | "desc"
+    target: "title" | "desc",
   ) => {
     const value = typeof e === "string" ? e : e.target.value;
 
@@ -148,9 +146,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
 
   useEffect(() => {
     if (task?.assignees) {
-      const ids = task.assignees.map((a: any) =>
-        typeof a === "number" ? a : a.id
-      );
+      const ids = task.assignees.map((a: any) => (typeof a === "number" ? a : a.id));
       setValue("assignees", ids);
     } else setValue("assignees", []);
   }, [task, setValue]);
@@ -159,12 +155,13 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (resizing.current) return;
-      const target = event.target as Node;
+      const target = event.target as HTMLElement;
+
+      if (target.closest("[data-ignore-panel-outside]")) return;
+
       if (
         panelRef.current?.contains(target) ||
-        Object.values(inputRefs?.current ?? {}).some((el) =>
-          el?.contains(target)
-        )
+        Object.values(inputRefs?.current ?? {}).some((el) => el?.contains(target))
       )
         return;
       closePanel();
@@ -212,12 +209,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         />
       )}
 
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={closePanel}
-        className="text-gray-600 ml-2 mt-2"
-      >
+      <Button variant="ghost" size="icon" onClick={closePanel} className="text-gray-600 ml-2 mt-2">
         <FaAngleDoubleRight className="w-6 h-6" />
       </Button>
 
@@ -240,9 +232,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
             options={ALL_STATUS}
             value={columnKey as Status}
             onChange={handleUpdateStatus}
-            renderOption={(status) => (
-              <KanbanColumnBadge columnKey={status} isDark={isDark} />
-            )}
+            renderOption={(status) => <KanbanColumnBadge columnKey={status} isDark={isDark} />}
           />
 
           {!isPersonal && (
@@ -275,11 +265,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
 
       <div className="p-2 sm:p-4 h-full flex flex-col overflow-y-auto">
         <TaskComments taskId={task?.id} />
-        <Editor
-          onChange={(e) => handleUpdateTask(e, "desc")}
-          content={localDesc}
-          upload={upload}
-        />
+        <Editor onChange={(e) => handleUpdateTask(e, "desc")} content={localDesc} upload={upload} />
       </div>
     </div>
   );

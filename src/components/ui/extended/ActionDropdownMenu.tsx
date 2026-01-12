@@ -58,7 +58,7 @@ export function ActionDropdownMenu({
   const showLabelMenu = labels && handleSelectedLabel;
 
   const onClickDropdownMenu = (
-    e: React.MouseEvent<HTMLButtonElement | HTMLDivElement, MouseEvent>
+    e: React.MouseEvent<HTMLButtonElement | HTMLDivElement, MouseEvent>,
   ) => {
     if (project && setValue) {
       setValue("projectId", project.id);
@@ -67,29 +67,26 @@ export function ActionDropdownMenu({
   };
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
+    <DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
           size="sm"
           className={cn(
             "hover:bg-gray-200 dark:hover:bg-gray-600 p-2",
-            isOnLightBackground && "dark:hover:bg-gray-400"
+            isOnLightBackground && "dark:hover:bg-gray-400",
           )}
         >
-          <MoreVertical
-            className={isOnLightBackground ? "text-[var(--box-text)]" : ""}
-          />
+          <MoreVertical className={isOnLightBackground ? "text-[var(--box-text)]" : ""} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         onClick={onClickDropdownMenu}
         align="end"
         className="w-[200px] bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-200"
+        data-ignore-panel-outside
       >
-        <DropdownMenuLabel className="dark:text-gray-400">
-          {title ?? "페이지"}
-        </DropdownMenuLabel>
+        <DropdownMenuLabel className="dark:text-gray-400">{title ?? "페이지"}</DropdownMenuLabel>
         <DropdownMenuGroup>
           {items.map((item) => (
             <DropdownMenuItem

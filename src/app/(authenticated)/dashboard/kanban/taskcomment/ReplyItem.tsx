@@ -17,26 +17,18 @@ interface ReplyItemProps {
 // 자신의 대댓글인 경우 수정 가능
 // 편집 상태 관리
 // 댓글 업데이트 호출
-export const ReplyItem = ({
-  reply,
-  currentUser,
-  updateCommentMutate,
-}: ReplyItemProps) => {
+export const ReplyItem = ({ reply, currentUser, updateCommentMutate }: ReplyItemProps) => {
   const editReplyId = useCommentStore((state) => state.editReplyId);
   const setEditReplyId = useCommentStore((state) => state.setEditReplyId);
 
   const editReplyContent = useCommentStore((state) => state.editReplyContent);
-  const setEditReplyContent = useCommentStore(
-    (state) => state.setEditReplyContent
-  );
+  const setEditReplyContent = useCommentStore((state) => state.setEditReplyContent);
 
   const resetEditReply = useCommentStore((state) => state.resetEditReply);
 
   const isEditing = editReplyId === reply.id;
 
-  const canEdit =
-    currentUser?.id === Number(reply.user.userId) ||
-    currentUser?.role === "ADMIN";
+  const canEdit = currentUser?.id === Number(reply.user.userId) || currentUser?.role === "ADMIN";
 
   const saveEdit = () => {
     if (!editReplyContent.trim()) return;
@@ -58,11 +50,7 @@ export const ReplyItem = ({
 
   return (
     <div className="flex gap-2 mt-3">
-      <UserAvatar
-        src={reply.user.profileImage}
-        alt={reply.user.name}
-        className="mt-1"
-      />
+      <UserAvatar src={reply.user.profileImage} alt={reply.user.name} className="mt-1" />
       <div className="flex-1">
         <div className="flex justify-between items-center">
           <span className="text-sm font-medium">{reply.user.name}</span>
@@ -102,7 +90,7 @@ export const ReplyItem = ({
             </div>
           </div>
         ) : (
-          <p className="text-sm text-gray-800 mt-1">{reply.comment}</p>
+          <p className="text-sm  mt-1 ">{reply.comment}</p>
         )}
       </div>
     </div>
