@@ -5,13 +5,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  FaUser,
-  FaProjectDiagram,
-  FaTasks,
-  FaUserCheck,
-  FaChartBar,
-} from "react-icons/fa";
+import { FaUser, FaProjectDiagram, FaTasks, FaUserCheck, FaChartBar } from "react-icons/fa";
 import Image from "next/image";
 import { logo } from "@/assets/images";
 import useSignup from "@/hooks/react-query/useSignup";
@@ -70,8 +64,7 @@ function FeatureBoxes() {
     {
       icon: <FaChartBar className="text-brown-500 w-8 h-8" />,
       title: "칸반 보드",
-      description:
-        "직관적인 칸반 보드로 업무 진행 상황을 한눈에 파악할 수 있습니다.",
+      description: "직관적인 칸반 보드로 업무 진행 상황을 한눈에 파악할 수 있습니다.",
     },
   ];
 
@@ -84,9 +77,7 @@ function FeatureBoxes() {
         >
           <div className="mb-4">{icon}</div>
           <h3 className="font-semibold text-lg mb-2 text-brown-700">{title}</h3>
-          <p className="text-brown-600 text-sm leading-relaxed">
-            {description}
-          </p>
+          <p className="text-brown-600 text-sm leading-relaxed">{description}</p>
         </div>
       ))}
     </div>
@@ -116,13 +107,7 @@ export default function SignupForm() {
         {/* 로고 및 말풍선 박스 */}
         <h2 className="logo-name text-3xl">Squireal Dashboard</h2>
         <div className="flex flex-col items-center relative">
-          <Image
-            src={logo}
-            alt="Logo"
-            width={180}
-            height={180}
-            className="mb-2"
-          />
+          <Image src={logo} alt="Logo" width={180} height={180} className="mb-2" priority />
 
           {/* 말풍선 */}
           <div className="bg-[var(--item-bg)]  relative px-6 py-3 rounded-xl max-w-xs text-center text-sm font-medium leading-snug shadow-md">
@@ -166,9 +151,7 @@ export default function SignupForm() {
                       />
                     </div>
                     {errors.userId && (
-                      <p className="text-sm text-red-500 -mt-1">
-                        {errors.userId.message}
-                      </p>
+                      <p className="text-sm text-red-500 -mt-1">{errors.userId.message}</p>
                     )}
                   </div>
 
@@ -201,9 +184,7 @@ export default function SignupForm() {
                       />
                     </div>
                     {errors.name && (
-                      <p className="text-sm text-red-500 -mt-1">
-                        {errors.name.message}
-                      </p>
+                      <p className="text-sm text-red-500 -mt-1">{errors.name.message}</p>
                     )}
                   </div>
                 </div>

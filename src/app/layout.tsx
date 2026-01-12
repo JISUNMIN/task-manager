@@ -4,9 +4,9 @@ import "./globals.css";
 import Toast from "@/components/ui/Toast";
 import QueryProvider from "./QueryProvider";
 import UserStoreInitializer from "@/components/system/UserStoreInitializer";
-import ThemeProviderLayout from "./ThemeProviderLayout";
 import { cookies } from "next/headers";
 import { Theme } from "@/store/useThemeStore";
+import ThemeSync from "./ThemeSync";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,6 +28,7 @@ export const metadata: Metadata = {
   title: "Squirrel Dashboard",
   description: "Welcome to your personalized Kanban board and analytics dashboard.",
 };
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -36,14 +37,20 @@ export default async function RootLayout({
   const initialTheme = await getInitialTheme();
 
   return (
-    <QueryProvider>
-      <UserStoreInitializer />
-      <html lang="en" className={initialTheme}>
-        <ThemeProviderLayout geistSans={geistSans.variable} geistMono={geistMono.variable}>
+    <html
+      lang="ko"
+      className={`${initialTheme} ${geistSans.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="antialiased">
+        <QueryProvider>
+          <UserStoreInitializer />
+          <ThemeSync initialTheme={initialTheme} />
+
           {children}
           <Toast />
-        </ThemeProviderLayout>
-      </html>
-    </QueryProvider>
+        </QueryProvider>
+      </body>
+    </html>
   );
 }
