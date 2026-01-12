@@ -57,7 +57,7 @@ export default function LoginForm() {
     <div className="flex min-h-screen items-center justify-center transition-colors duration-300">
       <div>
         <div className="flex justify-center mt-8">
-          <Image src={logo} alt="Logo" width={150} height={300} />
+          <Image src={logo} alt="Logo" width={160} height={160} priority />
         </div>
         <p className="logo-name text-2xl">Squirrel Board</p>
         <Card className="w-full max-w-[20rem] sm:max-w-[24rem] sm:w-96 cardStyle mt-5">
@@ -77,9 +77,7 @@ export default function LoginForm() {
                   />
                 </div>
                 {errors.userId && (
-                  <p className="text-sm text-red-500 -mt-1">
-                    {errors.userId.message}
-                  </p>
+                  <p className="text-sm text-red-500 -mt-1">{errors.userId.message}</p>
                 )}
               </div>
               <PasswordInput
