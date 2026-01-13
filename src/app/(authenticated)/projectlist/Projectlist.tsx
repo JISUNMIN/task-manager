@@ -173,6 +173,9 @@ const ProjectList = () => {
   const renderProjects = () => {
     const projectsToRender = isEditing ? editableProjects : filteredProjects;
 
+    const personalProject = projectsToRender.find((p) => p.isPersonal);
+    const nonPersonalProjects = projectsToRender.filter((p) => !p.isPersonal);
+
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {!isEditing && role === "ADMIN" && (
@@ -193,14 +196,25 @@ const ProjectList = () => {
           </div>
         )}
 
-        {projectsToRender.map((project) => {
+        {/* personal 프로젝트는 무조건 첫번쨰로 고정 */}
+        {personalProject && (
+          <div key={personalProject.id}>
+            <ProjectCard
+              project={personalProject}
+              isEditing={isEditing}
+              disabled={isEditing}
+              onClick={() => onClickProject(personalProject.id)}
+            />
+          </div>
+        )}
+
+        {/* 나머지는 드래그/정렬 가능 */}
+        {nonPersonalProjects.map((project) => {
           const card = (
             <ProjectCard
               project={project}
               isEditing={isEditing}
-              disabled={isEditing && project.isPersonal}
               onClick={() => onClickProject(project.id)}
-              isNavigating={navigatingProjectId === project.id}
             />
           );
 
@@ -273,7 +287,7 @@ const ProjectList = () => {
             onDragEnd={handleDragEnd}
           >
             <SortableContext
-              items={filteredProjects.map((p) => p.id)}
+              items={editableProjects.filter((p) => !p.isPersonal).map((p) => p.id)}
               strategy={rectSortingStrategy}
             >
               {renderProjects()}
