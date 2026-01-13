@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { KanbanSidebar } from "../sidebar/KanbanSidebar";
@@ -26,11 +25,10 @@ const TaskInfoPanel = dynamic(
   () => import("@/app/(authenticated)/dashboard/kanban/panel/TaskInfoPanel"),
   {
     ssr: false,
-  }
+  },
 );
 
 const KanbanBoard = () => {
-  const queryClient = useQueryClient();
   const sidebar = useMemo(() => <KanbanSidebar />, []);
   const trigger = useMemo(() => <SidebarTrigger />, []);
   const { theme } = useThemeStore();
@@ -49,18 +47,9 @@ const KanbanBoard = () => {
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId") ?? undefined;
   const { detailData, isDetailLoading } = useProjects(projectId);
-  const debouncedUpdateMap = useRef<Record<number, (title: string) => void>>(
-    {}
-  );
-  const [creatingColumns, setCreatingColumns] = useState<Set<Status>>(
-    new Set()
-  );
-  const {
-    createTaskMutate,
-    deleteTaskMutate,
-    updateTaskMutate,
-    moveTaskMutate,
-  } = useTasks();
+  const debouncedUpdateMap = useRef<Record<number, (title: string) => void>>({});
+  const [creatingColumns, setCreatingColumns] = useState<Set<Status>>(new Set());
+  const { createTaskMutate, deleteTaskMutate, updateTaskMutate, moveTaskMutate } = useTasks();
   const isPersonal = detailData?.isPersonal;
   const { user } = useAuthStore();
 
@@ -78,14 +67,11 @@ const KanbanBoard = () => {
   // 전체 개수 계산
   const totalCount = useMemo(
     () => Object.values(columns).reduce((acc, arr) => acc + arr.length, 0),
-    [columns]
+    [columns],
   );
 
   // 완료 개수
-  const completedCount = useMemo(
-    () => columns["Completed"]?.length ?? 0,
-    [columns]
-  );
+  const completedCount = useMemo(() => columns["Completed"]?.length ?? 0, [columns]);
 
   const debouncedUpdate = (taskId: number, newTitle: string) => {
     if (!debouncedUpdateMap.current[taskId]) {
@@ -98,10 +84,7 @@ const KanbanBoard = () => {
   const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result;
     if (!destination) return;
-    if (
-      source.droppableId === destination.droppableId &&
-      source.index === destination.index
-    )
+    if (source.droppableId === destination.droppableId && source.index === destination.index)
       return;
 
     const sourceStatus = source.droppableId as Status;
@@ -149,13 +132,7 @@ const KanbanBoard = () => {
     }
 
     // 프론트 상태 업데이트 (order 반영)
-    moveTask(
-      sourceStatus,
-      destinationStatus,
-      source.index,
-      destination.index,
-      newOrder
-    );
+    moveTask(sourceStatus, destinationStatus, source.index, destination.index, newOrder);
 
     // 서버 업데이트 호출
     moveTaskMutate({
@@ -172,10 +149,7 @@ const KanbanBoard = () => {
     setFocusedInputKey(`${columnKey}-${itemIndex}`);
   };
 
-  const calculateNewTaskOrder = (
-    tasks: any[],
-    orderType: "top" | "bottom"
-  ): number => {
+  const calculateNewTaskOrder = (tasks: any[], orderType: "top" | "bottom"): number => {
     if (tasks.length === 0) {
       return 0;
     }
@@ -190,7 +164,7 @@ const KanbanBoard = () => {
   const handleCreateTask = async (
     columnKey: Status,
     columnIndex: number,
-    orderType: "top" | "bottom" = "bottom"
+    orderType: "top" | "bottom" = "bottom",
   ) => {
     if (creatingColumns.has(columnKey)) return;
 
@@ -229,11 +203,7 @@ const KanbanBoard = () => {
     removeColumn(columnKey, itemIndex);
   };
 
-  const handleUpdateTask = (
-    columnKey: Status,
-    value: string,
-    itemIndex: number
-  ) => {
+  const handleUpdateTask = (columnKey: Status, value: string, itemIndex: number) => {
     const task = columns[columnKey][itemIndex];
     updateTask(columnKey, itemIndex, { title: value });
 
@@ -263,7 +233,7 @@ const KanbanBoard = () => {
     }
   }, [detailData, initializeColumns, projectId]);
   return (
-    <SidebarProvider className={`bg-[var(--bg-fourth)] relative`}>
+    <SidebarProvider className={`bg-[var(--bg-fourth)] relative pt-14`}>
       {sidebar}
       {trigger}
 
@@ -314,7 +284,7 @@ const KanbanBoard = () => {
                     <Droppable droppableId={columnKey}>
                       {(provided) => (
                         <div
-                          className="flex flex-col min-h-full max-h-[500px] lg:max-h-[80vh] overflow-y-auto space-y-3"
+                          className="flex flex-col flex-1 min-h-0 space-y-3 overflow-y-auto"
                           ref={provided.innerRef}
                           {...provided.droppableProps}
                         >
@@ -338,15 +308,13 @@ const KanbanBoard = () => {
                           {provided.placeholder}
 
                           <button
-                            onClick={() =>
-                              handleCreateTask(status, columnIndex, "bottom")
-                            }
+                            onClick={() => handleCreateTask(status, columnIndex, "bottom")}
                             disabled={creatingColumns.has(status)}
                             className={cn(
                               "bg-[var(--btn-bg)] border-2 border-dashed border-[var(--btn-border)] rounded-lg p-3 text-center text-[var(--text-blur)] transition-all duration-200 mt-3",
                               creatingColumns.has(status)
                                 ? "opacity-50 cursor-not-allowed"
-                                : "hover:bg-[var(--btn-hover-bg)] hover:border-[var(--btn-hover-border)] hover:text-[var(--foreground)] cursor-pointer"
+                                : "hover:bg-[var(--btn-hover-bg)] hover:border-[var(--btn-hover-border)] hover:text-[var(--foreground)] cursor-pointer",
                             )}
                           >
                             + 새 작업 추가

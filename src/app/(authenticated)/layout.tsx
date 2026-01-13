@@ -23,7 +23,7 @@ export default function AuthenticatedLayout({
   return (
     <>
       <Navbar />
-      <main className="pt-14">{children}</main>
+      <main >{children}</main>
     </>
   );
 }

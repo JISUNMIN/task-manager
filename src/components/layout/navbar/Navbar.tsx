@@ -1,19 +1,20 @@
 import { useState } from "react";
-import { Menu2, Search, SunHigh, Bell, Moon } from "tabler-icons-react";
+// import { Menu2, Search, SunHigh, Bell, Moon } from "tabler-icons-react";
+import { SunHigh, Moon } from "tabler-icons-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import UserMenu from "./UserMenu";
 import { UserAvatar } from "@/components/ui/extended/UserAvatar";
 import { useThemeStore } from "@/store/useThemeStore";
 
 const Navbar = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  // const [menuOpen, setMenuOpen] = useState(false);
+  // const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
   const { user } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 w-full flex h-14 items-center p-6 shadow-sm bg-[var(--item-bg)] text-[var(--foreground)] gap-2 mx-auto transition-colors duration-300">
+    <div className="fixed z-50 w-full flex h-14 items-center px-6 shadow-sm bg-[var(--item-bg)] text-[var(--foreground)] gap-4 mx-auto transition-colors duration-300 ">
       {/* 메뉴 토글 버튼 (모바일) */}
       {/* <button
         id="vertical-nav-toggle-btn"
@@ -68,12 +69,7 @@ const Navbar = () => {
         className="relative cursor-pointer w-9 h-9 rounded-full overflow-hidden"
         onClick={() => setAvatarMenuOpen(!avatarMenuOpen)}
       >
-        <UserAvatar
-          src={user?.profileImage}
-          alt={user?.userId}
-          size="lg"
-          className="mt-1"
-        />
+        <UserAvatar src={user?.profileImage} alt={user?.userId} size="lg" className="mt-1" />
         <span className="absolute bottom-2 right-1 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white dark:border-gray-800" />
       </div>
 

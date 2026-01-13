@@ -19,12 +19,7 @@ const SlashCommandKeyHandler = Extension.create({
       Enter: ({ editor }) => {
         const { state } = editor;
         const { from } = state.selection;
-        const textBefore = state.doc.textBetween(
-          Math.max(0, from - 50),
-          from,
-          "\n",
-          "\0"
-        );
+        const textBefore = state.doc.textBetween(Math.max(0, from - 50), from, "\n", "\0");
         const isSlashCommand = /\/(\w*)$/.test(textBefore);
         if (isSlashCommand) {
           if (typeof window !== "undefined") {
@@ -71,12 +66,7 @@ const SlashCommands = ({ editor }: { editor: any }) => {
   const deleteSlashCommand = () => {
     const { state } = editor;
     const { from } = state.selection;
-    const textBefore = state.doc.textBetween(
-      Math.max(0, from - 50),
-      from,
-      "\n",
-      "\0"
-    );
+    const textBefore = state.doc.textBetween(Math.max(0, from - 50), from, "\n", "\0");
     const match = textBefore.match(/\/(\w*)$/);
     if (match) {
       const start = from - match[0].length;
@@ -88,20 +78,13 @@ const SlashCommands = ({ editor }: { editor: any }) => {
   const onUpdate = () => {
     const { state } = editor;
     const { from } = state.selection;
-    const textBefore = state.doc.textBetween(
-      Math.max(0, from - 50),
-      from,
-      "\n",
-      "\0"
-    );
+    const textBefore = state.doc.textBetween(Math.max(0, from - 50), from, "\n", "\0");
     const match = textBefore.match(/\/(\w*)$/);
     if (match) {
       const keyword = match[1];
       setShowMenu(true);
       setFiltered(
-        commands.filter((cmd) =>
-          cmd.title.toLowerCase().includes(keyword.toLowerCase())
-        )
+        commands.filter((cmd) => cmd.title.toLowerCase().includes(keyword.toLowerCase())),
       );
       setSelectedIndex(0);
     } else {
@@ -119,8 +102,7 @@ const SlashCommands = ({ editor }: { editor: any }) => {
       }
 
       if (event.key === "ArrowUp") {
-        nextIndex =
-          selectedIndex === 0 ? filtered.length - 1 : selectedIndex - 1;
+        nextIndex = selectedIndex === 0 ? filtered.length - 1 : selectedIndex - 1;
       }
 
       const selectedItem = document.getElementById(`command-item-${nextIndex}`);
@@ -140,7 +122,7 @@ const SlashCommands = ({ editor }: { editor: any }) => {
         setShowMenu(false);
       }
     },
-    [showMenu, filtered, selectedIndex]
+    [showMenu, filtered, selectedIndex],
   );
 
   useEffect(() => {
@@ -155,11 +137,11 @@ const SlashCommands = ({ editor }: { editor: any }) => {
   }, [editor, handleKeyDown]);
 
   return showMenu ? (
-    <div className="absolute bg-white border rounded shadow p-2 z-10">
+    <div className="absolute bg-[var(--bg-fourth)] border rounded shadow p-2 z-10">
       {filtered.map((item, index) => (
         <div
           key={index}
-          className="cursor-pointer p-1 hover:bg-gray-100 focus:bg-gray-100"
+          className="cursor-pointer p-1 hover:bg-[var(--btn-hover-bg)]  focus:bg-[var(--btn-hover-bg)]"
           onClick={() => item.command()}
           tabIndex={0}
           id={`command-item-${index}`}
@@ -214,9 +196,7 @@ export default function Editor({
     return `${(size / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!editor || !event.target.files) return;
     const files = Array.from(event.target.files);
 
@@ -231,10 +211,7 @@ export default function Editor({
           editor
             .chain()
             .focus()
-            .insertContentAt(0, [
-              { type: "image", attrs: { src: fileUrl } },
-              { type: "paragraph" },
-            ])
+            .insertContentAt(0, [{ type: "image", attrs: { src: fileUrl } }, { type: "paragraph" }])
             .setTextSelection(1)
             .run();
         } else {
@@ -268,7 +245,7 @@ export default function Editor({
   }, [content]);
 
   return (
-    <div className="relative p-4 h-full">
+    <div className="relative p-4 ">
       {editor && <SlashCommands editor={editor} />}
 
       {/* 업로드 버튼 */}
@@ -291,10 +268,7 @@ export default function Editor({
           <Skeleton className="h-[125px] w-full rounded-xl" />
         </div>
       )}
-      <EditorContent
-        editor={editor}
-        className={`h-full ${styles.editorContent}`}
-      />
+      <EditorContent editor={editor} className={` ${styles.editorContent}`} />
     </div>
   );
 }
