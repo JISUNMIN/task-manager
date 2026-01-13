@@ -263,7 +263,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         </Grid>
       </div>
 
-      <div className="p-2 sm:p-4 h-full flex flex-col overflow-y-auto">
+      <div className="p-2 sm:p-4 mb-14 flex flex-col overflow-y-auto">
         <TaskComments taskId={task?.id} />
         <Editor onChange={(e) => handleUpdateTask(e, "desc")} content={localDesc} upload={upload} />
       </div>
