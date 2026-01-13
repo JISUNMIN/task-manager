@@ -233,7 +233,7 @@ const KanbanBoard = () => {
     }
   }, [detailData, initializeColumns, projectId]);
   return (
-    <SidebarProvider className={`bg-[var(--bg-fourth)] relative pt-14`}>
+    <SidebarProvider className={`bg-[var(--bg-fourth)] relative`}>
       {sidebar}
       {trigger}
 
@@ -284,7 +284,7 @@ const KanbanBoard = () => {
                     <Droppable droppableId={columnKey}>
                       {(provided) => (
                         <div
-                          className="flex flex-col flex-1 min-h-0 space-y-3 overflow-y-auto"
+                          className="flex flex-col flex-1 space-y-3 overflow-y-auto"
                           ref={provided.innerRef}
                           {...provided.droppableProps}
                         >

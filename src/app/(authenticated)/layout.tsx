@@ -5,11 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
 import Navbar from "@/components/layout/navbar/Navbar";
 
-export default function AuthenticatedLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, hasHydrated } = useAuthStore();
   const router = useRouter();
 
@@ -23,7 +19,7 @@ export default function AuthenticatedLayout({
   return (
     <>
       <Navbar />
-      <main >{children}</main>
+      <main className="pt-14">{children}</main>
     </>
   );
 }
