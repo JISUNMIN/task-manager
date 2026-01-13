@@ -109,7 +109,7 @@ export const CommentItem = ({
           <span className="text-sm font-medium">{comment.user.name}</span>
           <span className="text-xs text-gray-400 flex items-center gap-2">
             {getTimeAgo(comment?.createdAt ?? "")}
-            <ActionDropdownMenu items={commentItems} />
+            <ActionDropdownMenu items={commentItems} modal={false} />
           </span>
         </div>
 

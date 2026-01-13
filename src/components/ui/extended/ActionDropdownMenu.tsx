@@ -41,6 +41,7 @@ interface ActionDropdownMenuProps {
   handleSelectedLabel?: (label: ProjectLabel) => void;
   project?: ClientProject;
   isOnLightBackground?: boolean;
+  modal?: boolean;
 }
 
 export function ActionDropdownMenu({
@@ -50,6 +51,7 @@ export function ActionDropdownMenu({
   handleSelectedLabel,
   project,
   isOnLightBackground,
+  modal = true,
 }: ActionDropdownMenuProps) {
   const formContext = useOptionalFormContext();
   const setValue = formContext?.setValue;
@@ -67,7 +69,7 @@ export function ActionDropdownMenu({
   };
 
   return (
-    <DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
+    <DropdownMenu modal={modal} open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"

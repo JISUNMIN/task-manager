@@ -48,7 +48,7 @@ const TaskItem = ({
           {...provided.dragHandleProps}
         >
           <div className="text-right">
-            <ActionDropdownMenu items={items} />
+            <ActionDropdownMenu items={items} modal={false} />
           </div>
           <TextareaAutosize
             ref={(el) => {
