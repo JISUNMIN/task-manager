@@ -41,7 +41,7 @@ Task를 상태별로 관리할 수 있는 칸반 보드 화면입니다.
 - 컬럼 및 카드 단위 상태 시각화
 - Task 완료 비율 기반 진행률 표시
 
-![Kanban Board](./assets/screenshots/kanban-dark.png)
+![Kanban Board](./assets/screenshots/kanban-dark(1).png)
 
 > 🔎 실제 동작(GIF)은 [포트폴리오 페이지](https://jisunmin.github.io/)에서 확인할 수 있습니다.
 
@@ -94,7 +94,7 @@ Task를 클릭하면 우측에서 **사이드 패널 형태의 상세 화면**�
 
 ---
 
-## 주요 기능 요약
+## 📌  주요 기능 요약
 
 ### 프로젝트 관리
 - 프로젝트 생성 및 수정  
@@ -131,7 +131,7 @@ Task를 클릭하면 우측에서 **사이드 패널 형태의 상세 화면**�
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 - Next.js 15 (App Router)
 - TypeScript
@@ -148,5 +148,5 @@ Task를 클릭하면 우측에서 **사이드 패널 형태의 상세 화면**�
 
 ## 🔗 Links
 
-- 🔗 Portfolio (GitHub Pages)
-- 📦 Repository
+- 🔗 [Portfolio (GitHub Pages)](https://jisunmin.github.io/)
+- 📦 [Repository](https://github.com/JISUNMIN/task-manager)
