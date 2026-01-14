@@ -45,6 +45,7 @@ const SlashCommands = ({
   const [filtered, setFiltered] = useState<any[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [pos, setPos] = useState<{ left: number; top: number }>({ left: 0, top: 0 });
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const commands = [
     {
@@ -104,16 +105,24 @@ const SlashCommands = ({
     setShowMenu(true);
 
     const caret = view.coordsAtPos(from);
-
     const container = containerRef.current;
+
     if (container) {
       const rect = container.getBoundingClientRect();
+      const menuHeight = menuRef.current?.offsetHeight ?? 120;
+
+      const spaceBelow = rect.bottom - caret.bottom;
+      const spaceAbove = caret.top - rect.top;
+
+      const top =
+        spaceBelow < menuHeight && spaceAbove > menuHeight
+          ? caret.top - rect.top - menuHeight - 6
+          : caret.bottom - rect.top + 6;
+
       setPos({
         left: caret.left - rect.left,
-        top: caret.bottom - rect.top + 6,
+        top,
       });
-    } else {
-      setPos({ left: caret.left, top: caret.bottom + 6 });
     }
   };
 
@@ -321,7 +330,7 @@ export default function Editor({
           <Skeleton className="h-[125px] w-full rounded-xl" />
         </div>
       )}
-      <EditorContent editor={editor} className={`${styles.editorContent}`} />
+      <EditorContent editor={editor} className={styles.editorContent} />
     </div>
   );
 }

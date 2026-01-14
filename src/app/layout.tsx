@@ -25,8 +25,9 @@ async function getInitialTheme() {
 }
 
 export const metadata: Metadata = {
-  title: "Squirrel Dashboard",
-  description: "Welcome to your personalized Kanban board and analytics dashboard.",
+  title: "Squirrel Board",
+  description:
+    "A Kanban board for managing projects and tasks with a focus on collaboration and usability.",
 };
 
 export default async function RootLayout({
