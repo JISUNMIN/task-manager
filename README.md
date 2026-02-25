@@ -6,7 +6,7 @@
 다크 모드 지원과 직관적인 UI/UX를 중심으로,  
 실제 협업 도구에 가까운 사용 경험을 목표로 구현했습니다.
 
-> 🔗 배포 주소: https://task-manager-pink-ten.vercel.app
+> 🔗 Live Demo: https://task-manager-pink-ten.vercel.app
 
 ---
 
