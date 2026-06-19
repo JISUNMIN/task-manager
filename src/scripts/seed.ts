@@ -159,16 +159,30 @@ async function main() {
   await ensurePersonalProject(demoAdmin.id, demoAdmin.name);
   await ensurePersonalProject(demoMember.id, demoMember.name);
 
+  const allowedTeamProjectNames = [
+    "팀 협업 보드 예시",
+    "출시 준비 체크리스트",
+  ];
+
+  await prisma.project.deleteMany({
+    where: {
+      isPersonal: false,
+      projectName: {
+        notIn: allowedTeamProjectNames,
+      },
+    },
+  });
+
   const sprintProject = await upsertProject({
     managerId: demoAdmin.id,
-    projectName: "Demo Sprint Board",
+    projectName: "팀 협업 보드 예시",
     deadline: new Date("2026-07-31"),
     label: "feature",
   });
 
   const launchProject = await upsertProject({
     managerId: demoAdmin.id,
-    projectName: "Portfolio Launch Prep",
+    projectName: "출시 준비 체크리스트",
     deadline: new Date("2026-08-15"),
     label: "design",
   });

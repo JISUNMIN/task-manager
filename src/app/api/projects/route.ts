@@ -4,6 +4,18 @@ import { AuthError } from "@/lib/error";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
+const projectInclude = {
+  manager: {
+    select: {
+      id: true,
+      userId: true,
+      name: true,
+      role: true,
+      profileImage: true,
+    },
+  },
+} as const;
+
 export async function GET(req: NextRequest) {
   try {
     const payload = authenticate(req);
@@ -12,13 +24,11 @@ export async function GET(req: NextRequest) {
     let projects;
 
     if (role === "ADMIN") {
-      projects = await prisma.project.findMany({
+        projects = await prisma.project.findMany({
         where: {
           OR: [{ isPersonal: false }, { isPersonal: true, managerId: id }],
         },
-        include: {
-          manager: true,
-        },
+        include: projectInclude,
         orderBy: [{ isPersonal: "desc" }, { order: "asc" }, { id: "desc" }],
       });
     } else {
@@ -40,9 +50,7 @@ export async function GET(req: NextRequest) {
             },
           ],
         },
-        include: {
-          manager: true,
-        },
+        include: projectInclude,
       });
     }
 

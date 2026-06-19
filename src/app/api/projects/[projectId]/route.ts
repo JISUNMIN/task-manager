@@ -5,6 +5,31 @@ import { AuthError } from "@/lib/error";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
+const projectDetailInclude = {
+  manager: {
+    select: {
+      id: true,
+      userId: true,
+      name: true,
+      role: true,
+      profileImage: true,
+    },
+  },
+  tasks: {
+    include: {
+      assignees: {
+        select: {
+          id: true,
+          userId: true,
+          name: true,
+          profileImage: true,
+        },
+      },
+    },
+    orderBy: { order: "asc" as const },
+  },
+} as const;
+
 export async function GET(
   req: NextRequest,
   context: { params: Promise<{ projectId: string }> }
@@ -15,15 +40,7 @@ export async function GET(
     const numericProjectId = Number(projectId);
 
     const project = await prisma.project.findUnique({
-      include: {
-        manager: true,
-        tasks: {
-          include: {
-            assignees: true,
-          },
-          orderBy: { order: "asc" },
-        },
-      },
+      include: projectDetailInclude,
       where: { id: numericProjectId },
     });
 

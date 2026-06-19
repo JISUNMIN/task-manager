@@ -1,7 +1,11 @@
 "use client";
 import React, { useState, useEffect, ReactNode, useRef } from "react";
 import ProjectCard from "./ProjectCard";
-import useProjects, { ClientProject } from "@/hooks/react-query/useProjects";
+import useProjects, {
+  ClientProject,
+  fetchProjectDetail,
+  PROJECT_QUERY_KEYS,
+} from "@/hooks/react-query/useProjects";
 import { useRouter } from "next/navigation";
 import NewProjectCard from "./NewProjectCard";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -24,6 +28,7 @@ import { CardSkeleton } from "@/components/ui/extended/Skeleton/CardSkeleton";
 import { LABELS, LABEL_COLOR_MAP } from "@/app/constants/common";
 import { cn } from "@/lib/utils";
 import { Filter, Loader2Icon } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 const SortableItem = ({
   id,
@@ -57,6 +62,7 @@ const ProjectList = () => {
   const role = user?.role;
   const { listData } = useProjects();
   const { updateProjectOrder } = useProjectMutations();
+  const queryClient = useQueryClient();
 
   const [editableProjects, setEditableProjects] = useState<ClientProject[]>([]);
   const originalProjectsRef = useRef<ClientProject[]>([]);
@@ -89,10 +95,19 @@ const ProjectList = () => {
     });
   };
 
+  const prefetchProjectDetail = (projectId: number) => {
+    void queryClient.prefetchQuery({
+      queryKey: PROJECT_QUERY_KEYS.detail(projectId),
+      queryFn: () => fetchProjectDetail(projectId),
+    });
+    void router.prefetch(`/dashboard/kanban?projectId=${projectId}`);
+  };
+
   const onClickProject = (projectId: number) => {
     if (isEditing) return;
     if (isNavigating) return;
 
+    prefetchProjectDetail(projectId);
     setIsNavigating(true);
     setNavigatingProjectId(projectId);
     router.push(`/dashboard/kanban?projectId=${projectId}`);
@@ -208,6 +223,7 @@ const ProjectList = () => {
               isEditing={isEditing}
               disabled={isEditing}
               isNavigating={navigatingProjectId === personalProject.id}
+              onMouseEnter={() => prefetchProjectDetail(personalProject.id)}
               onClick={() => onClickProject(personalProject.id)}
             />
           </div>
@@ -220,6 +236,7 @@ const ProjectList = () => {
               project={project}
               isEditing={isEditing}
               isNavigating={navigatingProjectId === project.id}
+              onMouseEnter={() => prefetchProjectDetail(project.id)}
               onClick={() => onClickProject(project.id)}
             />
           );

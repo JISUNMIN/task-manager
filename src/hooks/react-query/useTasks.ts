@@ -83,7 +83,6 @@ const useTasks = () => {
         };
         updateTask(updatedTask.status as Status, index, normalizedTask);
       }
-      invalidateProjectQueries();
     },
     onError: () => {},
   });

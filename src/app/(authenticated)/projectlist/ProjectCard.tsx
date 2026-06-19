@@ -22,6 +22,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 interface ProjectCardProps {
   project: ClientProject;
   onClick: () => void;
+  onMouseEnter?: () => void;
   disabled?: boolean;
   isEditing?: boolean;
   isNavigating?: boolean;
@@ -94,7 +95,7 @@ const ProjectTitle: FC<{ title: string; className?: string }> = ({ title, classN
 };
 
 const ProjectCard: FC<ProjectCardProps> = memo(
-  ({ project, onClick, disabled, isEditing, isNavigating }) => {
+  ({ project, onClick, onMouseEnter, disabled, isEditing, isNavigating }) => {
     const { control } = useFormContext();
     const { user } = useAuthStore();
     const userId = user?.id;
@@ -197,6 +198,7 @@ const ProjectCard: FC<ProjectCardProps> = memo(
       <>
         <div
           ref={containerRef}
+          onMouseEnter={disabled || isNavigating ? undefined : onMouseEnter}
           onClick={disabled || isNavigating ? undefined : onClick}
           className={cn(
             "relative h-55 rounded-lg p-6 shadow-md mb-3 transition-all duration-100 bg-[var(--bg-seonday)]",

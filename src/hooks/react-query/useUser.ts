@@ -5,8 +5,17 @@ import { showToast, ToastMode } from "@/lib/toast";
 import { useAuthStore } from "@/store/useAuthStore";
 
 const USER_API_PATH = "/users";
+const USER_STALE_TIME = 1000 * 60 * 10;
 
 export type UserSummary = Pick<User, "id" | "name" | "role" | "userId" | "profileImage">;
+export const USER_QUERY_KEYS = {
+  list: ["users", "list"] as const,
+};
+
+export const fetchUsers = async () => {
+  const res = await axios.get<UserSummary[]>(USER_API_PATH);
+  return res.data;
+};
 
 const useUser = (targetId?: string | number) => {
   const queryClient = useQueryClient();
@@ -17,11 +26,11 @@ const useUser = (targetId?: string | number) => {
     isLoading: isListLoading,
     isFetching: isListFetching,
   } = useQuery<UserSummary[], Error>({
-    queryKey: ["users", "list"],
-    queryFn: async () => {
-      const res = await axios.get<UserSummary[]>(USER_API_PATH);
-      return res.data;
-    },
+    queryKey: USER_QUERY_KEYS.list,
+    queryFn: fetchUsers,
+    staleTime: USER_STALE_TIME,
+    gcTime: USER_STALE_TIME * 2,
+    refetchOnWindowFocus: false,
   });
 
   // profileImage update
