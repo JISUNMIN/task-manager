@@ -2,6 +2,7 @@ import { PasswordInput } from "@/components/form/PasswordInput";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/useAuthStore";
 import { yupResolver } from "@hookform/resolvers/yup";
+import Link from "next/link";
 import React, { useState } from "react";
 import { FormProvider, Resolver, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -61,7 +62,7 @@ export default function UserProfile() {
 
   // 서버 전송용 파일 상태
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
-  const { updateProfile } = useUser(id);
+  const { updateProfile, profileSummary, isProfileSummaryLoading } = useUser(id);
 
   const {
     register,
@@ -86,7 +87,66 @@ export default function UserProfile() {
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto p-8">
+    <div className="w-full max-w-5xl mx-auto p-8">
+      <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--box-bg)] p-4 shadow-sm">
+          <p className="text-sm text-[var(--text-blur)]">관리 중인 프로젝트</p>
+          <p className="mt-2 text-2xl font-bold text-[var(--text-base)]">
+            {isProfileSummaryLoading ? "-" : profileSummary?.managedProjectsCount ?? 0}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--box-bg)] p-4 shadow-sm">
+          <p className="text-sm text-[var(--text-blur)]">담당 중인 작업</p>
+          <p className="mt-2 text-2xl font-bold text-[var(--text-base)]">
+            {isProfileSummaryLoading ? "-" : profileSummary?.assignedTasksCount ?? 0}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--box-bg)] p-4 shadow-sm">
+          <p className="text-sm text-[var(--text-blur)]">완료한 작업</p>
+          <p className="mt-2 text-2xl font-bold text-[var(--text-base)]">
+            {isProfileSummaryLoading ? "-" : profileSummary?.completedTasksCount ?? 0}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--box-bg)] p-4 shadow-sm">
+          <p className="text-sm text-[var(--text-blur)]">기한 지난 작업</p>
+          <p className="mt-2 text-2xl font-bold text-red-600">
+            {isProfileSummaryLoading ? "-" : profileSummary?.overdueTasksCount ?? 0}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--box-bg)] p-4 shadow-sm">
+          <p className="text-sm text-[var(--text-blur)]">높은 우선순위 작업</p>
+          <p className="mt-2 text-2xl font-bold text-amber-600">
+            {isProfileSummaryLoading ? "-" : profileSummary?.highPriorityTasksCount ?? 0}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--box-bg)] p-4 shadow-sm">
+          <p className="text-sm text-[var(--text-blur)]">최근 2주 활동 로그</p>
+          <p className="mt-2 text-2xl font-bold text-[var(--text-base)]">
+            {isProfileSummaryLoading ? "-" : profileSummary?.recentActivityCount ?? 0}
+          </p>
+        </div>
+      </div>
+
+      <div className="mb-6 flex flex-wrap gap-3">
+        <Button asChild variant="outline">
+          <Link href="/projectlist">프로젝트 목록으로</Link>
+        </Button>
+        {profileSummary?.recommendedProjectId && (
+          <Button asChild>
+            <Link href={`/dashboard/kanban?projectId=${profileSummary.recommendedProjectId}&assignee=me`}>
+              내 작업 바로 보기
+            </Link>
+          </Button>
+        )}
+        {profileSummary?.personalProjectId && (
+          <Button asChild variant="secondary">
+            <Link href={`/dashboard/kanban?projectId=${profileSummary.personalProjectId}`}>
+              개인 프로젝트 열기
+            </Link>
+          </Button>
+        )}
+      </div>
+
       <FormProvider {...methods}>
         <form
           onSubmit={handleSubmit(onSubmit)}

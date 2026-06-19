@@ -6,6 +6,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { KanbanSidebar } from "../sidebar/KanbanSidebar";
 import { ClientTask, Status, useKanbanStore } from "@/store/useKanbanStore";
 import dynamic from "next/dynamic";
+import TextareaAutosize from "react-textarea-autosize";
 
 import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
 import useProjects from "@/hooks/react-query/useProjects";
@@ -20,6 +21,7 @@ import TaskItem from "./TaskItem";
 import ProjectInfoCard from "./ProjectInfoCard";
 import ColumnHeader from "./KanbanColumnHeader";
 import { cn } from "@/lib/utils";
+import { TASK_PRIORITY_LABELS } from "@/lib/utils/task";
 
 const TaskInfoPanel = dynamic(
   () => import("@/app/(authenticated)/dashboard/kanban/panel/TaskInfoPanel"),
@@ -46,9 +48,14 @@ const KanbanBoard = () => {
   const inputRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId") ?? undefined;
+  const assigneeFilterParam = searchParams.get("assignee");
   const { detailData, isDetailLoading } = useProjects(projectId);
   const debouncedUpdateMap = useRef<Record<number, (title: string) => void>>({});
   const [creatingColumns, setCreatingColumns] = useState<Set<Status>>(new Set());
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedAssignee, setSelectedAssignee] = useState("all");
+  const [selectedPriority, setSelectedPriority] = useState("all");
+  const [selectedDueFilter, setSelectedDueFilter] = useState("all");
   const { createTaskMutate, deleteTaskMutate, updateTaskMutate, moveTaskMutate } = useTasks();
   const isPersonal = detailData?.isPersonal;
   const { user } = useAuthStore();
@@ -72,6 +79,67 @@ const KanbanBoard = () => {
 
   // 완료 개수
   const completedCount = useMemo(() => columns["Completed"]?.length ?? 0, [columns]);
+
+  const projectAssignees = useMemo(() => {
+    const map = new Map<number, { id: number; name: string; userId: string }>();
+    detailData?.tasks?.forEach((task) => {
+      task.assignees.forEach((assignee) => {
+        map.set(assignee.id, {
+          id: assignee.id,
+          name: assignee.name,
+          userId: assignee.userId,
+        });
+      });
+    });
+    return Array.from(map.values());
+  }, [detailData?.tasks]);
+
+  const isFilteredView = Boolean(
+    searchTerm.trim() || selectedAssignee !== "all" || selectedPriority !== "all" || selectedDueFilter !== "all",
+  );
+
+  const filteredColumns = useMemo(() => {
+    const nextColumns = {} as typeof columns;
+    const keyword = searchTerm.trim().toLowerCase();
+
+    (Object.keys(columns) as Status[]).forEach((status) => {
+      nextColumns[status] = columns[status].filter((task) => {
+        const matchesKeyword =
+          keyword.length === 0 ||
+          task.title.toLowerCase().includes(keyword) ||
+          task.desc.toLowerCase().includes(keyword);
+
+        const matchesAssignee =
+          selectedAssignee === "all" ||
+          task.assignees?.includes(Number(selectedAssignee));
+
+        const matchesPriority =
+          selectedPriority === "all" || task.priority === selectedPriority;
+
+        const dueDate = task.dueDate ? new Date(task.dueDate) : null;
+        const today = new Date();
+        const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const taskDueDate =
+          dueDate && !Number.isNaN(dueDate.getTime())
+            ? new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate())
+            : null;
+        const diffDays =
+          taskDueDate == null
+            ? null
+            : Math.ceil((taskDueDate.getTime() - todayStart.getTime()) / (1000 * 60 * 60 * 24));
+
+        const matchesDueFilter =
+          selectedDueFilter === "all" ||
+          (selectedDueFilter === "none" && !taskDueDate) ||
+          (selectedDueFilter === "overdue" && diffDays !== null && diffDays < 0) ||
+          (selectedDueFilter === "soon" && diffDays !== null && diffDays >= 0 && diffDays <= 3);
+
+        return matchesKeyword && matchesAssignee && matchesPriority && matchesDueFilter;
+      });
+    });
+
+    return nextColumns;
+  }, [columns, searchTerm, selectedAssignee, selectedPriority, selectedDueFilter]);
 
   const debouncedUpdate = (taskId: number, newTitle: string) => {
     if (!debouncedUpdateMap.current[taskId]) {
@@ -245,7 +313,9 @@ const KanbanBoard = () => {
 
   useEffect(() => {
     const ref = focusedTaskId == null ? null : inputRefs.current[String(focusedTaskId)];
-    if (ref) ref.focus();
+    if (!ref) return;
+    if (document.activeElement === ref) return;
+    ref.focus();
   }, [focusedTaskId]);
 
   useEffect(() => {
@@ -267,6 +337,15 @@ const KanbanBoard = () => {
       prevProjectIdRef.current = projectId;
     }
   }, [detailData, initializeColumns, projectId]);
+
+  useEffect(() => {
+    if (assigneeFilterParam === "me" && user?.id) {
+      setSelectedAssignee(String(user.id));
+      return;
+    }
+
+    setSelectedAssignee("all");
+  }, [assigneeFilterParam, projectId, user?.id]);
 
   useEffect(() => {
     if (focusedTaskId == null) return;
@@ -292,6 +371,80 @@ const KanbanBoard = () => {
           totalCount={totalCount}
         />
 
+        <div className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--box-bg)] p-4 shadow-sm">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="text-base font-semibold text-[var(--text-base)]">작업 검색 및 필터</h3>
+              <p className="text-sm text-[var(--text-blur)]">
+                제목/본문 검색, 담당자, 우선순위, 마감 임박 기준으로 보드를 빠르게 좁혀볼 수 있습니다.
+              </p>
+            </div>
+            {isFilteredView && (
+              <button
+                type="button"
+                className="text-sm font-medium text-blue-600 hover:underline"
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedAssignee(assigneeFilterParam === "me" && user?.id ? String(user.id) : "all");
+                  setSelectedPriority("all");
+                  setSelectedDueFilter("all");
+                }}
+              >
+                필터 초기화
+              </button>
+            )}
+          </div>
+          <div className={`grid gap-3 md:grid-cols-2 ${isPersonal ? "xl:grid-cols-3" : "xl:grid-cols-4"}`}>
+            <TextareaAutosize
+              minRows={1}
+              maxRows={1}
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="제목 또는 본문 검색"
+              className="w-full rounded-md border border-slate-300 bg-white p-2 text-[var(--text-base)] shadow-sm transition-colors hover:border-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-500 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-gray-400 dark:focus:border-blue-400 dark:focus:ring-blue-900/40"
+            />
+            {!isPersonal && (
+              <select
+                value={selectedAssignee}
+                onChange={(event) => setSelectedAssignee(event.target.value)}
+                className="h-9 rounded-md border border-slate-300 bg-white px-3 text-sm shadow-sm outline-none transition-colors hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-gray-800 dark:border-gray-500 dark:text-gray-100 dark:hover:border-gray-400 dark:focus:border-blue-400 dark:focus:ring-blue-900/40"
+              >
+                <option value="all">전체 담당자</option>
+                {projectAssignees.map((assignee) => (
+                  <option key={assignee.id} value={String(assignee.id)}>
+                    {assignee.name} ({assignee.userId})
+                  </option>
+                ))}
+              </select>
+            )}
+            <select
+              value={selectedPriority}
+              onChange={(event) => setSelectedPriority(event.target.value)}
+              className="h-9 rounded-md border border-slate-300 bg-white px-3 text-sm shadow-sm outline-none transition-colors hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-gray-800 dark:border-gray-500 dark:text-gray-100 dark:hover:border-gray-400 dark:focus:border-blue-400 dark:focus:ring-blue-900/40"
+            >
+              <option value="all">전체 우선순위</option>
+              <option value="HIGH">{TASK_PRIORITY_LABELS.HIGH}</option>
+              <option value="MEDIUM">{TASK_PRIORITY_LABELS.MEDIUM}</option>
+              <option value="LOW">{TASK_PRIORITY_LABELS.LOW}</option>
+            </select>
+            <select
+              value={selectedDueFilter}
+              onChange={(event) => setSelectedDueFilter(event.target.value)}
+              className="h-9 rounded-md border border-slate-300 bg-white px-3 text-sm shadow-sm outline-none transition-colors hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-gray-800 dark:border-gray-500 dark:text-gray-100 dark:hover:border-gray-400 dark:focus:border-blue-400 dark:focus:ring-blue-900/40"
+            >
+              <option value="all">전체 마감 상태</option>
+              <option value="soon">3일 이내 마감</option>
+              <option value="overdue">기한 지난 작업</option>
+              <option value="none">마감일 미설정</option>
+            </select>
+          </div>
+          {isFilteredView && (
+            <p className="mt-3 text-xs text-[var(--text-blur)]">
+              필터가 적용된 동안에는 카드 드래그 이동을 잠시 비활성화했습니다.
+            </p>
+          )}
+        </div>
+
         {isDetailLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -306,7 +459,6 @@ const KanbanBoard = () => {
                 const keys = Object.keys(columns);
                 const columnIndex = keys.indexOf(status);
                 const { kanbanBoardBg } = getStatusColors(status, isDark);
-                const count = columns[status].length;
 
                 return (
                   <div
@@ -317,7 +469,7 @@ const KanbanBoard = () => {
                       status={status}
                       isDark={isDark}
                       columnIndex={columnIndex}
-                      count={count}
+                      count={filteredColumns[status].length}
                       onCreateTask={(status, columnIndex) =>
                         handleCreateTask(status, columnIndex, "top")
                       }
@@ -331,19 +483,25 @@ const KanbanBoard = () => {
                           ref={provided.innerRef}
                           {...provided.droppableProps}
                         >
-                          {columns[status]?.map((task, itemIndex) => {
+                          {filteredColumns[status]?.map((task, filteredIndex) => {
                             if (!task) return null;
+                            const itemIndex = columns[status].findIndex(
+                              (columnTask) => String(columnTask.id) === String(task.id),
+                            );
+                            if (itemIndex < 0) return null;
                             return (
                               <TaskItem
                                 key={String(task.id)}
                                 columnKey={status}
                                 itemIndex={itemIndex}
+                                draggableIndex={filteredIndex}
                                 task={task}
                                 handleDeleteTask={handleDeleteTask}
                                 handleUpdateTask={handleUpdateTask}
                                 setFocusedTaskId={setFocusedTaskId}
                                 openPanel={openPanel}
                                 inputRefs={inputRefs}
+                                isDragDisabled={isFilteredView}
                               />
                             );
                           })}

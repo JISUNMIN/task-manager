@@ -8,8 +8,20 @@ const USER_API_PATH = "/users";
 const USER_STALE_TIME = 1000 * 60 * 10;
 
 export type UserSummary = Pick<User, "id" | "name" | "role" | "userId" | "profileImage">;
+export type ProfileSummary = {
+  managedProjectsCount: number;
+  assignedTasksCount: number;
+  completedTasksCount: number;
+  overdueTasksCount: number;
+  highPriorityTasksCount: number;
+  recentActivityCount: number;
+  personalProjectId: number | null;
+  recommendedProjectId: number | null;
+};
+
 export const USER_QUERY_KEYS = {
   list: ["users", "list"] as const,
+  profileSummary: (targetId: string | number) => ["users", "summary", targetId] as const,
 };
 
 export const fetchUsers = async () => {
@@ -33,6 +45,21 @@ const useUser = (targetId?: string | number) => {
     refetchOnWindowFocus: false,
   });
 
+  const {
+    data: profileSummary,
+    isLoading: isProfileSummaryLoading,
+  } = useQuery<ProfileSummary, Error>({
+    queryKey: USER_QUERY_KEYS.profileSummary(targetId as string | number),
+    queryFn: async () => {
+      const res = await axios.get<ProfileSummary>(`${USER_API_PATH}/${targetId}/summary`);
+      return res.data;
+    },
+    enabled: !!targetId,
+    staleTime: USER_STALE_TIME,
+    gcTime: USER_STALE_TIME * 2,
+    refetchOnWindowFocus: false,
+  });
+
   // profileImage update
   const { mutate: updateProfile } = useMutation<
     { profileImage: string },
@@ -51,6 +78,7 @@ const useUser = (targetId?: string | number) => {
         profileImage: updatedUser.profileImage,
       });
       queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
+      queryClient.invalidateQueries({ queryKey: USER_QUERY_KEYS.profileSummary(targetId as string | number) });
       showToast({ type: ToastMode.SUCCESS, action: "CHANGE" });
     },
     onError: () => {
@@ -63,6 +91,8 @@ const useUser = (targetId?: string | number) => {
     listData,
     isListLoading,
     isListFetching,
+    profileSummary,
+    isProfileSummaryLoading,
     //update
     updateProfile,
   };

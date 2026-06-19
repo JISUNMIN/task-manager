@@ -4,6 +4,11 @@
 import { authenticate } from "@/lib/auth";
 import { AuthError } from "@/lib/error";
 import { prisma } from "@/lib/prisma";
+import {
+  createTaskActivity,
+  formatTaskDateValue,
+  formatTaskPriorityValue,
+} from "@/lib/utils/services/taskActivity";
 import { updateProjectProgress } from "@/lib/utils/services/project";
 import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
@@ -63,7 +68,7 @@ export async function PATCH(
   try {
     const { id, role } = authenticate(req);
     const { taskId } = await context.params;
-    const { title, desc, assignees } = await req.json();
+    const { title, desc, assignees, priority, dueDate } = await req.json();
     const numericTaskId = Number(taskId);
 
     const task = await prisma.task.findUnique({
@@ -73,7 +78,7 @@ export async function PATCH(
           select: { managerId: true },
         },
         assignees: {
-          select: { id: true },
+          select: { id: true, name: true },
         },
       },
     });
@@ -92,9 +97,39 @@ export async function PATCH(
     }
 
     const updateData: Prisma.TaskUpdateInput = {};
+    const activityLogs: Promise<unknown>[] = [];
 
-    if (title !== undefined) updateData.title = title;
-    if (desc !== undefined) updateData.desc = desc;
+    if (title !== undefined) {
+      updateData.title = title;
+      if (title !== task.title) {
+        activityLogs.push(
+          createTaskActivity({
+            taskId: numericTaskId,
+            actorId: id,
+            type: "TITLE_CHANGED",
+            fieldLabel: "제목",
+            fromValue: task.title,
+            toValue: title,
+          }),
+        );
+      }
+    }
+
+    if (desc !== undefined) {
+      updateData.desc = desc;
+      if (desc !== task.desc) {
+        activityLogs.push(
+          createTaskActivity({
+            taskId: numericTaskId,
+            actorId: id,
+            type: "DESCRIPTION_CHANGED",
+            fieldLabel: "본문",
+            fromValue: task.desc ? "작성됨" : "비어 있음",
+            toValue: desc ? "작성됨" : "비어 있음",
+          }),
+        );
+      }
+    }
 
     if (Array.isArray(assignees)) {
       updateData.assignees = {
@@ -103,6 +138,70 @@ export async function PATCH(
           .filter((id) => typeof id === "number")
           .map((id) => ({ id })),
       };
+
+      const previousAssigneeIds = task.assignees.map((assignee) => assignee.id).sort((a, b) => a - b);
+      const nextAssigneeIds = assignees.filter((value: unknown): value is number => typeof value === "number").sort((a, b) => a - b);
+
+      if (previousAssigneeIds.join(",") !== nextAssigneeIds.join(",")) {
+        const nextAssignees = await prisma.user.findMany({
+          where: { id: { in: nextAssigneeIds } },
+          select: { name: true },
+        });
+
+        activityLogs.push(
+          createTaskActivity({
+            taskId: numericTaskId,
+            actorId: id,
+            type: "ASSIGNEES_CHANGED",
+            fieldLabel: "할당자",
+            fromValue:
+              task.assignees.length > 0
+                ? task.assignees.map((assignee) => assignee.name).join(", ")
+                : "미지정",
+            toValue:
+              nextAssignees.length > 0
+                ? nextAssignees.map((assignee) => assignee.name).join(", ")
+                : "미지정",
+          }),
+        );
+      }
+    }
+
+    if (priority !== undefined) {
+      updateData.priority = priority;
+
+      if (priority !== task.priority) {
+        activityLogs.push(
+          createTaskActivity({
+            taskId: numericTaskId,
+            actorId: id,
+            type: "PRIORITY_CHANGED",
+            fieldLabel: "우선순위",
+            fromValue: formatTaskPriorityValue(task.priority),
+            toValue: formatTaskPriorityValue(priority),
+          }),
+        );
+      }
+    }
+
+    if (dueDate !== undefined) {
+      updateData.dueDate = dueDate ? new Date(dueDate) : null;
+
+      const previousDate = task.dueDate ? task.dueDate.toISOString().slice(0, 10) : null;
+      const nextDate = typeof dueDate === "string" && dueDate.length > 0 ? dueDate : null;
+
+      if (previousDate !== nextDate) {
+        activityLogs.push(
+          createTaskActivity({
+            taskId: numericTaskId,
+            actorId: id,
+            type: "DUE_DATE_CHANGED",
+            fieldLabel: "마감일",
+            fromValue: formatTaskDateValue(task.dueDate),
+            toValue: formatTaskDateValue(nextDate),
+          }),
+        );
+      }
     }
 
     if (Object.keys(updateData).length === 0) {
@@ -121,6 +220,10 @@ export async function PATCH(
         },
       },
     });
+
+    if (activityLogs.length > 0) {
+      await Promise.all(activityLogs);
+    }
 
     return NextResponse.json(updatedTask, { status: 200 });
   } catch (error) {

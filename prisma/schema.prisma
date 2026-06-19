@@ -30,6 +30,22 @@ enum FileType {
   OTHER
 }
 
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TaskActivityType {
+  CREATED
+  TITLE_CHANGED
+  DESCRIPTION_CHANGED
+  STATUS_CHANGED
+  ASSIGNEES_CHANGED
+  PRIORITY_CHANGED
+  DUE_DATE_CHANGED
+}
+
 model User {
   id           Int     @id @default(autoincrement())
   userId       String  @unique
@@ -41,6 +57,7 @@ model User {
   tasks        Task[]    @relation("TaskAssignees") // 내가 맡은 일
   managedTasks Task[]    @relation("ManagingUser") // 내가 관리하는 일
   comments     Comment[]
+  taskActivities TaskActivity[] @relation("TaskActivityActor")
   projects     Project[] @relation("ProjectManager") // 내가 담당하는 프로젝트들
 }
 
@@ -66,6 +83,8 @@ model Task {
   status    String
   projectId Int
   managerId Int
+  priority  TaskPriority @default(MEDIUM)
+  dueDate   DateTime?
 
   manager  User      @relation("ManagingUser", fields: [managerId], references: [id])
   project  Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -78,6 +97,7 @@ model Task {
 
   // 첨부 파일
   attachments TaskAttachment[]
+  activities  TaskActivity[]
 }
 
 model Comment {
@@ -106,4 +126,18 @@ model TaskAttachment {
   createdAt DateTime @default(now())
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model TaskActivity {
+  id        Int              @id @default(autoincrement())
+  taskId     Int
+  actorId    Int?
+  type       TaskActivityType
+  fieldLabel String?
+  fromValue  String?
+  toValue    String?
+  createdAt  DateTime         @default(now())
+
+  task  Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  actor User? @relation("TaskActivityActor", fields: [actorId], references: [id], onDelete: SetNull)
 }

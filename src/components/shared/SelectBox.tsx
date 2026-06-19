@@ -87,15 +87,12 @@ export function SelectBox<T extends string | number>({
         onKeyDown={handleKeyDown}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className=" w-full flex justify-between items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm shadow-sm
-        hover:border-blue-500
-        dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100
-        dark:hover:border-blue-400
-        dark:focus:ring-blue-400"
+        className="flex h-10 w-full justify-between items-center rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition-colors
+        hover:border-slate-400 focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-200
+        dark:bg-gray-800 dark:border-gray-500 dark:text-gray-100
+        dark:hover:border-gray-400 dark:focus-visible:border-blue-400 dark:focus-visible:ring-blue-900/40"
       >
-        <span
-          className={`${value ? "text-gray-900" : "text-gray-400"} dark:text-gray-100 dark:placeholder:text-gray-400`}
-        >
+        <span className={cn("truncate text-left", value ? "text-gray-900 dark:text-gray-100" : "text-gray-400")}>
           {value ? (renderOption ? renderOption(value) : value) : placeholder}
         </span>
         <svg
@@ -118,8 +115,8 @@ export function SelectBox<T extends string | number>({
         <ul
           role="listbox"
           tabIndex={-1}
-          className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg text-sm
-                     dark:bg-gray-900 dark:border-gray-700 dark:shadow-lg"
+          className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-slate-300 bg-white shadow-lg text-sm
+                     dark:bg-gray-900 dark:border-gray-600 dark:shadow-lg"
         >
           {options.map((option, idx) => {
             const isSelected = option === value;

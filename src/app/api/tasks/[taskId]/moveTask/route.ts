@@ -2,6 +2,7 @@
 import { authenticate } from "@/lib/auth";
 import { AuthError } from "@/lib/error";
 import { prisma } from "@/lib/prisma";
+import { createTaskActivity } from "@/lib/utils/services/taskActivity";
 import { NextRequest, NextResponse } from "next/server";
 import { updateProjectProgress } from "@/lib/utils/services/project/progress";
 
@@ -44,6 +45,17 @@ export async function PATCH(
       where: { id: numericTaskId },
       data: { status: toColumn, order: order },
     });
+
+    if (task.status !== toColumn) {
+      await createTaskActivity({
+        taskId: numericTaskId,
+        actorId: id,
+        type: "STATUS_CHANGED",
+        fieldLabel: "상태",
+        fromValue: task.status,
+        toValue: toColumn,
+      });
+    }
 
     updateProjectProgress(projectId, progress);
 

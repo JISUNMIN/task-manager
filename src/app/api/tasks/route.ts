@@ -2,6 +2,7 @@
 import { authenticate } from "@/lib/auth";
 import { AuthError } from "@/lib/error";
 import { prisma } from "@/lib/prisma";
+import { createTaskActivity } from "@/lib/utils/services/taskActivity";
 import { updateProjectProgress } from "@/lib/utils/services/project";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -15,6 +16,8 @@ export async function POST(req: NextRequest) {
       status,
       projectId,
       progress,
+      priority = "MEDIUM",
+      dueDate = null,
       order, // 프론트엔드에서 계산된 order 값
     } = body;
 
@@ -38,8 +41,18 @@ export async function POST(req: NextRequest) {
         status,
         projectId: Number(projectId),
         managerId: project.managerId,
+        priority,
+        dueDate: dueDate ? new Date(dueDate) : null,
         order,
       },
+    });
+
+    await createTaskActivity({
+      taskId: newTask.id,
+      actorId: id,
+      type: "CREATED",
+      fieldLabel: "작업",
+      toValue: newTask.title || "새 작업",
     });
 
     updateProjectProgress(Number(projectId), progress).catch(console.error);

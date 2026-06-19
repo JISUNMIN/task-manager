@@ -19,10 +19,11 @@ export const ALL_STATUS: Status[] = [
 
 export type ClientTask = Omit<
   Task,
-  "id" | "status" | "projectId" | "assignees" | "project" | "managerId"
+  "id" | "status" | "projectId" | "assignees" | "project" | "managerId" | "dueDate"
 > & {
   id: number | string;
   assignees?: number[];
+  dueDate?: string | null;
   managerId?: number;
 };
 
@@ -42,6 +43,8 @@ export const useKanbanStore = create<{
       desc: string;
       status: Status;
       assignees?: number[];
+      priority?: Task["priority"];
+      dueDate?: Date | string | null;
       order: number;
     }[]
   ) => void;
@@ -86,7 +89,7 @@ export const useKanbanStore = create<{
             total === 0 ? 0 : Math.floor((completed / total) * 100);
           set({ progress: newProgress });
         },
-        initializeColumns: (tasks) => {
+      initializeColumns: (tasks) => {
           const newColumns: Columns = {
             "To Do": [],
             Ready: [],
@@ -102,6 +105,8 @@ export const useKanbanStore = create<{
                 title: task.title,
                 desc: task.desc,
                 assignees: task.assignees || [],
+                priority: task.priority ?? "MEDIUM",
+                dueDate: task.dueDate ? String(task.dueDate) : null,
                 order: task.order,
               });
             }
@@ -119,6 +124,8 @@ export const useKanbanStore = create<{
             id: tempId ?? `temp-${Date.now()}`,
             title: "",
             desc: "",
+            priority: "MEDIUM",
+            dueDate: null,
             order: orderType === "top" ? -1 : Number.MAX_SAFE_INTEGER,
             assignees: [],
           };
@@ -142,6 +149,7 @@ export const useKanbanStore = create<{
                   ? {
                       ...t,
                       ...realTask,
+                      dueDate: realTask.dueDate ? String(realTask.dueDate) : null,
                       assignees: [],
                     }
                   : t

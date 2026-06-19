@@ -1,5 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ALL_STATUS, ClientTask, Status, useKanbanStore } from "@/store/useKanbanStore";
+import { TaskPriority } from "@prisma/client";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
@@ -14,10 +17,18 @@ import { UserSelectInput } from "@/components/form/UserSelectInput";
 import { Controller, useForm } from "react-hook-form";
 import useTasks from "@/hooks/react-query/useTasks";
 import { TaskComments } from "../taskcomment/TaskComments";
+import { TaskActivityFeed } from "./TaskActivityFeed";
 import { useThemeStore } from "@/store/useThemeStore";
 import { SelectBox } from "@/components/shared/SelectBox";
 import useUpload from "@/hooks/react-query/useUpload";
 import { useSearchParams } from "next/navigation";
+import {
+  formatTaskDateForInput,
+  formatTaskDueDate,
+  TASK_PRIORITY_LABELS,
+  TASK_PRIORITY_OPTIONS,
+} from "@/lib/utils/task";
+import { CalendarDays } from "lucide-react";
 
 interface TaskInfoPanelProps {
   isTaskInfoPanelOpen: boolean;
@@ -43,7 +54,6 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   inputRefs,
 }) => {
   const [localTitle, setLocalTitle] = useState("");
-  const [localDesc, setLocalDesc] = useState("");
   const [saveStatus, setSaveStatus] = useState<EditorSaveStatus>("idle");
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
@@ -74,36 +84,43 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const columnKey = taskLocation?.columnKey;
   const taskIndex = taskLocation?.taskIndex ?? -1;
   const task = taskLocation?.task;
+  const currentTaskId = task?.id ?? null;
+  const currentTaskTitle = task?.title ?? "";
+  const currentTaskDesc = task?.desc ?? "";
+  const currentTaskPriority = task?.priority ?? "MEDIUM";
+  const currentTaskDueDate = task?.dueDate ? String(task.dueDate) : null;
+  const currentTaskAssignees = useMemo(() => task?.assignees ?? [], [task?.assignees]);
   const { upload } = useUpload(task?.id);
 
   const isMobile = useMediaQuery("(max-width: 767px)");
   const saveStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previousTaskIdRef = useRef<string | number | null>(null);
 
   const { control, setValue } = useForm<FormData>({
     defaultValues: { assignees: [] },
   });
 
-  const markSaving = () => {
+  const markSaving = useCallback(() => {
     if (saveStatusTimerRef.current) {
       clearTimeout(saveStatusTimerRef.current);
     }
     setSaveStatus("saving");
-  };
+  }, []);
 
-  const markSaved = () => {
+  const markSaved = useCallback(() => {
     if (saveStatusTimerRef.current) {
       clearTimeout(saveStatusTimerRef.current);
     }
     setSaveStatus("saved");
     saveStatusTimerRef.current = setTimeout(() => setSaveStatus("idle"), 1800);
-  };
+  }, []);
 
-  const markSaveError = () => {
+  const markSaveError = useCallback(() => {
     if (saveStatusTimerRef.current) {
       clearTimeout(saveStatusTimerRef.current);
     }
     setSaveStatus("error");
-  };
+  }, []);
 
   const debouncedUpdateTitle = useMemo(
     () =>
@@ -116,7 +133,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           },
         );
       }, 500),
-    [updateTaskMutate],
+    [markSaveError, markSaved, updateTaskMutate],
   );
 
   const debouncedUpdateDesc = useMemo(
@@ -130,7 +147,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           },
         );
       }, 500),
-    [updateTaskMutate],
+    [markSaveError, markSaved, updateTaskMutate],
   );
 
   const debouncedUpdateAssignees = useMemo(
@@ -144,10 +161,33 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           },
         );
       }, 500),
-    [updateTaskMutate],
+    [markSaveError, markSaved, updateTaskMutate],
   );
 
-  const handleUpdateTask = (
+  const debouncedUpdateMeta = useMemo(
+    () =>
+      debounce((taskId: number, payload: { priority?: TaskPriority; dueDate?: string | null }) => {
+        updateTaskMutate(
+          { id: taskId, ...payload },
+          {
+            onSuccess: markSaved,
+            onError: markSaveError,
+          },
+        );
+      }, 500),
+    [markSaveError, markSaved, updateTaskMutate],
+  );
+
+  const saveStatusLabel =
+    saveStatus === "saving"
+      ? "저장 중..."
+      : saveStatus === "saved"
+        ? "저장됨"
+        : saveStatus === "error"
+          ? "저장 실패"
+          : "편집 중";
+
+  const handleUpdateTask = useCallback((
     e: React.ChangeEvent<HTMLTextAreaElement> | string,
     target: "title" | "desc",
   ) => {
@@ -160,12 +200,18 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       markSaving();
       debouncedUpdateTitle(task.id, value);
     } else {
-      setLocalDesc(value);
-      updateTask(columnKey, taskIndex, { desc: value });
       markSaving();
       debouncedUpdateDesc(task.id, value);
     }
-  };
+  }, [
+    columnKey,
+    debouncedUpdateDesc,
+    debouncedUpdateTitle,
+    markSaving,
+    task,
+    taskIndex,
+    updateTask,
+  ]);
 
   const handleUpdateStatus = (newStatus: Status) => {
     if (!task || !columnKey || taskIndex < 0) return;
@@ -203,19 +249,46 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     setFocusedTaskId(task.id);
   };
 
-  useEffect(() => {
-    if (task) {
-      setLocalTitle(task.title ?? "");
-      setLocalDesc(task.desc ?? "");
-      setSaveStatus("idle");
-    }
-  }, [task]);
+  const handleUpdatePriority = (newPriority: TaskPriority) => {
+    if (!task || !columnKey || taskIndex < 0 || typeof task.id !== "number") return;
+
+    updateTask(columnKey, taskIndex, { priority: newPriority });
+    markSaving();
+    debouncedUpdateMeta(task.id, { priority: newPriority });
+  };
+
+  const handleUpdateDueDate = (newDueDate: string) => {
+    if (!task || !columnKey || taskIndex < 0 || typeof task.id !== "number") return;
+
+    const nextValue = newDueDate || null;
+    updateTask(columnKey, taskIndex, { dueDate: nextValue });
+    markSaving();
+    debouncedUpdateMeta(task.id, { dueDate: nextValue });
+  };
 
   useEffect(() => {
-    if (task?.assignees) {
-      setValue("assignees", task.assignees);
-    } else setValue("assignees", []);
-  }, [task, setValue]);
+    if (currentTaskId == null) {
+      previousTaskIdRef.current = null;
+      setLocalTitle("");
+      setSaveStatus("idle");
+      return;
+    }
+
+    if (previousTaskIdRef.current === currentTaskId) {
+      if (localTitle !== currentTaskTitle) {
+        setLocalTitle(currentTaskTitle);
+      }
+      return;
+    }
+
+    previousTaskIdRef.current = currentTaskId;
+    setLocalTitle(currentTaskTitle);
+    setSaveStatus("idle");
+  }, [currentTaskId, currentTaskTitle, localTitle]);
+
+  useEffect(() => {
+    setValue("assignees", currentTaskAssignees);
+  }, [currentTaskAssignees, currentTaskId, setValue]);
 
   useEffect(() => {
     return () => {
@@ -225,8 +298,9 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       debouncedUpdateTitle.cancel();
       debouncedUpdateDesc.cancel();
       debouncedUpdateAssignees.cancel();
+      debouncedUpdateMeta.cancel();
     };
-  }, [debouncedUpdateAssignees, debouncedUpdateDesc, debouncedUpdateTitle]);
+  }, [debouncedUpdateAssignees, debouncedUpdateDesc, debouncedUpdateMeta, debouncedUpdateTitle]);
 
   // 패널 외부 클릭 시 닫기
   useEffect(() => {
@@ -271,6 +345,17 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     };
   }, [handleMouseMove, handleMouseUp]);
 
+  const panelFieldClassName =
+    "h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm shadow-sm transition-colors hover:border-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:bg-gray-800 dark:border-gray-500 dark:text-gray-100 dark:hover:border-gray-400 dark:focus:border-blue-400 dark:focus:ring-blue-900/40";
+  const selectedDueDate = currentTaskDueDate ? new Date(currentTaskDueDate) : undefined;
+
+  const handleQuickDueDate = (daysToAdd: number) => {
+    const baseDate = new Date();
+    baseDate.setHours(0, 0, 0, 0);
+    baseDate.setDate(baseDate.getDate() + daysToAdd);
+    handleUpdateDueDate(formatTaskDateForInput(baseDate));
+  };
+
   return (
     <div
       ref={panelRef}
@@ -296,14 +381,14 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       <div className="pl-2 sm:pl-4">
         <TextareaAutosize
           maxRows={2}
-          className="w-full p-2 resize-none text-sm sm:text-base"
+          className="w-full resize-none rounded-md border border-transparent bg-transparent p-2 text-sm sm:text-base focus:border-slate-300 focus:outline-none dark:focus:border-gray-600"
           style={{ fontSize: 16 }}
           placeholder="제목을 입력하세요"
           onChange={(e) => handleUpdateTask(e, "title")}
           value={localTitle}
         />
 
-        <Grid className="grid grid-cols-1 sm:grid-cols-[1fr_6fr] gap-y-3 px-2 sm:px-5">
+        <Grid className="grid grid-cols-1 sm:grid-cols-[110px_minmax(0,1fr)] gap-x-4 gap-y-3 px-2 sm:px-5">
           <div className="flex items-center gap-1 whitespace-nowrap">
             <TbCircleDotted className="w-4 h-4 sm:w-5 sm:h-5" />
             <span className="text-sm sm:text-base">상태</span>
@@ -313,7 +398,75 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
             value={columnKey ?? ALL_STATUS[0]}
             onChange={handleUpdateStatus}
             renderOption={(status) => <KanbanColumnBadge columnKey={status} isDark={isDark} />}
+            className="max-w-none"
           />
+
+          <div className="flex items-center gap-1 whitespace-nowrap">
+            <TbCircleDotted className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-sm sm:text-base">우선순위</span>
+          </div>
+          <SelectBox
+            options={TASK_PRIORITY_OPTIONS}
+            value={currentTaskPriority}
+            onChange={handleUpdatePriority}
+            renderOption={(priority) => TASK_PRIORITY_LABELS[priority]}
+            className="max-w-none"
+          />
+
+          <div className="flex items-center gap-1 whitespace-nowrap">
+            <TbCircleDotted className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-sm sm:text-base">마감일</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  data-ignore-panel-outside
+                  className={`${panelFieldClassName} flex items-center justify-between`}
+                >
+                  <span className={currentTaskDueDate ? "" : "text-gray-400"}>
+                    {currentTaskDueDate ? formatTaskDueDate(currentTaskDueDate) : "마감일 선택"}
+                  </span>
+                  <CalendarDays className="h-4 w-4 text-[var(--text-blur)]" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent
+                align="start"
+                data-ignore-panel-outside
+                className="w-auto rounded-2xl border border-[var(--border)] p-3"
+              >
+                <div data-ignore-panel-outside className="mb-3 flex flex-wrap gap-2">
+                  <Button type="button" size="sm" variant="outline" onClick={() => handleQuickDueDate(0)}>
+                    오늘
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => handleQuickDueDate(1)}>
+                    내일
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => handleQuickDueDate(3)}>
+                    3일 뒤
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => handleQuickDueDate(7)}>
+                    1주일 뒤
+                  </Button>
+                  <Button type="button" size="sm" variant="ghost" onClick={() => handleUpdateDueDate("")}>
+                    지우기
+                  </Button>
+                </div>
+                <div data-ignore-panel-outside>
+                  <Calendar
+                    mode="single"
+                    selected={selectedDueDate}
+                    onSelect={(date) => handleUpdateDueDate(date ? formatTaskDateForInput(date) : "")}
+                    captionLayout="dropdown"
+                  />
+                </div>
+              </PopoverContent>
+            </Popover>
+            <span className="text-xs text-[var(--text-blur)]">
+              {currentTaskDueDate ? `선택된 마감일: ${formatTaskDueDate(currentTaskDueDate)}` : "마감일 없음"}
+            </span>
+          </div>
 
           {!isPersonal && (
             <>
@@ -347,12 +500,26 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       </div>
 
       <div className="p-2 sm:p-4 mb-14 flex flex-col overflow-y-auto h-full">
+        {typeof task?.id === "number" && <TaskActivityFeed taskId={task.id} />}
         {typeof task?.id === "number" && <TaskComments taskId={task.id} />}
+        <div className="mb-3 flex justify-end">
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-medium ${
+              saveStatus === "error"
+                ? "bg-red-100 text-red-700"
+                : saveStatus === "saved"
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "bg-[var(--btn-hover-bg)] text-[var(--text-base)]"
+            }`}
+          >
+            {saveStatusLabel}
+          </span>
+        </div>
         <Editor
+          key={String(currentTaskId ?? "empty-task")}
           onChange={(e) => handleUpdateTask(e, "desc")}
-          content={localDesc}
+          content={currentTaskDesc}
           upload={upload}
-          saveStatus={saveStatus}
         />
       </div>
     </div>

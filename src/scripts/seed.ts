@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import { prisma } from "../lib/prisma.js";
-import { ProjectLabel, Role } from "@prisma/client";
+import { ProjectLabel, Role, TaskActivityType, TaskPriority } from "@prisma/client";
 
 const DEMO_PASSWORD = "testDemo123!";
 
@@ -68,9 +68,11 @@ async function upsertTask(params: {
   desc: string;
   status: string;
   order: number;
+  priority?: TaskPriority;
+  dueDate?: Date | null;
   assigneeIds?: number[];
 }) {
-  const { projectId, managerId, title, desc, status, order, assigneeIds = [] } = params;
+  const { projectId, managerId, title, desc, status, order, priority = "MEDIUM", dueDate = null, assigneeIds = [] } = params;
   const existingTask = await prisma.task.findFirst({
     where: {
       projectId,
@@ -86,6 +88,8 @@ async function upsertTask(params: {
         status,
         order,
         managerId,
+        priority,
+        dueDate,
         assignees: {
           set: assigneeIds.map((id) => ({ id })),
         },
@@ -101,6 +105,8 @@ async function upsertTask(params: {
       order,
       projectId,
       managerId,
+      priority,
+      dueDate,
       assignees: {
         connect: assigneeIds.map((id) => ({ id })),
       },
@@ -126,6 +132,43 @@ async function upsertComment(taskId: number, userId: number, comment: string) {
       taskId,
       userId,
       comment,
+    },
+  });
+}
+
+async function upsertTaskActivity(params: {
+  taskId: number;
+  actorId: number;
+  type: TaskActivityType;
+  fieldLabel: string;
+  fromValue?: string | null;
+  toValue?: string | null;
+}) {
+  const { taskId, actorId, type, fieldLabel, fromValue = null, toValue = null } = params;
+
+  const existingActivity = await prisma.taskActivity.findFirst({
+    where: {
+      taskId,
+      actorId,
+      type,
+      fieldLabel,
+      fromValue,
+      toValue,
+    },
+  });
+
+  if (existingActivity) {
+    return existingActivity;
+  }
+
+  return prisma.taskActivity.create({
+    data: {
+      taskId,
+      actorId,
+      type,
+      fieldLabel,
+      fromValue,
+      toValue,
     },
   });
 }
@@ -195,6 +238,8 @@ async function main() {
     desc: "데모 계정 자동 입력, 에러 메시지 정리, 첫 화면 진입 흐름을 점검합니다.",
     status: "To Do",
     order: 1,
+    priority: "HIGH",
+    dueDate: new Date("2026-07-10"),
     assigneeIds: [demoAdmin.id],
   });
 
@@ -205,6 +250,8 @@ async function main() {
     desc: "우측 상세 패널 열림/닫힘, 리사이즈, 상태 변경 동작을 마감 품질로 정리합니다.",
     status: "In Progress",
     order: 2,
+    priority: "MEDIUM",
+    dueDate: new Date("2026-07-04"),
     assigneeIds: [demoAdmin.id, demoMember.id],
   });
 
@@ -215,6 +262,8 @@ async function main() {
     desc: "핵심 기능, 실행 방법, 데모 계정, 검증 상태를 문서화합니다.",
     status: "Completed",
     order: 1,
+    priority: "LOW",
+    dueDate: new Date("2026-06-28"),
     assigneeIds: [demoMember.id],
   });
 
@@ -233,6 +282,30 @@ async function main() {
     demoAdmin.id,
     "README에 데모 계정과 실행 방법을 추가해서 진입 장벽을 낮췄습니다."
   );
+
+  await upsertTaskActivity({
+    taskId: backlogTask.id,
+    actorId: demoAdmin.id,
+    type: "CREATED",
+    fieldLabel: "작업",
+    toValue: backlogTask.title,
+  });
+  await upsertTaskActivity({
+    taskId: progressTask.id,
+    actorId: demoMember.id,
+    type: "STATUS_CHANGED",
+    fieldLabel: "상태",
+    fromValue: "Ready",
+    toValue: "In Progress",
+  });
+  await upsertTaskActivity({
+    taskId: doneTask.id,
+    actorId: demoAdmin.id,
+    type: "DESCRIPTION_CHANGED",
+    fieldLabel: "본문",
+    fromValue: "비어 있음",
+    toValue: "작성됨",
+  });
 
   console.log("Demo seed completed.");
   console.log(`Demo login ID: ${demoAdmin.userId}`);

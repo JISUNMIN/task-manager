@@ -97,22 +97,11 @@ const EditorToolbar = ({
   editor,
   isUploading,
   onOpenFilePicker,
-  saveStatus,
 }: {
   editor: TiptapEditor;
   isUploading: boolean;
   onOpenFilePicker: () => void;
-  saveStatus: EditorSaveStatus;
 }) => {
-  const saveLabel =
-    saveStatus === "saving"
-      ? "저장 중..."
-      : saveStatus === "saved"
-        ? "저장됨"
-        : saveStatus === "error"
-          ? "저장 실패"
-          : "편집 중";
-
   return (
     <div className="mb-3 flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--bg-third)]/80 p-2">
       {TOOLBAR_ACTIONS.map(({ key, label, icon: Icon, isActive, action }) => (
@@ -143,18 +132,6 @@ const EditorToolbar = ({
         <ImageIcon className="mr-1 h-4 w-4" />
         이미지/파일 업로드
       </Button>
-
-      <span
-        className={`ml-auto rounded-full px-3 py-1 text-xs font-medium ${
-          saveStatus === "error"
-            ? "bg-red-100 text-red-700"
-            : saveStatus === "saved"
-              ? "bg-emerald-100 text-emerald-700"
-              : "bg-[var(--btn-hover-bg)] text-[var(--text-base)]"
-        }`}
-      >
-        {saveLabel}
-      </span>
     </div>
   );
 };
@@ -353,17 +330,21 @@ export default function Editor({
   onChange,
   content,
   upload,
-  saveStatus = "idle",
 }: {
   onChange?: (content: string) => void;
   content?: string;
   upload: (formData: FormData) => Promise<UploadResponse>;
-  saveStatus?: EditorSaveStatus;
 }) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadCount, setUploadCount] = useState(0);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const isComposingRef = useRef(false);
+  const onChangeRef = useRef(onChange);
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -397,9 +378,10 @@ export default function Editor({
       },
     },
     onUpdate: ({ editor: currentEditor }) => {
-      onChange?.(currentEditor.getHTML());
+      if (isComposingRef.current) return;
+      onChangeRef.current?.(currentEditor.getHTML());
     },
-  });
+  }, []);
 
   const formatFileSize = (size: number) => {
     if (size < 1024) return `${size} B`;
@@ -506,6 +488,16 @@ export default function Editor({
     }
   };
 
+  const handleCompositionStart = () => {
+    isComposingRef.current = true;
+  };
+
+  const handleCompositionEnd = () => {
+    isComposingRef.current = false;
+    if (!editor) return;
+    onChangeRef.current?.(editor.getHTML());
+  };
+
   useEffect(() => {
     if (!editor) return;
     if (typeof content !== "string") return;
@@ -531,7 +523,6 @@ export default function Editor({
         editor={editor}
         isUploading={isUploading}
         onOpenFilePicker={() => fileInputRef.current?.click()}
-        saveStatus={saveStatus}
       />
 
       <input
@@ -554,7 +545,14 @@ export default function Editor({
         </div>
       )}
 
-      <div onPaste={handlePaste} onDrop={handleDrop} onDragOver={(event) => event.preventDefault()} onKeyDown={handleWrapperKeyDown}>
+      <div
+        onPaste={handlePaste}
+        onDrop={handleDrop}
+        onDragOver={(event) => event.preventDefault()}
+        onKeyDown={handleWrapperKeyDown}
+        onCompositionStart={handleCompositionStart}
+        onCompositionEnd={handleCompositionEnd}
+      >
         <EditorContent editor={editor} className={styles.editorContent} />
       </div>
     </div>

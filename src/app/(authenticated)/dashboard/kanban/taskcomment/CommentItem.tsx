@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/ui/extended/UserAvatar";
@@ -50,11 +50,17 @@ export const CommentItem = ({
   // 로컬 상태: 대댓글 보이기/숨기기, 답글 입력창 토글, 답글 내용
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [replyContent, setReplyContent] = useState("");
+  const replyInputRef = useRef<HTMLInputElement>(null);
   const showReplyMap = useCommentStore((state) => state.showReplyMap);
   const toggleShowReply = useCommentStore((state) => state.toggleShowReply);
   const isVisible = showReplyMap[comment.id] ?? true;
 
   const isEditing = editCommentId === comment.id;
+
+  useEffect(() => {
+    if (!showReplyInput) return;
+    replyInputRef.current?.focus();
+  }, [showReplyInput]);
 
   // 권한 체크
   const canEdit = user?.id === comment.user.id || user?.role === "ADMIN";
@@ -182,6 +188,7 @@ export const CommentItem = ({
             />
             <div className="flex-1 relative">
               <Input
+                ref={replyInputRef}
                 placeholder="답글을 입력하세요"
                 className="pr-16 border-none focus-visible:ring-0 shadow-none"
                 value={replyContent}

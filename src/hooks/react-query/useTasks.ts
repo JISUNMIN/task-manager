@@ -1,7 +1,7 @@
-import { ClientTask, Status, useKanbanStore } from "@/store/useKanbanStore";
+import { Status, useKanbanStore } from "@/store/useKanbanStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import { Task } from "@prisma/client";
+import { Task, TaskPriority } from "@prisma/client";
 
 type TaskCreateParams = {
   id?: number;
@@ -13,6 +13,8 @@ type TaskCreateParams = {
   userId?: number;
   managerId?: number;
   assignees?: number[];
+  priority?: TaskPriority;
+  dueDate?: string | null;
   orderType?: "top" | "bottom";
   newOrder?: number;
 };
@@ -32,7 +34,6 @@ const TASK_PROJECT_API_PATH = "/tasks";
 
 const useTasks = () => {
   const queryClient = useQueryClient();
-  const { updateTask } = useKanbanStore();
   const progress = useKanbanStore((state) => state.progress);
 
   const invalidateProjectQueries = () => {
@@ -61,7 +62,7 @@ const useTasks = () => {
   // task update
   const { mutate: updateTaskMutate } = useMutation<TaskUpdateResponse, Error, TaskCreateParams>({
     mutationFn: async (data) => {
-      const { id, title, desc, assignees } = data;
+      const { id, title, desc, assignees, priority, dueDate } = data;
 
       const response = await axios.patch<TaskUpdateResponse>(
         `${TASK_PROJECT_API_PATH}/${id}`,
@@ -69,20 +70,14 @@ const useTasks = () => {
           title,
           desc,
           assignees,
+          priority,
+          dueDate,
         }
       );
       return response.data;
     },
     onSuccess: (updatedTask) => {
-      const columnTasks = useKanbanStore.getState().columns[updatedTask.status as Status];
-      const index = columnTasks.findIndex((t) => t.id === updatedTask.id);
-      if (index >= 0) {
-        const normalizedTask: Partial<ClientTask> = {
-          ...updatedTask,
-          assignees: updatedTask.assignees?.map((assignee) => assignee.id) ?? [],
-        };
-        updateTask(updatedTask.status as Status, index, normalizedTask);
-      }
+      queryClient.invalidateQueries({ queryKey: ["tasks", "history", updatedTask.id] });
     },
     onError: () => {},
   });
@@ -96,7 +91,10 @@ const useTasks = () => {
         progress,
       });
     },
-    onSuccess: invalidateProjectQueries,
+    onSuccess: (_, variables) => {
+      invalidateProjectQueries();
+      queryClient.invalidateQueries({ queryKey: ["tasks", "history", variables.id] });
+    },
     onError: (error) => {
       console.error("이동 실패:", error);
     },
