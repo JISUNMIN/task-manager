@@ -6,6 +6,8 @@ import { useAuthStore } from "@/store/useAuthStore";
 
 const USER_API_PATH = "/users";
 
+export type UserSummary = Pick<User, "id" | "name" | "role" | "userId" | "profileImage">;
+
 const useUser = (targetId?: string | number) => {
   const queryClient = useQueryClient();
   const { updateUser } = useAuthStore();
@@ -14,10 +16,10 @@ const useUser = (targetId?: string | number) => {
     data: listData,
     isLoading: isListLoading,
     isFetching: isListFetching,
-  } = useQuery<User[], Error>({
+  } = useQuery<UserSummary[], Error>({
     queryKey: ["users", "list"],
     queryFn: async () => {
-      const res = await axios.get<User[]>(USER_API_PATH);
+      const res = await axios.get<UserSummary[]>(USER_API_PATH);
       return res.data;
     },
   });

@@ -67,7 +67,7 @@ export function KanbanSidebar() {
         });
       }
     }
-  }, []);
+  }, [filteredProjects, selectedProjectId]);
   useEffect(() => {
     prevProjectIdRef.current = selectedProjectId;
   }, [filteredProjects, selectedProjectId]);

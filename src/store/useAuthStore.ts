@@ -11,6 +11,8 @@ interface User {
   profileImage?: string;
 }
 
+export type AuthUser = User;
+
 interface AuthState {
   isAuthenticated: boolean;
   user: User | null;

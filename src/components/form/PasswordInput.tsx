@@ -1,24 +1,26 @@
 import { useState } from "react";
-import { FieldErrors, UseFormRegister } from "react-hook-form";
+import { FieldErrors, FieldValues, Path, UseFormRegister } from "react-hook-form";
 import { FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 
-interface PasswordInputProps {
-  register: UseFormRegister<any>;
-  errors: FieldErrors;
-  name: string;
+interface PasswordInputProps<TFieldValues extends FieldValues> {
+  register: UseFormRegister<TFieldValues>;
+  errors: FieldErrors<TFieldValues>;
+  name: Path<TFieldValues>;
   placeholder?: string;
   defaultValue?: string;
   disabled?: boolean;
+  autoComplete?: string;
 }
 
-export function PasswordInput({
+export function PasswordInput<TFieldValues extends FieldValues>({
   register,
   errors,
   name,
   placeholder,
   defaultValue,
   disabled,
-}: PasswordInputProps) {
+  autoComplete,
+}: PasswordInputProps<TFieldValues>) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -35,6 +37,7 @@ export function PasswordInput({
           className="flex-1 border-none p-0 focus:outline-none focus:ring-0 bg-transparent"
           defaultValue={defaultValue}
           disabled={disabled}
+          autoComplete={autoComplete}
         />
         <button
           type="button"

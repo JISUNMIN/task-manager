@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
-import { User } from "@prisma/client";
 import { useUserStore } from "@/store/useUserStore";
 import { cn } from "@/lib/utils";
 import { UserAvatar } from "../ui/extended/UserAvatar";
@@ -62,7 +61,7 @@ export function UserSelectInput({
     selectedEl?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [selectedIndex]);
 
-  const toggleUser = (user: User) => {
+  const toggleUser = (user: (typeof users)[number]) => {
     const isAlreadySelected = value.includes(user.id);
 
     if (isAlreadySelected) {
@@ -167,6 +166,7 @@ export function UserSelectInput({
       {/* 드롭다운 */}
       {dropdownOpen && (
         <ul
+          role="listbox"
           className="absolute left-0 top-full mt-1 w-full max-h-60 overflow-auto rounded-md border bg-white shadow-md z-50
                        dark:bg-gray-900 dark:border-gray-700 dark:shadow-lg"
         >
@@ -181,6 +181,7 @@ export function UserSelectInput({
 
               return (
                 <li
+                  role="option"
                   key={user.id}
                   ref={(el) => {
                     itemRefs.current[index] = el;

@@ -1,7 +1,6 @@
 // src/lib/axios.ts
 import axios from "axios";
-import Router from "next/router"; 
-import { useAuthStore } from "@/store/useAuthStore"; 
+import { useAuthStore } from "@/store/useAuthStore";
 
 const axiosInstance = axios.create({
   baseURL: "/api",
@@ -17,7 +16,9 @@ axiosInstance.interceptors.response.use(
       useAuthStore.getState().logout?.();
 
       // 2) 로그인 페이지로 이동
-      Router.replace("/auth/login");
+      if (typeof window !== "undefined") {
+        window.location.href = "/auth/login";
+      }
     }
     return Promise.reject(error);
   }

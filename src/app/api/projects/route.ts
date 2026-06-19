@@ -7,9 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
   try {
     const payload = authenticate(req);
-    // payload에서 userId, role 추출
-    const id = (payload as any).id;
-    const role = (payload as any).role;
+    const { id, role } = payload;
 
     let projects;
 
@@ -68,6 +66,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    authenticate(req);
+
     const { projectName, deadline, managerId } = await req.json();
 
     if (!projectName || !deadline || !managerId) {

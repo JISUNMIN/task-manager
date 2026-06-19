@@ -1,6 +1,7 @@
 // app/api/projects/[projectId]/route.ts
 // 특정 projectId로 조회
 import { authenticate } from "@/lib/auth";
+import { AuthError } from "@/lib/error";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -9,7 +10,10 @@ export async function GET(
   context: { params: Promise<{ projectId: string }> }
 ) {
   try {
+    const { id, role } = authenticate(req);
     const { projectId } = await context.params;
+    const numericProjectId = Number(projectId);
+
     const project = await prisma.project.findUnique({
       include: {
         manager: true,
@@ -20,7 +24,7 @@ export async function GET(
           orderBy: { order: "asc" },
         },
       },
-      where: { id: Number(projectId) },
+      where: { id: numericProjectId },
     });
 
     if (!project) {
@@ -30,8 +34,21 @@ export async function GET(
       );
     }
 
+    const canAccess =
+      role === "ADMIN" ||
+      project.managerId === id ||
+      project.tasks.some((task) => task.assignees.some((assignee) => assignee.id === id));
+
+    if (!canAccess) {
+      return NextResponse.json({ error: "조회 권한이 없습니다." }, { status: 403 });
+    }
+
     return NextResponse.json(project);
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+
     return NextResponse.json(
       { error: "서버 오류가 발생했습니다." },
       { status: 500 }
@@ -45,8 +62,7 @@ export async function DELETE(
 ) {
   try {
     const payload = authenticate(req);
-    const userId = (payload as any).id;
-    const role = (payload as any).role;
+    const { id: userId, role } = payload;
 
     const { projectId } = await context.params;
 

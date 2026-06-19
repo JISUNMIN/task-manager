@@ -3,14 +3,15 @@ import { Draggable } from "@hello-pangea/dnd";
 import TextareaAutosize from "react-textarea-autosize";
 import { ActionDropdownMenu } from "@/components/ui/extended/ActionDropdownMenu";
 import { Trash } from "lucide-react";
+import { ClientTask, Status } from "@/store/useKanbanStore";
 
 interface TaskItemProps {
-  columnKey: string;
+  columnKey: Status;
   itemIndex: number;
-  task: any;
-  handleDeleteTask: (columnKey: any, index: number) => void;
-  handleUpdateTask: (columnKey: any, value: string, index: number) => void;
-  setFocusedInputKey: (key: string) => void;
+  task: ClientTask;
+  handleDeleteTask: (columnKey: Status, index: number) => void;
+  handleUpdateTask: (columnKey: Status, value: string, index: number) => void;
+  setFocusedTaskId: (taskId: string | number) => void;
   openPanel: () => void;
   inputRefs: React.MutableRefObject<Record<string, HTMLTextAreaElement | null>>;
 }
@@ -21,7 +22,7 @@ const TaskItem = ({
   task,
   handleDeleteTask,
   handleUpdateTask,
-  setFocusedInputKey,
+  setFocusedTaskId,
   openPanel,
   inputRefs,
 }: TaskItemProps) => {
@@ -30,14 +31,14 @@ const TaskItem = ({
       label: "삭제",
       icon: <Trash />,
       variant: "destructive" as const,
-      onSelect: () => handleDeleteTask(columnKey as any, itemIndex),
+      onSelect: () => handleDeleteTask(columnKey, itemIndex),
     },
   ];
 
   return (
     <Draggable
-      key={`${columnKey}-${itemIndex}`}
-      draggableId={`${columnKey}-${itemIndex}`}
+      key={String(task.id)}
+      draggableId={String(task.id)}
       index={itemIndex}
     >
       {(provided) => (
@@ -52,13 +53,11 @@ const TaskItem = ({
           </div>
           <TextareaAutosize
             ref={(el) => {
-              inputRefs.current[`${columnKey}-${itemIndex}`] = el;
+              inputRefs.current[String(task.id)] = el;
             }}
-            value={task.title}
-            onChange={(e) =>
-              handleUpdateTask(columnKey as any, e.target.value, itemIndex)
-            }
-            onFocus={() => setFocusedInputKey(`${columnKey}-${itemIndex}`)}
+            value={task.title ?? ""}
+            onChange={(e) => handleUpdateTask(columnKey, e.target.value, itemIndex)}
+            onFocus={() => setFocusedTaskId(task.id)}
             onClick={openPanel}
             placeholder="제목을 입력하세요"
             className="w-full p-2 border text-[var(--text-base)] rounded dark:focus:border-gray-300 dark:focus:outline-none"

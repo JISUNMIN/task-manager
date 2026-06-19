@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { KanbanSidebar } from "../sidebar/KanbanSidebar";
-import { Status, useKanbanStore } from "@/store/useKanbanStore";
+import { ClientTask, Status, useKanbanStore } from "@/store/useKanbanStore";
 import dynamic from "next/dynamic";
 
 import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
@@ -37,12 +37,12 @@ const KanbanBoard = () => {
 
   // TaskInfoPanel 열림/닫힘
   const [isTaskInfoPanelOpen, setTaskInfoPanelOpen] = useState(false);
-  const closePanel = () => setTaskInfoPanelOpen(false);
-  const openPanel = () => setTaskInfoPanelOpen(true);
+  const [focusedTaskId, setFocusedTaskId] = useState<string | number | null>(null);
+  const closePanel = useCallback(() => setTaskInfoPanelOpen(false), []);
+  const openPanel = useCallback(() => setTaskInfoPanelOpen(true), []);
 
   // 오른쪽 패널 width 상태
   const [panelWidth, setPanelWidth] = useState(400);
-  const [focusedInputKey, setFocusedInputKey] = useState<string>("Completed-0");
   const inputRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId") ?? undefined;
@@ -81,6 +81,26 @@ const KanbanBoard = () => {
     }
     debouncedUpdateMap.current[taskId](newTitle);
   };
+  const findTaskLocation = useMemo(() => {
+    return (taskId: string | number | null) => {
+      if (taskId == null) return null;
+
+      const entries = Object.entries(columns) as [Status, ClientTask[]][];
+      for (const [status, tasks] of entries) {
+        const itemIndex = tasks.findIndex((task) => String(task.id) === String(taskId));
+        if (itemIndex >= 0) {
+          return {
+            status,
+            itemIndex,
+            task: tasks[itemIndex],
+          };
+        }
+      }
+
+      return null;
+    };
+  }, [columns]);
+
   const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result;
     if (!destination) return;
@@ -135,31 +155,33 @@ const KanbanBoard = () => {
     moveTask(sourceStatus, destinationStatus, source.index, destination.index, newOrder);
 
     // 서버 업데이트 호출
-    moveTaskMutate({
-      id: task.id,
-      projectId: Number(projectId),
-      toColumn: destinationStatus,
-      newOrder,
-    });
+    if (typeof task.id === "number") {
+      moveTaskMutate({
+        id: task.id,
+        projectId: Number(projectId),
+        toColumn: destinationStatus,
+        newOrder,
+      });
+    }
 
     // 포커스 유지
-    setFocusedInputKey(`${destinationStatus}-${destination.index}`);
-  };
-  const handleFocusedInputKey = (columnKey: string, itemIndex: number) => {
-    setFocusedInputKey(`${columnKey}-${itemIndex}`);
+    setFocusedTaskId(task.id);
   };
 
-  const calculateNewTaskOrder = (tasks: any[], orderType: "top" | "bottom"): number => {
+  const calculateNewTaskOrder = (
+    tasks: ClientTask[],
+    orderType: "top" | "bottom",
+  ): number => {
     if (tasks.length === 0) {
       return 0;
     }
 
     if (orderType === "top") {
-      return tasks[0].order - 1;
+      return (tasks[0]?.order ?? 0) - 1;
     }
 
     // orderType === "bottom"
-    return tasks[tasks.length - 1].order + 1;
+    return (tasks[tasks.length - 1]?.order ?? 0) + 1;
   };
   const handleCreateTask = async (
     columnKey: Status,
@@ -178,6 +200,8 @@ const KanbanBoard = () => {
 
     const tempId = `temp-${Date.now()}`;
     addTask(columnIndex, orderType, tempId);
+    setFocusedTaskId(tempId);
+    openPanel();
 
     const result = await createTaskMutate({
       title: "",
@@ -195,12 +219,19 @@ const KanbanBoard = () => {
       return newSet;
     });
     replaceTempTask(columnKey, tempId, result);
+    setFocusedTaskId(result.id);
   };
 
   const handleDeleteTask = (columnKey: Status, itemIndex: number) => {
     const task = columns[columnKey][itemIndex];
-    deleteTaskMutate({ id: task.id });
+    if (typeof task.id === "number") {
+      deleteTaskMutate({ id: task.id });
+    }
     removeColumn(columnKey, itemIndex);
+    if (String(focusedTaskId) === String(task.id)) {
+      closePanel();
+      setFocusedTaskId(null);
+    }
   };
 
   const handleUpdateTask = (columnKey: Status, value: string, itemIndex: number) => {
@@ -213,9 +244,9 @@ const KanbanBoard = () => {
   };
 
   useEffect(() => {
-    const ref = inputRefs.current[focusedInputKey];
+    const ref = focusedTaskId == null ? null : inputRefs.current[String(focusedTaskId)];
     if (ref) ref.focus();
-  }, [focusedInputKey]);
+  }, [focusedTaskId]);
 
   useEffect(() => {
     if (detailData?.tasks && prevProjectIdRef.current !== projectId) {
@@ -224,6 +255,10 @@ const KanbanBoard = () => {
           ...task,
           status: task.status as Status,
           order: task.order ?? Number.MAX_SAFE_INTEGER,
+          assignees:
+            task.assignees?.map((assignee) =>
+              typeof assignee === "number" ? assignee : assignee.id,
+            ) ?? [],
         }))
         .sort((a, b) => a.order - b.order);
 
@@ -232,6 +267,14 @@ const KanbanBoard = () => {
       prevProjectIdRef.current = projectId;
     }
   }, [detailData, initializeColumns, projectId]);
+
+  useEffect(() => {
+    if (focusedTaskId == null) return;
+    if (!findTaskLocation(focusedTaskId)) {
+      setFocusedTaskId(null);
+      closePanel();
+    }
+  }, [closePanel, findTaskLocation, focusedTaskId]);
   return (
     <SidebarProvider className={`bg-[var(--bg-fourth)] relative`}>
       {sidebar}
@@ -292,13 +335,13 @@ const KanbanBoard = () => {
                             if (!task) return null;
                             return (
                               <TaskItem
-                                key={`${columnKey}-${itemIndex}`}
-                                columnKey={columnKey}
+                                key={String(task.id)}
+                                columnKey={status}
                                 itemIndex={itemIndex}
                                 task={task}
                                 handleDeleteTask={handleDeleteTask}
                                 handleUpdateTask={handleUpdateTask}
-                                setFocusedInputKey={setFocusedInputKey}
+                                setFocusedTaskId={setFocusedTaskId}
                                 openPanel={openPanel}
                                 inputRefs={inputRefs}
                               />
@@ -333,8 +376,8 @@ const KanbanBoard = () => {
       <TaskInfoPanel
         isTaskInfoPanelOpen={isTaskInfoPanelOpen}
         closePanel={closePanel}
-        focusedInputKey={focusedInputKey}
-        handleFocusedInputKey={handleFocusedInputKey}
+        focusedTaskId={focusedTaskId}
+        setFocusedTaskId={setFocusedTaskId}
         isPersonal={isPersonal}
         panelWidth={panelWidth}
         setPanelWidth={setPanelWidth}

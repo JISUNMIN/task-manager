@@ -1,24 +1,24 @@
 // stores/useUserStore.ts
 
 import { create } from "zustand";
-import { User } from "@prisma/client";
-import { devtools, persist } from "zustand/middleware";
+import { devtools } from "zustand/middleware";
+
+type UserSummary = {
+  id: number;
+  name: string;
+  role: "USER" | "ADMIN";
+  userId: string;
+  profileImage: string | null;
+};
 
 type UserStore = {
-  users: User[];
-  setUsers: (users: User[]) => void;
+  users: UserSummary[];
+  setUsers: (users: UserSummary[]) => void;
 };
 
 export const useUserStore = create<UserStore>()(
-  devtools(
-    persist(
-      (set) => ({
-        users: [],
-        setUsers: (users) => set({ users }),
-      }),
-      {
-        name: "user-storage",
-      }
-    )
-  )
+  devtools((set) => ({
+    users: [],
+    setUsers: (users) => set({ users }),
+  }))
 );

@@ -1,11 +1,15 @@
+import { getServerSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import LoginForm from "./LoginForm";
-import LogoutOnMount from "./LogoutOnMount";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const session = await getServerSession();
+
+  if (session) {
+    redirect("/projectlist");
+  }
+
   return (
-    <>
-      <LogoutOnMount />
-      <LoginForm />
-    </>
+    <LoginForm />
   );
 }

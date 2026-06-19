@@ -11,7 +11,7 @@ import { ActionDropdownMenu } from "@/components/ui/extended/ActionDropdownMenu"
 import { Calendar, Trash, User as UserIcon } from "lucide-react";
 import { DEADLINE_COLOR_MAP, LABEL_COLOR_MAP, LABELS } from "@/app/constants/common";
 import { DeleteDialog } from "@/components/ui/extended/DeleteDialog";
-import { UserSelectionModal } from "@/components/ui/extended/UserSelectionModal ";
+import { UserSelectionModal } from "@/components/ui/extended/UserSelectionModal";
 import { DeadlineModal } from "@/components/ui/extended/DeadlineModal";
 import { UserAvatar } from "@/components/ui/extended/UserAvatar";
 import { useThemeStore } from "@/store/useThemeStore";
@@ -359,5 +359,7 @@ const ProjectCard: FC<ProjectCardProps> = memo(
     );
   },
 );
+
+ProjectCard.displayName = "ProjectCard";
 
 export default ProjectCard;

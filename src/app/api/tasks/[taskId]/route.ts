@@ -1,8 +1,11 @@
 // /api/tasks/[taskId]  → DELETE (task 삭제)
 // /api/tasks/[taskId]   → PATCH (task 수정)
 
+import { authenticate } from "@/lib/auth";
+import { AuthError } from "@/lib/error";
 import { prisma } from "@/lib/prisma";
 import { updateProjectProgress } from "@/lib/utils/services/project";
+import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(
@@ -10,11 +13,30 @@ export async function DELETE(
   context: { params: Promise<{ taskId: string }> }
 ) {
   try {
+    const { id, role } = authenticate(req);
     const { taskId } = await context.params;
     const { progress } = await req.json();
+    const numericTaskId = Number(taskId);
+
+    const task = await prisma.task.findUnique({
+      where: { id: numericTaskId },
+      include: {
+        project: {
+          select: { managerId: true },
+        },
+      },
+    });
+
+    if (!task) {
+      return NextResponse.json({ error: "Task를 찾을 수 없습니다." }, { status: 404 });
+    }
+
+    if (role !== "ADMIN" && task.project.managerId !== id) {
+      return NextResponse.json({ error: "삭제 권한이 없습니다." }, { status: 403 });
+    }
 
     const newTask = await prisma.task.delete({
-      where: { id: Number(taskId) },
+      where: { id: numericTaskId },
     });
     await updateProjectProgress(newTask.projectId, progress);
     return NextResponse.json(
@@ -22,6 +44,10 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+
     console.error("Task 삭제 에러:", error);
     return NextResponse.json(
       { error: "Task 삭제에 실패했습니다.", detail: String(error) },
@@ -35,10 +61,37 @@ export async function PATCH(
   context: { params: Promise<{ taskId: string }> }
 ) {
   try {
+    const { id, role } = authenticate(req);
     const { taskId } = await context.params;
     const { title, desc, assignees } = await req.json();
+    const numericTaskId = Number(taskId);
 
-    const updateData: any = {};
+    const task = await prisma.task.findUnique({
+      where: { id: numericTaskId },
+      include: {
+        project: {
+          select: { managerId: true },
+        },
+        assignees: {
+          select: { id: true },
+        },
+      },
+    });
+
+    if (!task) {
+      return NextResponse.json({ error: "Task를 찾을 수 없습니다." }, { status: 404 });
+    }
+
+    const canEdit =
+      role === "ADMIN" ||
+      task.project.managerId === id ||
+      task.assignees.some((assignee) => assignee.id === id);
+
+    if (!canEdit) {
+      return NextResponse.json({ error: "수정 권한이 없습니다." }, { status: 403 });
+    }
+
+    const updateData: Prisma.TaskUpdateInput = {};
 
     if (title !== undefined) updateData.title = title;
     if (desc !== undefined) updateData.desc = desc;
@@ -60,12 +113,21 @@ export async function PATCH(
     }
 
     const updatedTask = await prisma.task.update({
-      where: { id: Number(taskId) },
+      where: { id: numericTaskId },
       data: updateData,
+      include: {
+        assignees: {
+          select: { id: true },
+        },
+      },
     });
 
     return NextResponse.json(updatedTask, { status: 200 });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+
     console.error("Task 수정 에러:", error);
     return NextResponse.json(
       { error: "Task 수정에 실패했습니다.", detail: String(error) },

@@ -5,8 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans:
+    "Pretendard Variable", "Segoe UI", "SF Pro Display", "Apple SD Gothic Neo", ui-sans-serif,
+    sans-serif;
+  --font-mono:
+    "JetBrains Mono", "SFMono-Regular", "Cascadia Code", "Fira Code", ui-monospace, monospace;
 }
 
 body {

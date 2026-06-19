@@ -15,14 +15,13 @@ export type Comment = {
   replies?: Comment[];
 };
 
-type CommentCreateParams = {
+export type CommentCreateParams = {
   comment: string;
-  userId: number;
   taskId: number;
   parentCommentId?: number;
 };
 
-type CommentUpdateParams = {
+export type CommentUpdateParams = {
   commentId: number;
   comment: string;
 };

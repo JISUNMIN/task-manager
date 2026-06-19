@@ -1,6 +1,6 @@
 import { Task } from "@prisma/client";
 import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
+import { devtools } from "zustand/middleware";
 
 export type Status =
   | "To Do"
@@ -19,8 +19,9 @@ export const ALL_STATUS: Status[] = [
 
 export type ClientTask = Omit<
   Task,
-  "status" | "projectId" | "assignees" | "project" | "managerId"
+  "id" | "status" | "projectId" | "assignees" | "project" | "managerId"
 > & {
+  id: number | string;
   assignees?: number[];
   managerId?: number;
 };
@@ -64,9 +65,7 @@ export const useKanbanStore = create<{
   ) => void;
   removeColumn: (columnKey: Status, index: number) => void;
 }>()(
-  devtools(
-    persist(
-      (set, get) => ({
+  devtools((set, get) => ({
         columns: {
           "To Do": [],
           Ready: [],
@@ -116,7 +115,13 @@ export const useKanbanStore = create<{
           const columnKey = columnKeys[index];
           if (!columnKey) return;
 
-          const newTask = { id: tempId, title: "", desc: "", assignees: [] };
+          const newTask: ClientTask = {
+            id: tempId ?? `temp-${Date.now()}`,
+            title: "",
+            desc: "",
+            order: orderType === "top" ? -1 : Number.MAX_SAFE_INTEGER,
+            assignees: [],
+          };
           set((state) => ({
             columns: {
               ...state.columns,
@@ -133,7 +138,13 @@ export const useKanbanStore = create<{
             columns: {
               ...state.columns,
               [columnKey]: state.columns[columnKey].map((t) =>
-                String(t.id) === tempId ? { ...t, id: realTask.id } : t
+                String(t.id) === tempId
+                  ? {
+                      ...t,
+                      ...realTask,
+                      assignees: [],
+                    }
+                  : t
               ),
             },
           }));
@@ -190,8 +201,5 @@ export const useKanbanStore = create<{
           });
           get().recalcProgress();
         },
-      }),
-      { name: "kanban-store" }
-    )
-  )
+      }))
 );

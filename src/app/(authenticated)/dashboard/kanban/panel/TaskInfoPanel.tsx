@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { ALL_STATUS, Status, useKanbanStore } from "@/store/useKanbanStore";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { ALL_STATUS, ClientTask, Status, useKanbanStore } from "@/store/useKanbanStore";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import TextareaAutosize from "react-textarea-autosize";
 import KanbanColumnBadge from "../board/KanbanColumnBadge";
-import Editor from "@/components/shared/editor/Editor";
+import Editor, { EditorSaveStatus } from "@/components/shared/editor/Editor";
 import Grid from "@/layout/Grid";
 import { TbCircleDotted } from "react-icons/tb";
 import { FaPeopleGroup } from "react-icons/fa6";
@@ -22,8 +22,8 @@ import { useSearchParams } from "next/navigation";
 interface TaskInfoPanelProps {
   isTaskInfoPanelOpen: boolean;
   closePanel: () => void;
-  focusedInputKey: string;
-  handleFocusedInputKey: (columnKey: string, itemIndex: number) => void;
+  focusedTaskId: string | number | null;
+  setFocusedTaskId: (taskId: string | number | null) => void;
   isPersonal?: boolean;
   panelWidth: number;
   setPanelWidth: (w: number) => void;
@@ -35,8 +35,8 @@ type FormData = { assignees: number[] };
 const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   isTaskInfoPanelOpen,
   closePanel,
-  focusedInputKey,
-  handleFocusedInputKey,
+  focusedTaskId,
+  setFocusedTaskId,
   isPersonal,
   panelWidth,
   setPanelWidth,
@@ -44,33 +44,77 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
 }) => {
   const [localTitle, setLocalTitle] = useState("");
   const [localDesc, setLocalDesc] = useState("");
+  const [saveStatus, setSaveStatus] = useState<EditorSaveStatus>("idle");
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
   const { updateTask, columns, moveTask } = useKanbanStore();
   const { updateTaskMutate, moveTaskMutate } = useTasks();
 
-  const [columnKey, itemIndexStr] = focusedInputKey.split("-");
-  const taskIndex = Number(itemIndexStr);
   const resizing = useRef(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId") ?? undefined;
-  const task = useMemo(
-    () => columns[columnKey as Status]?.[taskIndex],
-    [columns, columnKey, taskIndex],
-  );
+  const taskLocation = useMemo(() => {
+    if (focusedTaskId == null) return null;
+
+    const entries = Object.entries(columns) as [Status, ClientTask[]][];
+    for (const [status, tasks] of entries) {
+      const itemIndex = tasks.findIndex((candidate) => String(candidate.id) === String(focusedTaskId));
+      if (itemIndex >= 0) {
+        return {
+          columnKey: status,
+          taskIndex: itemIndex,
+          task: tasks[itemIndex],
+        };
+      }
+    }
+
+    return null;
+  }, [columns, focusedTaskId]);
+  const columnKey = taskLocation?.columnKey;
+  const taskIndex = taskLocation?.taskIndex ?? -1;
+  const task = taskLocation?.task;
   const { upload } = useUpload(task?.id);
 
   const isMobile = useMediaQuery("(max-width: 767px)");
+  const saveStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { control, setValue } = useForm<FormData>({
     defaultValues: { assignees: [] },
   });
 
+  const markSaving = () => {
+    if (saveStatusTimerRef.current) {
+      clearTimeout(saveStatusTimerRef.current);
+    }
+    setSaveStatus("saving");
+  };
+
+  const markSaved = () => {
+    if (saveStatusTimerRef.current) {
+      clearTimeout(saveStatusTimerRef.current);
+    }
+    setSaveStatus("saved");
+    saveStatusTimerRef.current = setTimeout(() => setSaveStatus("idle"), 1800);
+  };
+
+  const markSaveError = () => {
+    if (saveStatusTimerRef.current) {
+      clearTimeout(saveStatusTimerRef.current);
+    }
+    setSaveStatus("error");
+  };
+
   const debouncedUpdateTitle = useMemo(
     () =>
       debounce((taskId: number, value: string) => {
-        updateTaskMutate({ id: taskId, title: value });
+        updateTaskMutate(
+          { id: taskId, title: value },
+          {
+            onSuccess: markSaved,
+            onError: markSaveError,
+          },
+        );
       }, 500),
     [updateTaskMutate],
   );
@@ -78,7 +122,13 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const debouncedUpdateDesc = useMemo(
     () =>
       debounce((taskId: number, value: string) => {
-        updateTaskMutate({ id: taskId, desc: value });
+        updateTaskMutate(
+          { id: taskId, desc: value },
+          {
+            onSuccess: markSaved,
+            onError: markSaveError,
+          },
+        );
       }, 500),
     [updateTaskMutate],
   );
@@ -86,7 +136,13 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const debouncedUpdateAssignees = useMemo(
     () =>
       debounce((taskId: number, assignees: number[]) => {
-        updateTaskMutate({ id: taskId, assignees });
+        updateTaskMutate(
+          { id: taskId, assignees },
+          {
+            onSuccess: markSaved,
+            onError: markSaveError,
+          },
+        );
       }, 500),
     [updateTaskMutate],
   );
@@ -96,19 +152,23 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     target: "title" | "desc",
   ) => {
     const value = typeof e === "string" ? e : e.target.value;
+    if (!task || !columnKey || taskIndex < 0 || typeof task.id !== "number") return;
 
     if (target === "title") {
       setLocalTitle(value);
-      updateTask(columnKey as Status, taskIndex, { title: value });
+      updateTask(columnKey, taskIndex, { title: value });
+      markSaving();
       debouncedUpdateTitle(task.id, value);
     } else {
       setLocalDesc(value);
-      updateTask(columnKey as Status, taskIndex, { desc: value });
+      updateTask(columnKey, taskIndex, { desc: value });
+      markSaving();
       debouncedUpdateDesc(task.id, value);
     }
   };
 
   const handleUpdateStatus = (newStatus: Status) => {
+    if (!task || !columnKey || taskIndex < 0) return;
     if (columnKey === newStatus) return;
 
     // 1️ 프론트에서 order 계산
@@ -124,32 +184,49 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     const newOrder = nextOrder - 1;
 
     //  프론트 상태 업데이트 (order 반영)
-    moveTask(columnKey as Status, newStatus as Status, taskIndex, 0, newOrder);
+    moveTask(columnKey, newStatus, taskIndex, 0, newOrder);
 
     //  서버 업데이트 호출
-    moveTaskMutate({
-      id: task.id,
-      projectId: Number(projectId),
-      toColumn: newStatus,
-      newOrder,
-    });
+    if (typeof task.id === "number") {
+      markSaving();
+      moveTaskMutate({
+        id: task.id,
+        projectId: Number(projectId),
+        toColumn: newStatus,
+        newOrder,
+      }, {
+        onSuccess: markSaved,
+        onError: markSaveError,
+      });
+    }
 
-    handleFocusedInputKey(newStatus, taskIndex);
+    setFocusedTaskId(task.id);
   };
 
   useEffect(() => {
     if (task) {
       setLocalTitle(task.title ?? "");
       setLocalDesc(task.desc ?? "");
+      setSaveStatus("idle");
     }
-  }, [task?.id, task?.title]);
+  }, [task]);
 
   useEffect(() => {
     if (task?.assignees) {
-      const ids = task.assignees.map((a: any) => (typeof a === "number" ? a : a.id));
-      setValue("assignees", ids);
+      setValue("assignees", task.assignees);
     } else setValue("assignees", []);
   }, [task, setValue]);
+
+  useEffect(() => {
+    return () => {
+      if (saveStatusTimerRef.current) {
+        clearTimeout(saveStatusTimerRef.current);
+      }
+      debouncedUpdateTitle.cancel();
+      debouncedUpdateDesc.cancel();
+      debouncedUpdateAssignees.cancel();
+    };
+  }, [debouncedUpdateAssignees, debouncedUpdateDesc, debouncedUpdateTitle]);
 
   // 패널 외부 클릭 시 닫기
   useEffect(() => {
@@ -175,13 +252,16 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     resizing.current = true;
     e.preventDefault();
   };
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!resizing.current) return;
-    setPanelWidth(Math.min(Math.max(window.innerWidth - e.clientX, 400), 800));
-  };
-  const handleMouseUp = () => {
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!resizing.current) return;
+      setPanelWidth(Math.min(Math.max(window.innerWidth - e.clientX, 400), 800));
+    },
+    [setPanelWidth]
+  );
+  const handleMouseUp = useCallback(() => {
     resizing.current = false;
-  };
+  }, []);
   useEffect(() => {
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
@@ -189,7 +269,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, []);
+  }, [handleMouseMove, handleMouseUp]);
 
   return (
     <div
@@ -230,7 +310,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
           </div>
           <SelectBox
             options={ALL_STATUS}
-            value={columnKey as Status}
+            value={columnKey ?? ALL_STATUS[0]}
             onChange={handleUpdateStatus}
             renderOption={(status) => <KanbanColumnBadge columnKey={status} isDark={isDark} />}
           />
@@ -249,9 +329,12 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
                     value={field.value ?? []}
                     onChange={(newAssignees) => {
                       field.onChange(newAssignees);
-                      updateTask(columnKey as Status, taskIndex, {
+                      if (!task || !columnKey || taskIndex < 0 || typeof task.id !== "number") return;
+
+                      updateTask(columnKey, taskIndex, {
                         assignees: newAssignees,
                       });
+                      markSaving();
                       debouncedUpdateAssignees(task.id, newAssignees);
                     }}
                     placeholder="사용자 검색"
@@ -264,8 +347,13 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       </div>
 
       <div className="p-2 sm:p-4 mb-14 flex flex-col overflow-y-auto h-full">
-        <TaskComments taskId={task?.id} />
-        <Editor onChange={(e) => handleUpdateTask(e, "desc")} content={localDesc} upload={upload} />
+        {typeof task?.id === "number" && <TaskComments taskId={task.id} />}
+        <Editor
+          onChange={(e) => handleUpdateTask(e, "desc")}
+          content={localDesc}
+          upload={upload}
+          saveStatus={saveStatus}
+        />
       </div>
     </div>
   );

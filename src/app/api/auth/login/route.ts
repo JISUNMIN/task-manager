@@ -46,11 +46,13 @@ export async function POST(req: NextRequest) {
       profileImage: user.profileImage,
     });
 
+    const isSecureRequest = req.headers.get("x-forwarded-proto") === "https";
+
     res.cookies.set("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isSecureRequest,
       sameSite: "strict",
-      maxAge: 2 * 60 * 60 * 1000, // 2시간
+      maxAge: 2 * 60 * 60, // 2시간 (seconds)
       path: "/",
     });
     return res;

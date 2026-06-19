@@ -6,11 +6,13 @@ import { ActionDropdownMenu } from "@/components/ui/extended/ActionDropdownMenu"
 import { Edit } from "tabler-icons-react";
 import { AiOutlineClose, AiOutlineCheck } from "react-icons/ai";
 import { useCommentStore } from "@/store/useCommentStore";
+import { CommentUpdateParams, Comment } from "@/hooks/react-query/useComment";
+import { AuthUser } from "@/store/useAuthStore";
 
 interface ReplyItemProps {
-  reply: any;
-  currentUser: any;
-  updateCommentMutate: (data: { commentId: number; comment: string }) => void;
+  reply: Comment;
+  currentUser: AuthUser | null;
+  updateCommentMutate: (data: CommentUpdateParams) => void;
 }
 
 // 대댓글 하나를 표시
@@ -28,7 +30,7 @@ export const ReplyItem = ({ reply, currentUser, updateCommentMutate }: ReplyItem
 
   const isEditing = editReplyId === reply.id;
 
-  const canEdit = currentUser?.id === Number(reply.user.userId) || currentUser?.role === "ADMIN";
+  const canEdit = currentUser?.id === reply.user.id || currentUser?.role === "ADMIN";
 
   const saveEdit = () => {
     if (!editReplyContent.trim()) return;
@@ -50,7 +52,7 @@ export const ReplyItem = ({ reply, currentUser, updateCommentMutate }: ReplyItem
 
   return (
     <div className="flex gap-2 mt-3">
-      <UserAvatar src={reply.user.profileImage} alt={reply.user.name} className="mt-1" />
+      <UserAvatar src={reply.user.profileImage ?? undefined} alt={reply.user.name} className="mt-1" />
       <div className="flex-1">
         <div className="flex justify-between items-center">
           <span className="text-sm font-medium">{reply.user.name}</span>

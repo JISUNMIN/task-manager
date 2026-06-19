@@ -1,4 +1,4 @@
-import useComment from "@/hooks/react-query/useComment.";
+import useComment from "@/hooks/react-query/useComment";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,6 @@ export const TaskComments = ({ taskId }: Props) => {
     if (!newComment.trim() || !user) return;
     createCommentMutate({
       comment: newComment,
-      userId: user.id,
       taskId,
     });
     setNewComment("");

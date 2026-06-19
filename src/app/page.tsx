@@ -1,20 +1,8 @@
-"use client";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/useAuthStore";
+import { getServerSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
-export default function HomePage() {
-  const { isAuthenticated, hasHydrated } = useAuthStore();
-  const router = useRouter();
+export default async function HomePage() {
+  const session = await getServerSession();
 
-  useEffect(() => {
-    if (hasHydrated && !isAuthenticated) {
-      router.replace("/auth/login");
-    } else if (hasHydrated && isAuthenticated) {
-      router.replace("/projectlist");
-    }
-  }, [hasHydrated, isAuthenticated]);
-
-  // 인증 상태 준비 안 됐거나 인증 안 된 경우 아무것도 렌더링하지 않음
-  if (!hasHydrated || !isAuthenticated) return null;
+  redirect(session ? "/projectlist" : "/auth/login");
 }

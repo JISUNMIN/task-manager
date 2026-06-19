@@ -1,7 +1,7 @@
 // FileCardView.tsx
-import { NodeViewWrapper } from "@tiptap/react";
+import { NodeViewProps, NodeViewWrapper } from "@tiptap/react";
 
-export default function FileCardView(props: any) {
+export default function FileCardView(props: NodeViewProps) {
   const { node, deleteNode } = props;
   const { fileName, fileUrl, fileSize } = node.attrs;
 

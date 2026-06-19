@@ -1,8 +1,6 @@
 import { ReactNode } from "react";
 
 interface GridProps {
-  /** 부모 컴포넌트가 전달한 style */
-  classes?: string;
   /** Grid Item components */
   children: ReactNode;
   /** 열(column) */
@@ -15,7 +13,6 @@ interface GridProps {
 }
 
 const Grid = ({
-  classes,
   children,
   column = 1,
   row = 1,

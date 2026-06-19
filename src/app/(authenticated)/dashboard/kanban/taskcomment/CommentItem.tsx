@@ -9,13 +9,15 @@ import { AiOutlineClose, AiOutlineCheck } from "react-icons/ai";
 import { IoMdSend } from "react-icons/io";
 import { ReplyItem } from "./ReplyItem";
 import { useCommentStore } from "@/store/useCommentStore";
+import { Comment, CommentCreateParams, CommentUpdateParams } from "@/hooks/react-query/useComment";
+import { AuthUser } from "@/store/useAuthStore";
 
 export interface CommentItemProps {
-  comment: any;
+  comment: Comment;
   taskId: number;
-  user: any;
-  updateCommentMutate: any;
-  createCommentMutate: any;
+  user: AuthUser | null;
+  updateCommentMutate: (payload: CommentUpdateParams) => void;
+  createCommentMutate: (payload: CommentCreateParams) => void;
   setTargetDeleteCommentId: (id: number) => void;
   setIsDeleteDialogOpen: (open: boolean) => void;
   isCreating: boolean;
@@ -55,7 +57,7 @@ export const CommentItem = ({
   const isEditing = editCommentId === comment.id;
 
   // 권한 체크
-  const canEdit = user?.id === Number(comment.user.userId) || user?.role === "ADMIN";
+  const canEdit = user?.id === comment.user.id || user?.role === "ADMIN";
   const canDelete = canEdit;
 
   // 댓글 수정 저장
@@ -70,7 +72,6 @@ export const CommentItem = ({
     if (!replyContent.trim()) return;
     createCommentMutate({
       comment: replyContent,
-      userId: user.id,
       taskId,
       parentCommentId: comment.id,
     });
@@ -103,7 +104,7 @@ export const CommentItem = ({
 
   return (
     <div className="flex gap-2">
-      <UserAvatar src={comment.user.profileImage} alt={comment.user.name} className="mt-1" />
+      <UserAvatar src={comment.user.profileImage ?? undefined} alt={comment.user.name} className="mt-1" />
       <div className="flex-1">
         <div className="flex justify-between items-center">
           <span className="text-sm font-medium">{comment.user.name}</span>
@@ -161,7 +162,7 @@ export const CommentItem = ({
             </button>
 
             {isVisible &&
-              comment.replies.map((reply: any) => (
+              comment.replies?.map((reply) => (
                 <ReplyItem
                   key={reply.id}
                   reply={reply}
@@ -175,7 +176,7 @@ export const CommentItem = ({
         {showReplyInput && (
           <div className="flex items-start gap-2 mt-3 ml-6">
             <UserAvatar
-              src={user?.profileImage ?? null}
+              src={user?.profileImage ?? undefined}
               alt={user?.name ?? "User"}
               className="mt-1"
             />

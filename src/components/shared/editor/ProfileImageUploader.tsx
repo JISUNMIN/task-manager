@@ -1,4 +1,5 @@
 import { ImageIcon } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { IoPerson } from "react-icons/io5";
@@ -60,12 +61,15 @@ export function ProfileImageUploader({
       <div
         className={`relative w-32 h-32 rounded-full overflow-hidden border-2 cursor-pointer group border-gray-300 shadow-sm ${className}`}
         onClick={onClickImage}
-      >
+        >
         {previewUrl ? (
-          <img
+          <Image
             src={previewUrl}
             alt={alt}
-            className="w-full h-full object-cover rounded-full transition-transform duration-300 group-hover:scale-105"
+            fill
+            unoptimized
+            sizes="128px"
+            className="object-cover rounded-full transition-transform duration-300 group-hover:scale-105"
             onError={() => setPreviewUrl(null)}
           />
         ) : (

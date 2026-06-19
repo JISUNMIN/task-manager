@@ -21,17 +21,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../dialog";
-import { User } from "@prisma/client";
 import { useUserStore } from "@/store/useUserStore";
-import { IoPersonCircle } from "react-icons/io5";
 import { useFormContext } from "react-hook-form";
 import { UserAvatar } from "./UserAvatar";
+
+type SelectableUser = {
+  id: number;
+  name: string;
+  userId: string;
+  profileImage: string | null;
+  role: "USER" | "ADMIN";
+};
 
 interface UserSelectionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   name: string;
-  onConfirm?: (...args: any[]) => void;
+  onConfirm?: () => void;
 }
 
 export function UserSelectionModal({
@@ -41,13 +47,15 @@ export function UserSelectionModal({
   onConfirm,
 }: UserSelectionModalProps) {
   const { setValue } = useFormContext();
-  const [selectedUser, setSelectedUser] = useState<User | undefined>(undefined);
+  const [selectedUser, setSelectedUser] = useState<SelectableUser | undefined>(
+    undefined
+  );
   const { users } = useUserStore();
 
   const onClickConfirm = () => {
     onOpenChange(false);
     if (selectedUser) {
-      onConfirm && onConfirm();
+      onConfirm?.();
     }
   };
 

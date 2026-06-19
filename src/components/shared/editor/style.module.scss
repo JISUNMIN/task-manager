@@ -3,23 +3,41 @@
   :global(.ProseMirror) {
     border: none !important;
     outline: none;
+    min-height: 220px;
+    color: var(--foreground);
   }
 
+  :global(.ProseMirror p.is-editor-empty:first-child::before) {
+    content: attr(data-placeholder);
+    color: var(--text-blur);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+
+  :global(.editor-image),
   img {
+    width: 100%;
+    max-height: 360px;
     object-fit: contain;
-    border-radius: 4px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    margin: 0.75rem 0;
+    background: var(--bg-third);
   }
 
   h1 {
     font-size: 2rem;
     font-weight: bold;
-    margin-bottom: 0.5rem;
+    line-height: 1.15;
+    margin: 1rem 0 0.5rem;
   }
 
   h2 {
     font-size: 1.5rem;
     font-weight: bold;
-    margin-bottom: 0.5rem;
+    line-height: 1.2;
+    margin: 0.875rem 0 0.5rem;
   }
 
   ul {
@@ -30,5 +48,12 @@
 
   li {
     margin-bottom: 0.25rem;
+  }
+
+  blockquote {
+    border-left: 3px solid var(--border);
+    color: var(--sub-text);
+    margin: 0.75rem 0;
+    padding-left: 1rem;
   }
 }

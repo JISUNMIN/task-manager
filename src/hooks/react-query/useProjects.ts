@@ -2,11 +2,15 @@ import { User, Task, Project } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
+export type ProjectTask = Task & {
+  assignees: Pick<User, "id" | "name" | "userId" | "profileImage">[];
+};
+
 export type ClientProject = Omit<Project, "deadline" | "managerId"> & {
   deadline: string;
   manager: User;
   managerId?: number;
-  tasks?: Task[];
+  tasks?: ProjectTask[];
 };
 
 const PROJECT_API_PATH = "/projects";

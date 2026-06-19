@@ -1,23 +1,22 @@
-"use client";
-
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/useAuthStore";
 import Navbar from "@/components/layout/navbar/Navbar";
+import UserStoreInitializer from "@/components/system/UserStoreInitializer";
+import { getServerSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
-export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, hasHydrated } = useAuthStore();
-  const router = useRouter();
+export default async function AuthenticatedLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await getServerSession();
 
-  // 주소창에 path 입력했을떄 login안되어 있을시 막기 위함
-  useEffect(() => {
-    if (hasHydrated && !isAuthenticated) {
-      router.replace("/auth/login");
-    }
-  }, [hasHydrated, isAuthenticated]);
+  if (!session) {
+    redirect("/auth/login");
+  }
 
   return (
     <>
+      <UserStoreInitializer />
       <Navbar />
       <main className="pt-14">{children}</main>
     </>

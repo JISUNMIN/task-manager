@@ -1,4 +1,4 @@
-import { Status, useKanbanStore } from "@/store/useKanbanStore";
+import { ClientTask, Status, useKanbanStore } from "@/store/useKanbanStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import { Task } from "@prisma/client";
@@ -24,12 +24,20 @@ type MoveTaskParams = {
   newOrder: number;
 };
 
+type TaskUpdateResponse = Omit<Task, "assignees"> & {
+  assignees?: Array<{ id: number }>;
+};
+
 const TASK_PROJECT_API_PATH = "/tasks";
 
 const useTasks = () => {
   const queryClient = useQueryClient();
   const { updateTask } = useKanbanStore();
-  const { progress } = useKanbanStore();
+  const progress = useKanbanStore((state) => state.progress);
+
+  const invalidateProjectQueries = () => {
+    queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
+  };
 
   // task create
   const { mutateAsync: createTaskMutate } = useMutation<
@@ -46,20 +54,16 @@ const useTasks = () => {
       });
       return res.data;
     },
-    onSuccess: () => {},
+    onSuccess: invalidateProjectQueries,
     onError: () => {},
   });
 
   // task update
-  const { mutate: updateTaskMutate } = useMutation<
-    Task,
-    Error,
-    TaskCreateParams
-  >({
+  const { mutate: updateTaskMutate } = useMutation<TaskUpdateResponse, Error, TaskCreateParams>({
     mutationFn: async (data) => {
       const { id, title, desc, assignees } = data;
 
-      const response = await axios.patch<Task>(
+      const response = await axios.patch<TaskUpdateResponse>(
         `${TASK_PROJECT_API_PATH}/${id}`,
         {
           title,
@@ -70,12 +74,16 @@ const useTasks = () => {
       return response.data;
     },
     onSuccess: (updatedTask) => {
-      const columnTasks =
-        useKanbanStore.getState().columns[updatedTask.status as Status];
+      const columnTasks = useKanbanStore.getState().columns[updatedTask.status as Status];
       const index = columnTasks.findIndex((t) => t.id === updatedTask.id);
       if (index >= 0) {
-        updateTask(updatedTask.status as Status, index, updatedTask);
+        const normalizedTask: Partial<ClientTask> = {
+          ...updatedTask,
+          assignees: updatedTask.assignees?.map((assignee) => assignee.id) ?? [],
+        };
+        updateTask(updatedTask.status as Status, index, normalizedTask);
       }
+      invalidateProjectQueries();
     },
     onError: () => {},
   });
@@ -89,9 +97,7 @@ const useTasks = () => {
         progress,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
-    },
+    onSuccess: invalidateProjectQueries,
     onError: (error) => {
       console.error("이동 실패:", error);
     },
@@ -106,9 +112,7 @@ const useTasks = () => {
           data: { progress },
         });
       },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
-      },
+      onSuccess: invalidateProjectQueries,
       onError: () => {},
     }
   );

@@ -1,22 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Toast from "@/components/ui/Toast";
 import QueryProvider from "./QueryProvider";
-import UserStoreInitializer from "@/components/system/UserStoreInitializer";
 import { cookies } from "next/headers";
 import { Theme } from "@/store/useThemeStore";
 import ThemeSync from "./ThemeSync";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 async function getInitialTheme() {
   const cookieStore = await cookies();
@@ -38,14 +26,9 @@ export default async function RootLayout({
   const initialTheme = await getInitialTheme();
 
   return (
-    <html
-      lang="ko"
-      className={`${initialTheme} ${geistSans.variable} ${geistMono.variable}`}
-      suppressHydrationWarning
-    >
+    <html lang="ko" className={initialTheme} suppressHydrationWarning>
       <body className="antialiased">
         <QueryProvider>
-          <UserStoreInitializer />
           <ThemeSync initialTheme={initialTheme} />
 
           {children}

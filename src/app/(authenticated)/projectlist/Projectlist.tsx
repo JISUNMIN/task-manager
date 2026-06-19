@@ -80,7 +80,11 @@ const ProjectList = () => {
   const toggleLabel = (label: string) => {
     setSelectedLabels((prev) => {
       const newSet = new Set(prev);
-      newSet.has(label) ? newSet.delete(label) : newSet.add(label);
+      if (newSet.has(label)) {
+        newSet.delete(label);
+      } else {
+        newSet.add(label);
+      }
       return [...newSet];
     });
   };
@@ -203,6 +207,7 @@ const ProjectList = () => {
               project={personalProject}
               isEditing={isEditing}
               disabled={isEditing}
+              isNavigating={navigatingProjectId === personalProject.id}
               onClick={() => onClickProject(personalProject.id)}
             />
           </div>
@@ -214,6 +219,7 @@ const ProjectList = () => {
             <ProjectCard
               project={project}
               isEditing={isEditing}
+              isNavigating={navigatingProjectId === project.id}
               onClick={() => onClickProject(project.id)}
             />
           );

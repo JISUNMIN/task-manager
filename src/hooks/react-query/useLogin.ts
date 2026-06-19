@@ -41,7 +41,6 @@ const useLogin = () => {
       // localStorage.setItem("token", result.token); 등
 
       const { id, userId, role, name, profileImage } = result;
-      console.log("result", result);
 
       login({ id, userId, role, name, profileImage });
       router.replace("/projectlist");

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 // import { Menu2, Search, SunHigh, Bell, Moon } from "tabler-icons-react";
 import { SunHigh, Moon } from "tabler-icons-react";

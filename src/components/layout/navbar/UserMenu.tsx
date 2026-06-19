@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef } from "react";
 import Link from "next/link";
 import { IoPersonCircle, IoExitOutline, IoGridOutline } from "react-icons/io5";
@@ -5,6 +7,7 @@ import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import { UserAvatar } from "@/components/ui/extended/UserAvatar";
+import axios from "@/lib/axios";
 
 interface UserMenuProps {
   open: boolean;
@@ -16,8 +19,10 @@ const UserMenu = ({ open, onOpenChange }: UserMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     onOpenChange(false);
+    await axios.post("/auth/logout");
+    logout();
     router.replace("/auth/login");
   };
 

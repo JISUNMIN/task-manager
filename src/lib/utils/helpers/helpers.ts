@@ -174,8 +174,8 @@ const dateCalculatorMethod = (
 
 // NOTE 시작 날짜와 끝 날짜 포함 사이 날짜 배열 구하는 함수
 export const getDatesBetween = (startDate: Date, endDate: Date): Date[] => {
-  const dates = [];
-  let currentDate = new Date(startDate);
+  const dates: Date[] = [];
+  const currentDate = new Date(startDate);
 
   while (currentDate <= endDate) {
     dates.push(new Date(currentDate)); // 새 객체로 추가
@@ -200,7 +200,7 @@ export const dateCalculator = Object.freeze({
 });
 
 type ProcessedListData = {
-  result: Array<Record<string, any>>;
+  result: Array<Record<string, unknown>>;
 };
 
 // NOTE 날짜 UTC 기준으로 변환하는 함수
