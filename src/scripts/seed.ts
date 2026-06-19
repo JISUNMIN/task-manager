@@ -166,6 +166,7 @@ async function main() {
 
   await prisma.project.deleteMany({
     where: {
+      managerId: demoAdmin.id,
       isPersonal: false,
       projectName: {
         notIn: allowedTeamProjectNames,
