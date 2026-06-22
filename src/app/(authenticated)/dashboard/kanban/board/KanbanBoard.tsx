@@ -119,8 +119,7 @@ const KanbanBoard = () => {
         const matchesAssignee =
           selectedAssignee === "all" || task.assignees?.includes(Number(selectedAssignee));
 
-        const matchesPriority =
-          selectedPriority === "all" || task.priority === selectedPriority;
+        const matchesPriority = selectedPriority === "all" || task.priority === selectedPriority;
 
         const dueStatus = getTaskDueStatus(task.dueDate);
         const matchesDueFilter =
@@ -216,10 +215,7 @@ const KanbanBoard = () => {
     setFocusedInputKey(`${columnKey}-${itemIndex}`);
   };
 
-  const calculateNewTaskOrder = (
-    tasks: ClientTask[],
-    orderType: "top" | "bottom",
-  ): number => {
+  const calculateNewTaskOrder = (tasks: ClientTask[], orderType: "top" | "bottom"): number => {
     if (tasks.length === 0) {
       return 0;
     }
@@ -365,11 +361,10 @@ const KanbanBoard = () => {
         <div className="mb-6 rounded-2xl border border-[#dfe6ec] bg-white/95 p-4 shadow-[0_2px_10px_rgba(0,0,0,0.04)] dark:border-[var(--border)] dark:bg-[var(--surface-2)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.02)]">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h3 className="text-base font-semibold text-[var(--text-base)]">
-                작업 검색 및 필터
-              </h3>
+              <h3 className="text-base font-semibold text-[var(--text-base)]">작업 검색 및 필터</h3>
               <p className="text-sm text-[var(--text-blur)]">
-                제목/본문 검색, 담당자, 우선순위, 마감 임박 기준으로 보드를 빠르게 좁혀볼 수 있습니다.
+                제목/본문 검색, 담당자, 우선순위, 마감 임박 기준으로 보드를 빠르게 좁혀볼 수
+                있습니다.
               </p>
             </div>
             {isFilteredView && (
@@ -398,7 +393,7 @@ const KanbanBoard = () => {
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder="제목 또는 본문 검색"
-              className="app-field resize-none py-2"
+              className="app-field resize-none py-2 text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
             />
             {!isPersonal && (
               <select
