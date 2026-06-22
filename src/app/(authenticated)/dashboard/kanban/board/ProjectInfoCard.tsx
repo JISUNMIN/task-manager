@@ -25,14 +25,14 @@ const ProjectInfoCard = ({
   totalCount = 0,
 }: ProjectInfoCardProps) => {
   return (
-    <div className="bg-[var(--box-bg)] p-5 rounded-xl mb-6 border border-[var(--border)] shadow-sm transition-all">
+    <div className="app-surface mb-6 p-6">
       {/* 프로젝트 제목 */}
-      <h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-3">
+      <h2 className="mb-3 text-xl font-bold md:text-2xl">
         {projectName}
       </h2>
 
       {/* 담당자 + 마감일 */}
-      <div className="text-sm text-[var(--sub-text)] flex flex-wrap items-center gap-x-1 mb-4">
+      <div className="mb-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[var(--text-blur)]">
         <span>
           담당자: <span className="font-medium">{manager?.name}</span>{" "}
           <span className="text-xs text-gray-500 dark:text-gray-300">
@@ -50,8 +50,8 @@ const ProjectInfoCard = ({
       {/* 진행률 + 완료/전체 */}
       <div className="mb-2">
         {/* 완료/전체 배지 */}
-        <div className="flex justify-between items-center mb-1">
-          <span className="text-xs font-semibold bg-gray-100 text-gray-800 dark:bg-gray-300 rounded-full px-3 py-0.5 border border-gray-300">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="app-tag border border-[var(--border)] bg-[var(--surface-2)] text-[var(--foreground)]">
             {completedCount} / {totalCount}
           </span>
           <span className="text-sm font-medium text-[var(--text-base)]">

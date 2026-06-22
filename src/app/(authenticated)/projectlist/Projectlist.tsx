@@ -150,28 +150,25 @@ const ProjectList = () => {
   };
 
   const renderLabelFilters = () => (
-    <div className="flex gap-2 mb-4 flex-wrap items-center">
+    <div className="app-surface mb-5 flex flex-wrap items-center gap-2 p-3">
       {/* 필터 아이콘 */}
-      <div className="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
+      <div className="rounded-full bg-[var(--surface-3)] p-2">
         <Filter className="w-4 h-4" />
       </div>
 
       {LABELS.map((label) => {
         const isSelected = selectedLabels.includes(label);
         const className = cn(
-          "px-3 py-1 rounded-full text-sm font-semibold select-none transition-colors duration-200 cursor-pointer",
+          "app-tag cursor-pointer select-none font-semibold transition-colors duration-200",
           isSelected
             ? LABEL_COLOR_MAP[label]
-            : "border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400",
+            : "border border-[var(--border-strong)] bg-[var(--surface-1)] text-[var(--text-blur)]",
         );
 
         return (
           <span
             key={label}
-            className={`
-            rounded-full font-semibold select-none transition-colors duration-200
-            px-2 py-0.5 text-xs        
-            lg:px-3 lg:py-1 lg:text-sm ${className}`}
+            className={cn("text-xs lg:text-sm", className)}
             onClick={() => toggleLabel(label)}
           >
             {label}
@@ -181,7 +178,8 @@ const ProjectList = () => {
 
       {/* Reset 버튼 */}
       <Button
-        className="px-3 text-xs lg:py-1 lg:text-sm rounded-full font-semibold select-none cursor-pointer border"
+        variant="outline"
+        className="rounded-full px-3 text-xs lg:text-sm"
         onClick={handleResetClick}
       >
         {isResetting ? <Loader2Icon className="animate-spin" /> : "⟳"}
@@ -274,7 +272,7 @@ const ProjectList = () => {
   return (
     <FormProvider {...formInstance}>
       <div className="mx-auto max-w-screen-xl p-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-2 mb-4">
+        <div className="mb-5 flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
           <h1 className="text-3xl font-extrabold text-[var(--foreground)]">프로젝트 목록</h1>
           {renderActionButtons()}
         </div>
@@ -284,7 +282,7 @@ const ProjectList = () => {
 
         {/* 안내 메시지 */}
         {!isEditing && noTeamProjects && (
-          <div className="text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded p-4 text-center mb-6">
+          <div className="app-surface-muted mb-6 p-4 text-center text-[var(--text-blur)]">
             현재 할당된 팀 프로젝트가 없습니다.
             <br />
             개인 프로젝트를 이용하시거나, 관리자에게 프로젝트 할당을 요청해 주세요.

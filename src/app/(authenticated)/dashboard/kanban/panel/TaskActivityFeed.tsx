@@ -12,7 +12,7 @@ export function TaskActivityFeed({ taskId }: Props) {
   const { history, isLoading } = useTaskHistory(taskId);
 
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-[var(--box-bg)] p-4">
+    <div className="app-surface-muted p-4">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-[var(--text-base)]">작업 히스토리</h3>
         <span className="text-xs text-[var(--text-blur)]">
@@ -27,7 +27,7 @@ export function TaskActivityFeed({ taskId }: Props) {
           {history.map((item) => (
             <div
               key={item.id}
-              className="flex gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-third)]/50 p-3"
+              className="app-surface flex gap-3 p-3 shadow-none"
             >
               <UserAvatar
                 src={item.actor?.profileImage ?? undefined}
@@ -39,7 +39,7 @@ export function TaskActivityFeed({ taskId }: Props) {
                   <span className="font-medium text-[var(--text-base)]">
                     {item.actor?.name ?? "시스템"}
                   </span>
-                  <span className="rounded-full bg-[var(--btn-hover-bg)] px-2 py-0.5 text-xs text-[var(--text-base)]">
+                  <span className="app-tag bg-[var(--surface-3)] text-[var(--text-base)]">
                     {item.label}
                   </span>
                   <span className="text-xs text-[var(--text-blur)]">{getTimeAgo(item.createdAt)}</span>

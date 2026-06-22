@@ -122,28 +122,24 @@ export function KanbanSidebar() {
                         }}
                         onClick={() => handleSetProjectId(project.id)}
                         className={cn(
-                          "flex flex-col items-start mb-2 border-b p-3 rounded-md shadow-sm h-full",
+                          "mb-2 flex h-full flex-col items-start rounded-xl border p-3 text-left transition-colors",
                           isSelected
-                            ? "border-gray-400 shadow-md"
-                            : "hover:border-gray-400"
+                            ? "border-sky-300 bg-sky-50/90 ring-1 ring-sky-200 shadow-sm dark:border-sky-700 dark:bg-sky-950/30 dark:ring-sky-900/60"
+                            : "hover:border-slate-400 dark:hover:border-slate-400"
                         )}
-                        style={{
-                          backgroundColor: isSelected
-                            ? "var(--box-bg-selected)"
-                            : "var(--item-bg)",
-                        }}
+                        style={!isSelected ? { backgroundColor: "var(--surface-1)" } : undefined}
                       >
-                        <p className="font-medium">
-                          📌 프로젝트명: {project.projectName}
+                        <p className="mb-1 line-clamp-2 text-sm font-semibold">
+                          {project.projectName}
                         </p>
-                        <p className="text-sm">
-                          👤 담당자: {project.manager.name}{" "}
+                        <p className="text-sm text-[var(--text-base)]">
+                          담당자: {project.manager.name}{" "}
                           <span className="text-xs text-gray-500 dark:text-gray-300">
                             ({project?.manager?.userId})
                           </span>
                         </p>
-                        <p className="text-sm">
-                          📊 진행률:{" "}
+                        <p className="mt-1 text-sm text-[var(--text-base)]">
+                          진행률:{" "}
                           {isSelected
                             ? prevProjectIdRef.current === selectedProjectId
                               ? progress
@@ -152,8 +148,8 @@ export function KanbanSidebar() {
                           %
                         </p>
                         {!project.isPersonal && (
-                          <p className="text-xs sm:text-sm lg:text-base">
-                            🗓 마감일:{" "}
+                          <p className="mt-1 text-xs text-[var(--text-blur)] sm:text-sm">
+                            마감일:{" "}
                             {convertDateToString(
                               new Date(project.deadline),
                               "-"

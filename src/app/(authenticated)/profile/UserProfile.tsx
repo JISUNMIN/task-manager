@@ -1,5 +1,6 @@
 import { PasswordInput } from "@/components/form/PasswordInput";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuthStore } from "@/store/useAuthStore";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Link from "next/link";
@@ -89,42 +90,53 @@ export default function UserProfile() {
   return (
     <div className="w-full max-w-5xl mx-auto p-8">
       <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--box-bg)] p-4 shadow-sm">
-          <p className="text-sm text-[var(--text-blur)]">관리 중인 프로젝트</p>
-          <p className="mt-2 text-2xl font-bold text-[var(--text-base)]">
-            {isProfileSummaryLoading ? "-" : profileSummary?.managedProjectsCount ?? 0}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--box-bg)] p-4 shadow-sm">
-          <p className="text-sm text-[var(--text-blur)]">담당 중인 작업</p>
-          <p className="mt-2 text-2xl font-bold text-[var(--text-base)]">
-            {isProfileSummaryLoading ? "-" : profileSummary?.assignedTasksCount ?? 0}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--box-bg)] p-4 shadow-sm">
-          <p className="text-sm text-[var(--text-blur)]">완료한 작업</p>
-          <p className="mt-2 text-2xl font-bold text-[var(--text-base)]">
-            {isProfileSummaryLoading ? "-" : profileSummary?.completedTasksCount ?? 0}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--box-bg)] p-4 shadow-sm">
-          <p className="text-sm text-[var(--text-blur)]">기한 지난 작업</p>
-          <p className="mt-2 text-2xl font-bold text-red-600">
-            {isProfileSummaryLoading ? "-" : profileSummary?.overdueTasksCount ?? 0}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--box-bg)] p-4 shadow-sm">
-          <p className="text-sm text-[var(--text-blur)]">높은 우선순위 작업</p>
-          <p className="mt-2 text-2xl font-bold text-amber-600">
-            {isProfileSummaryLoading ? "-" : profileSummary?.highPriorityTasksCount ?? 0}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--box-bg)] p-4 shadow-sm">
-          <p className="text-sm text-[var(--text-blur)]">최근 2주 활동 로그</p>
-          <p className="mt-2 text-2xl font-bold text-[var(--text-base)]">
-            {isProfileSummaryLoading ? "-" : profileSummary?.recentActivityCount ?? 0}
-          </p>
-        </div>
+        {isProfileSummaryLoading ? (
+          Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="app-surface p-4">
+              <Skeleton className="h-4 w-28 rounded-full" />
+              <Skeleton className="mt-3 h-8 w-16 rounded-md" />
+            </div>
+          ))
+        ) : (
+          <>
+            <div className="app-surface p-4">
+              <p className="text-sm text-[var(--text-blur)]">관리 중인 프로젝트</p>
+              <p className="mt-2 text-2xl font-bold text-[var(--text-base)]">
+                {profileSummary?.managedProjectsCount ?? 0}
+              </p>
+            </div>
+            <div className="app-surface p-4">
+              <p className="text-sm text-[var(--text-blur)]">담당 중인 작업</p>
+              <p className="mt-2 text-2xl font-bold text-[var(--text-base)]">
+                {profileSummary?.assignedTasksCount ?? 0}
+              </p>
+            </div>
+            <div className="app-surface p-4">
+              <p className="text-sm text-[var(--text-blur)]">완료한 작업</p>
+              <p className="mt-2 text-2xl font-bold text-[var(--text-base)]">
+                {profileSummary?.completedTasksCount ?? 0}
+              </p>
+            </div>
+            <div className="app-surface p-4">
+              <p className="text-sm text-[var(--text-blur)]">기한 지난 작업</p>
+              <p className="mt-2 text-2xl font-bold text-red-600">
+                {profileSummary?.overdueTasksCount ?? 0}
+              </p>
+            </div>
+            <div className="app-surface p-4">
+              <p className="text-sm text-[var(--text-blur)]">높은 우선순위 작업</p>
+              <p className="mt-2 text-2xl font-bold text-amber-600">
+                {profileSummary?.highPriorityTasksCount ?? 0}
+              </p>
+            </div>
+            <div className="app-surface p-4">
+              <p className="text-sm text-[var(--text-blur)]">최근 2주 활동 로그</p>
+              <p className="mt-2 text-2xl font-bold text-[var(--text-base)]">
+                {profileSummary?.recentActivityCount ?? 0}
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="mb-6 flex flex-wrap gap-3">
@@ -150,11 +162,7 @@ export default function UserProfile() {
       <FormProvider {...methods}>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="
-          space-y-6 rounded-2xl shadow-lg p-8
-          bg-gradient-to-br from-[var(--bg-seonday)] to-[var(--card)]
-          border border-[var(--border)]
-        "
+          className="app-surface space-y-6 p-8"
         >
           {/* 프로필 영역 */}
           <div className="flex flex-col items-center space-y-2">

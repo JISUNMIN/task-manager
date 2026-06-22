@@ -71,7 +71,7 @@ export const TaskComments = ({ taskId }: Props) => {
   }
 
   return (
-    <div className="p-4 border-b border-gray-300">
+    <div className="app-surface-muted mb-4 p-4">
       {/* 댓글 리스트 */}
       <div className="space-y-4 mb-4">
         {listData?.map((comment) => (
@@ -96,10 +96,10 @@ export const TaskComments = ({ taskId }: Props) => {
           alt={user?.name ?? "User"}
           className="mt-1"
         />
-        <div className="flex-1 relative">
+        <div className="relative flex-1">
           <Input
             placeholder="댓글 추가"
-            className="pr-20 border-none focus-visible:ring-0 shadow-none"
+            className="pr-20"
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             onKeyDown={(e) => {

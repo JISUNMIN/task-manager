@@ -177,32 +177,56 @@ const KanbanBoard = () => {
 
     const sourceStatus = source.droppableId as Status;
     const destinationStatus = destination.droppableId as Status;
-    const task = columns[sourceStatus][source.index];
+    const sourceVisibleTasks = filteredColumns[sourceStatus] ?? [];
+    const destinationVisibleTasks = filteredColumns[destinationStatus] ?? [];
+    const task = sourceVisibleTasks[source.index];
+    if (!task) return;
 
-    // 프론트에서 order 계산
-    const tempTasks = [...columns[destinationStatus]];
-    if (sourceStatus === destinationStatus) {
-      // 같은 컬럼이면 원래 자리에서 제거
-      tempTasks.splice(source.index, 1);
-    }
-    tempTasks.splice(destination.index, 0, task);
+    const sourceActualIndex = columns[sourceStatus].findIndex(
+      (columnTask) => String(columnTask.id) === String(task.id),
+    );
+    if (sourceActualIndex < 0) return;
 
-    let prevTask: typeof task | null = null;
-    let nextTask: typeof task | null = null;
+    const destinationVisibleWithoutDragged =
+      sourceStatus === destinationStatus
+        ? destinationVisibleTasks.filter((visibleTask) => String(visibleTask.id) !== String(task.id))
+        : destinationVisibleTasks;
 
-    if (destination.index === 0) {
-      // 맨 위
-      prevTask = null;
-      nextTask = tempTasks[1] ?? null;
-    } else if (destination.index >= tempTasks.length - 1) {
-      // 맨 아래
-      prevTask = tempTasks[tempTasks.length - 2] ?? null;
-      nextTask = null;
+    const prevVisibleTask =
+      destination.index === 0 ? null : destinationVisibleWithoutDragged[destination.index - 1] ?? null;
+    const nextVisibleTask = destinationVisibleWithoutDragged[destination.index] ?? null;
+
+    const prevActualIndex =
+      prevVisibleTask == null
+        ? null
+        : columns[destinationStatus].findIndex(
+            (columnTask) => String(columnTask.id) === String(prevVisibleTask.id),
+          );
+    const nextActualIndex =
+      nextVisibleTask == null
+        ? null
+        : columns[destinationStatus].findIndex(
+            (columnTask) => String(columnTask.id) === String(nextVisibleTask.id),
+          );
+
+    let destinationActualIndex: number;
+    if (nextActualIndex != null && nextActualIndex >= 0) {
+      destinationActualIndex = nextActualIndex;
+    } else if (prevActualIndex != null && prevActualIndex >= 0) {
+      destinationActualIndex = prevActualIndex + 1;
     } else {
-      // 중간
-      prevTask = tempTasks[destination.index - 1];
-      nextTask = tempTasks[destination.index + 1];
+      destinationActualIndex = 0;
     }
+
+    if (
+      sourceStatus === destinationStatus &&
+      sourceActualIndex < destinationActualIndex
+    ) {
+      destinationActualIndex -= 1;
+    }
+
+    const prevTask = prevVisibleTask;
+    const nextTask = nextVisibleTask;
 
     const prevOrder = prevTask?.order;
     const nextOrder = nextTask?.order;
@@ -220,7 +244,7 @@ const KanbanBoard = () => {
     }
 
     // 프론트 상태 업데이트 (order 반영)
-    moveTask(sourceStatus, destinationStatus, source.index, destination.index, newOrder);
+    moveTask(sourceStatus, destinationStatus, sourceActualIndex, destinationActualIndex, newOrder);
 
     // 서버 업데이트 호출
     if (typeof task.id === "number") {
@@ -401,7 +425,7 @@ const KanbanBoard = () => {
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder="제목 또는 본문 검색"
-              className="w-full rounded-md border border-slate-300 bg-white p-2 text-[var(--text-base)] shadow-sm transition-colors hover:border-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-500 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-gray-400 dark:focus:border-blue-400 dark:focus:ring-blue-900/40"
+              className="w-full rounded-md border border-slate-300 bg-white p-2 text-black shadow-sm transition-colors hover:border-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 placeholder:text-gray-400 dark:border-gray-500 dark:bg-gray-800 dark:text-white dark:hover:border-gray-400 dark:focus:border-blue-400 dark:focus:ring-blue-900/40 dark:placeholder:text-gray-500"
             />
             {!isPersonal && (
               <select
@@ -438,11 +462,6 @@ const KanbanBoard = () => {
               <option value="none">마감일 미설정</option>
             </select>
           </div>
-          {isFilteredView && (
-            <p className="mt-3 text-xs text-[var(--text-blur)]">
-              필터가 적용된 동안에는 카드 드래그 이동을 잠시 비활성화했습니다.
-            </p>
-          )}
         </div>
 
         {isDetailLoading ? (
@@ -473,7 +492,7 @@ const KanbanBoard = () => {
                       onCreateTask={(status, columnIndex) =>
                         handleCreateTask(status, columnIndex, "top")
                       }
-                      isDisabled={creatingColumns.has(status)}
+                      isDisabled={creatingColumns.has(status) || isFilteredView}
                     />
 
                     <Droppable droppableId={columnKey}>
@@ -501,7 +520,6 @@ const KanbanBoard = () => {
                                 setFocusedTaskId={setFocusedTaskId}
                                 openPanel={openPanel}
                                 inputRefs={inputRefs}
-                                isDragDisabled={isFilteredView}
                               />
                             );
                           })}
@@ -510,10 +528,10 @@ const KanbanBoard = () => {
 
                           <button
                             onClick={() => handleCreateTask(status, columnIndex, "bottom")}
-                            disabled={creatingColumns.has(status)}
+                            disabled={creatingColumns.has(status) || isFilteredView}
                             className={cn(
                               "bg-[var(--btn-bg)] border-2 border-dashed border-[var(--btn-border)] rounded-lg p-3 text-center text-[var(--text-blur)] transition-all duration-200 mt-3",
-                              creatingColumns.has(status)
+                              creatingColumns.has(status) || isFilteredView
                                 ? "opacity-50 cursor-not-allowed"
                                 : "hover:bg-[var(--btn-hover-bg)] hover:border-[var(--btn-hover-border)] hover:text-[var(--foreground)] cursor-pointer",
                             )}

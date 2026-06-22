@@ -3,7 +3,7 @@ import Projectlist from "./Projectlist";
 
 const page = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[var(--background)]">
       <Projectlist />
     </div>
   );

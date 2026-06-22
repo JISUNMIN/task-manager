@@ -178,6 +178,13 @@ export const useKanbanStore = create<{
           toIndex: number,
           newOrder: number
         ) => {
+          const sortByOrder = (tasks: ClientTask[]) =>
+            [...tasks].sort(
+              (a, b) =>
+                (a.order ?? Number.MAX_SAFE_INTEGER) -
+                (b.order ?? Number.MAX_SAFE_INTEGER)
+            );
+
           set((state) => {
             const fromTasks = [...state.columns[fromColumn]];
             const taskToMove = fromTasks.splice(fromIndex, 1)[0];
@@ -188,12 +195,12 @@ export const useKanbanStore = create<{
             const newColumns = { ...state.columns };
             if (fromColumn === toColumn) {
               fromTasks.splice(toIndex, 0, taskToMove);
-              newColumns[fromColumn] = fromTasks;
+              newColumns[fromColumn] = sortByOrder(fromTasks);
             } else {
               const toTasks = [...state.columns[toColumn]];
               toTasks.splice(toIndex, 0, taskToMove);
-              newColumns[fromColumn] = fromTasks;
-              newColumns[toColumn] = toTasks;
+              newColumns[fromColumn] = sortByOrder(fromTasks);
+              newColumns[toColumn] = sortByOrder(toTasks);
             }
 
             return { columns: newColumns };

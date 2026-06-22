@@ -361,7 +361,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       ref={panelRef}
       className={`
         fixed top-14 right-0 h-full flex flex-col z-50
-        bg-[var(--bg-third)] shadow-[-2px_0_6px_rgba(0,0,0,0.15)]
+        bg-[var(--bg-third)] shadow-[-4px_0_20px_rgba(15,23,42,0.08)]
         transition-transform duration-300 ease-in-out
         ${isTaskInfoPanelOpen ? "translate-x-0" : "translate-x-full"}
       `}
@@ -378,7 +378,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         <FaAngleDoubleRight className="w-6 h-6" />
       </Button>
 
-      <div className="pl-2 sm:pl-4">
+      <div className="border-b border-[var(--border)] px-2 pb-4 sm:px-4">
         <TextareaAutosize
           maxRows={2}
           className="w-full resize-none rounded-md border border-transparent bg-transparent p-2 text-sm sm:text-base focus:border-slate-300 focus:outline-none dark:focus:border-gray-600"
@@ -499,7 +499,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
         </Grid>
       </div>
 
-      <div className="p-2 sm:p-4 mb-14 flex flex-col overflow-y-auto h-full">
+      <div className="mb-14 flex h-full flex-col overflow-y-auto p-3 sm:p-4">
         {typeof task?.id === "number" && <TaskActivityFeed taskId={task.id} />}
         {typeof task?.id === "number" && <TaskComments taskId={task.id} />}
         <div className="mb-3 flex justify-end">
