@@ -58,7 +58,7 @@ const TaskItem = ({
       {(provided) => (
         <div
           className={cn(
-            "bg-[var(--box-bg)] border rounded-lg p-3 cursor-pointer shadow-[0_1px_3px_rgba(0,0,0,0.12)] transition-all duration-150 hover:-translate-y-0.5 hover:border-slate-400 dark:shadow-[0_1px_3px_rgba(0,0,0,0.25)] dark:hover:border-white/15",
+            "rounded-lg border border-[#e4e8ed] bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,0.08)] transition-all duration-150 hover:-translate-y-0.5 hover:border-slate-400 dark:border-[var(--border)] dark:bg-[var(--box-bg)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.25)] dark:hover:border-white/15",
             isDragDisabled && "cursor-default",
           )}
           ref={provided.innerRef}

@@ -124,7 +124,7 @@ export function KanbanSidebar() {
                         className={cn(
                           "mb-2 flex h-full flex-col items-start rounded-xl border p-3 text-left transition-colors",
                           isSelected
-                            ? "border-sky-300 bg-sky-50/90 ring-1 ring-sky-200 shadow-sm dark:border-sky-700 dark:bg-sky-950/30 dark:ring-sky-900/60"
+                            ? "border-sky-300 bg-[#f0f7ff] ring-1 ring-sky-200 shadow-sm dark:border-sky-700 dark:bg-sky-950/30 dark:ring-sky-900/60"
                             : "bg-[var(--surface-1)] hover:border-slate-400 dark:bg-[#243243] dark:hover:border-slate-400"
                         )}
                       >

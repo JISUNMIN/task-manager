@@ -395,7 +395,7 @@ const KanbanBoard = () => {
           totalCount={totalCount}
         />
 
-        <div className="app-surface-muted mb-6 p-4">
+        <div className="mb-6 rounded-2xl border border-[#dfe6ec] bg-white/95 p-4 shadow-[0_2px_10px_rgba(0,0,0,0.04)] dark:border-[var(--border)] dark:bg-[var(--surface-2)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.02)]">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
               <h3 className="text-base font-semibold text-[var(--text-base)]">작업 검색 및 필터</h3>
@@ -530,7 +530,7 @@ const KanbanBoard = () => {
                             onClick={() => handleCreateTask(status, columnIndex, "bottom")}
                             disabled={creatingColumns.has(status) || isFilteredView}
                             className={cn(
-                              "bg-[var(--btn-bg)] border-2 border-dashed border-[var(--btn-border)] rounded-lg p-3 text-center text-[var(--text-blur)] transition-all duration-200 mt-3",
+                              "mt-3 rounded-lg border-2 border-dashed border-[var(--border-strong)] bg-[var(--btn-bg)] p-3 text-center text-[var(--text-base)] transition-all duration-200",
                               creatingColumns.has(status) || isFilteredView
                                 ? "opacity-50 cursor-not-allowed"
                                 : "hover:bg-[var(--btn-hover-bg)] hover:border-[var(--btn-hover-border)] hover:text-[var(--foreground)] cursor-pointer",

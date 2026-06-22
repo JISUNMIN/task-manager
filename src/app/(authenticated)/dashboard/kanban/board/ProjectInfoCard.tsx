@@ -25,7 +25,7 @@ const ProjectInfoCard = ({
   totalCount = 0,
 }: ProjectInfoCardProps) => {
   return (
-    <div className="app-surface mb-6 p-6">
+    <div className="app-surface mb-6 p-6 shadow-[0_2px_10px_rgba(0,0,0,0.04)] dark:shadow-[0_18px_34px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.02)]">
       {/* 프로젝트 제목 */}
       <h2 className="mb-3 text-xl font-bold md:text-2xl">
         {projectName}
