@@ -395,7 +395,7 @@ const KanbanBoard = () => {
           totalCount={totalCount}
         />
 
-        <div className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--box-bg)] p-4 shadow-sm">
+        <div className="app-surface-muted mb-6 p-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
               <h3 className="text-base font-semibold text-[var(--text-base)]">작업 검색 및 필터</h3>
@@ -482,7 +482,7 @@ const KanbanBoard = () => {
                 return (
                   <div
                     key={columnKey}
-                    className={`flex flex-col ${kanbanBoardBg} border border-[var(--border)] rounded-xl p-4`}
+                    className={`flex flex-col ${kanbanBoardBg} rounded-xl border border-[var(--border)] p-4 shadow-sm dark:border-[var(--border-strong)]`}
                   >
                     <ColumnHeader
                       status={status}

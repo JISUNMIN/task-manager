@@ -58,7 +58,7 @@ const TaskItem = ({
       {(provided) => (
         <div
           className={cn(
-            "bg-[var(--box-bg)] border rounded-lg p-3 cursor-pointer",
+            "bg-[var(--box-bg)] border rounded-lg p-3 cursor-pointer shadow-[0_1px_3px_rgba(0,0,0,0.12)] transition-all duration-150 hover:-translate-y-0.5 hover:border-slate-400 dark:shadow-[0_1px_3px_rgba(0,0,0,0.25)] dark:hover:border-white/15",
             isDragDisabled && "cursor-default",
           )}
           ref={provided.innerRef}
@@ -102,7 +102,7 @@ const TaskItem = ({
             onFocus={() => setFocusedTaskId(task.id)}
             onClick={openPanel}
             placeholder="제목을 입력하세요"
-            className="w-full rounded-md border border-slate-300 p-2 text-[var(--text-base)] dark:border-gray-600 dark:focus:border-gray-300 dark:focus:outline-none"
+            className="w-full rounded-md border border-slate-300 p-2 font-semibold text-[var(--text-base)] dark:border-gray-600 dark:focus:border-gray-300 dark:focus:outline-none"
           />
           {task.dueDate && (
             <p className="mt-1 text-[11px] text-[var(--text-blur)]">

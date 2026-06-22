@@ -125,9 +125,8 @@ export function KanbanSidebar() {
                           "mb-2 flex h-full flex-col items-start rounded-xl border p-3 text-left transition-colors",
                           isSelected
                             ? "border-sky-300 bg-sky-50/90 ring-1 ring-sky-200 shadow-sm dark:border-sky-700 dark:bg-sky-950/30 dark:ring-sky-900/60"
-                            : "hover:border-slate-400 dark:hover:border-slate-400"
+                            : "bg-[var(--surface-1)] hover:border-slate-400 dark:bg-[#243243] dark:hover:border-slate-400"
                         )}
-                        style={!isSelected ? { backgroundColor: "var(--surface-1)" } : undefined}
                       >
                         <p className="mb-1 line-clamp-2 text-sm font-semibold">
                           {project.projectName}

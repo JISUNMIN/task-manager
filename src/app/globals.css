@@ -83,19 +83,19 @@ body {
 }
 
 .dark {
-  --background: #0f1722;
-  --bg-seonday: #17212c;
-  --bg-third: #1a2530;
-  --bg-fourth: #111b25;
+  --background: #071426;
+  --bg-seonday: #1a2632;
+  --bg-third: #162233;
+  --bg-fourth: #0f1822;
   --foreground: oklch(0.985 0 0);
-  --item-bg: #1b2733;
-  --box-bg: #18222d;
-  --box-bg-selected: #24313e;
+  --item-bg: #1d2b3c;
+  --box-bg: #1d2b3c;
+  --box-bg-selected: #253648;
   --box-text: oklch(0.2 0 0);
   --text-base: #d1d5db;
   --text-blur: #9ca3af;
-  --hover-bg: #22303c;
-  --card: #18222d;
+  --hover-bg: #27374a;
+  --card: #1d2b3c;
   --card-foreground: oklch(0.985 0 0);
   --btn-bg: #2b3f51;
   --btn-border: #4d6478;
@@ -113,7 +113,7 @@ body {
   --accent-foreground: oklch(0.985 0 0);
   --destructive: #f87171;
   --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: #334150;
+  --border: #2e4157;
   --input: #1f2937;
   --ring: oklch(0.439 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
@@ -121,7 +121,7 @@ body {
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: #131d27;
+  --sidebar: #162233;
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -130,12 +130,13 @@ body {
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
   --logo-name-gradient: linear-gradient(to right, #f59e0b, #c2410c);
-  --surface-1: #18222d;
-  --surface-2: #202d39;
-  --surface-3: #283745;
-  --surface-hover: #233240;
-  --border-strong: #465565;
-  --shadow-soft: 0 16px 32px rgba(0, 0, 0, 0.3);
+  --surface-1: #1d2b3c;
+  --surface-2: #162233;
+  --surface-3: #213144;
+  --surface-hover: #2a3b4d;
+  --border-strong: #3a516a;
+  --shadow-soft: 0 18px 36px rgba(0, 0, 0, 0.32);
+  --progress-track: #515e6a;
 }
 
 @theme inline {
@@ -271,6 +272,7 @@ body {
   .app-surface-muted {
     border: 1px solid var(--border);
     background-color: var(--surface-2);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
     @apply rounded-xl;
   }
 
@@ -295,6 +297,20 @@ body {
   .dark .app-field:focus,
   .dark .app-field:focus-visible {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+
+  .dark .app-surface {
+    border-color: var(--border-strong);
+    box-shadow:
+      0 18px 34px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  }
+
+  .dark .app-surface-muted {
+    border-color: var(--border);
+    box-shadow:
+      0 10px 24px rgba(0, 0, 0, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.02);
   }
 
   .app-tag {

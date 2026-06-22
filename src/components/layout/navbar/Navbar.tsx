@@ -16,7 +16,7 @@ const Navbar = () => {
   const { theme, toggleTheme } = useThemeStore();
 
   return (
-    <div className="fixed z-50 w-full flex h-14 items-center px-6 shadow-sm bg-[var(--item-bg)] text-[var(--foreground)] gap-4 mx-auto transition-colors duration-300 ">
+    <div className="fixed z-50 mx-auto flex h-14 w-full items-center gap-4 border-b border-[var(--border)] bg-[var(--item-bg)] px-6 text-[var(--foreground)] shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-colors duration-300 dark:border-[#4a586b] dark:bg-[#344255] dark:shadow-[0_12px_28px_rgba(0,0,0,0.24)]">
       {/* 메뉴 토글 버튼 (모바일) */}
       {/* <button
         id="vertical-nav-toggle-btn"

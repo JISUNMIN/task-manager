@@ -2,39 +2,39 @@
 import { Status } from "@/store/useKanbanStore";
 
 export const getStatusColors = (status: Status, isDark: boolean) => {
-  const darkKanbanBg = "bg-[var(--box-bg)]";
+  const darkKanbanBg = "bg-[var(--surface-2)]";
+  const darkCompletedBg = "bg-[#121d29]";
 
   switch (status) {
     case "To Do":
       return {
-        //bg-slate-700
-        statusBgColor: isDark ? "bg-blue-900" : "bg-gray-400",
-        dotColor: isDark ? "bg-slate-400" : "bg-gray-500",
+        statusBgColor: isDark ? "bg-[#1f4fc4]" : "bg-gray-400",
+        dotColor: isDark ? "bg-[#6ea8ff]" : "bg-gray-500",
         kanbanBoardBg: isDark ? darkKanbanBg : "bg-gray-100",
       };
     case "Ready":
       return {
-        statusBgColor: isDark ? "bg-cyan-900" : "bg-blue-500",
-        dotColor: isDark ? "bg-cyan-400" : "bg-blue-600",
+        statusBgColor: isDark ? "bg-[#0b7ea0]" : "bg-blue-500",
+        dotColor: isDark ? "bg-[#56d2ff]" : "bg-blue-600",
         kanbanBoardBg: isDark ? darkKanbanBg : "bg-blue-50",
       };
     case "In Progress":
       return {
-        statusBgColor: isDark ? "bg-yellow-900" : "bg-yellow-500",
-        dotColor: isDark ? "bg-yellow-400" : "bg-yellow-600",
+        statusBgColor: isDark ? "bg-[#aa6500]" : "bg-yellow-500",
+        dotColor: isDark ? "bg-[#f8bf55]" : "bg-yellow-600",
         kanbanBoardBg: isDark ? darkKanbanBg : "bg-yellow-50",
       };
     case "On Hold":
       return {
-        statusBgColor: isDark ? "bg-orange-900" : "bg-orange-500",
-        dotColor: isDark ? "bg-orange-400" : "bg-orange-600",
+        statusBgColor: isDark ? "bg-[#b24b08]" : "bg-orange-500",
+        dotColor: isDark ? "bg-[#ff9b5f]" : "bg-orange-600",
         kanbanBoardBg: isDark ? darkKanbanBg : "bg-orange-50",
       };
     case "Completed":
       return {
-        statusBgColor: isDark ? "bg-emerald-900" : "bg-green-500",
-        dotColor: isDark ? "bg-emerald-400" : "bg-green-600",
-        kanbanBoardBg: isDark ? darkKanbanBg : "bg-green-50",
+        statusBgColor: isDark ? "bg-[#007a5a]" : "bg-green-500",
+        dotColor: isDark ? "bg-[#26d3a2]" : "bg-green-600",
+        kanbanBoardBg: isDark ? darkCompletedBg : "bg-green-50",
       };
     default:
       return {
