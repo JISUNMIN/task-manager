@@ -20,6 +20,8 @@ import TaskItem from "./TaskItem";
 import ProjectInfoCard from "./ProjectInfoCard";
 import ColumnHeader from "./KanbanColumnHeader";
 import { cn } from "@/lib/utils";
+import TextareaAutosize from "react-textarea-autosize";
+import { getTaskDueStatus, TASK_PRIORITY_LABELS } from "@/lib/utils/task";
 
 const TaskInfoPanel = dynamic(
   () => import("@/app/(authenticated)/dashboard/kanban/panel/TaskInfoPanel"),
@@ -46,9 +48,14 @@ const KanbanBoard = () => {
   const inputRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId") ?? undefined;
+  const assigneeFilterParam = searchParams.get("assignee");
   const { detailData, isDetailLoading } = useProjects(projectId);
   const debouncedUpdateMap = useRef<Record<number, (title: string) => void>>({});
   const [creatingColumns, setCreatingColumns] = useState<Set<Status>>(new Set());
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedAssignee, setSelectedAssignee] = useState("all");
+  const [selectedPriority, setSelectedPriority] = useState("all");
+  const [selectedDueFilter, setSelectedDueFilter] = useState("all");
   const { createTaskMutate, deleteTaskMutate, updateTaskMutate, moveTaskMutate } = useTasks();
   const isPersonal = detailData?.isPersonal;
   const { user } = useAuthStore();
@@ -73,6 +80,62 @@ const KanbanBoard = () => {
   // 완료 개수
   const completedCount = useMemo(() => columns["Completed"]?.length ?? 0, [columns]);
 
+  const projectAssignees = useMemo(() => {
+    const map = new Map<number, { id: number; name: string; userId: string }>();
+
+    detailData?.tasks?.forEach((task) => {
+      task.assignees.forEach((assignee) => {
+        if (typeof assignee === "number") return;
+
+        map.set(assignee.id, {
+          id: assignee.id,
+          name: assignee.name,
+          userId: assignee.userId,
+        });
+      });
+    });
+
+    return Array.from(map.values());
+  }, [detailData?.tasks]);
+
+  const isFilteredView = Boolean(
+    searchTerm.trim() ||
+      selectedAssignee !== "all" ||
+      selectedPriority !== "all" ||
+      selectedDueFilter !== "all",
+  );
+
+  const filteredColumns = useMemo(() => {
+    const keyword = searchTerm.trim().toLowerCase();
+    const nextColumns = {} as Record<Status, ClientTask[]>;
+
+    (Object.keys(columns) as Status[]).forEach((status) => {
+      nextColumns[status] = columns[status].filter((task) => {
+        const matchesKeyword =
+          keyword.length === 0 ||
+          task.title.toLowerCase().includes(keyword) ||
+          task.desc.toLowerCase().includes(keyword);
+
+        const matchesAssignee =
+          selectedAssignee === "all" || task.assignees?.includes(Number(selectedAssignee));
+
+        const matchesPriority =
+          selectedPriority === "all" || task.priority === selectedPriority;
+
+        const dueStatus = getTaskDueStatus(task.dueDate);
+        const matchesDueFilter =
+          selectedDueFilter === "all" ||
+          (selectedDueFilter === "none" && dueStatus === "none") ||
+          (selectedDueFilter === "overdue" && dueStatus === "overdue") ||
+          (selectedDueFilter === "soon" && (dueStatus === "today" || dueStatus === "soon"));
+
+        return matchesKeyword && matchesAssignee && matchesPriority && matchesDueFilter;
+      });
+    });
+
+    return nextColumns;
+  }, [columns, searchTerm, selectedAssignee, selectedPriority, selectedDueFilter]);
+
   const debouncedUpdate = (taskId: number, newTitle: string) => {
     if (!debouncedUpdateMap.current[taskId]) {
       debouncedUpdateMap.current[taskId] = debounce((title: string) => {
@@ -82,6 +145,8 @@ const KanbanBoard = () => {
     debouncedUpdateMap.current[taskId](newTitle);
   };
   const handleDragEnd = (result: DropResult) => {
+    if (isFilteredView) return;
+
     const { source, destination } = result;
     if (!destination) return;
     if (source.droppableId === destination.droppableId && source.index === destination.index)
@@ -244,6 +309,42 @@ const KanbanBoard = () => {
       prevProjectIdRef.current = projectId;
     }
   }, [detailData, initializeColumns, projectId]);
+
+  useEffect(() => {
+    if (assigneeFilterParam === "me" && user?.id) {
+      setSelectedAssignee(String(user.id));
+      return;
+    }
+
+    setSelectedAssignee("all");
+  }, [assigneeFilterParam, projectId, user?.id]);
+
+  const renderTaskItems = (status: Status) => {
+    const visibleTasks = filteredColumns[status] ?? [];
+
+    return visibleTasks.map((task) => {
+      const itemIndex = columns[status].findIndex(
+        (columnTask) => String(columnTask.id) === String(task.id),
+      );
+      if (itemIndex < 0) return null;
+
+      return (
+        <TaskItem
+          key={`${status}-${itemIndex}`}
+          columnKey={status}
+          itemIndex={itemIndex}
+          task={task}
+          handleDeleteTask={handleDeleteTask}
+          handleUpdateTask={handleUpdateTask}
+          setFocusedInputKey={setFocusedInputKey}
+          openPanel={openPanel}
+          inputRefs={inputRefs}
+          isDragDisabled={isFilteredView}
+        />
+      );
+    });
+  };
+
   return (
     <SidebarProvider className={`bg-[var(--bg-fourth)] relative`}>
       {sidebar}
@@ -261,11 +362,125 @@ const KanbanBoard = () => {
           totalCount={totalCount}
         />
 
+        <div className="mb-6 rounded-2xl border border-[#dfe6ec] bg-white/95 p-4 shadow-[0_2px_10px_rgba(0,0,0,0.04)] dark:border-[var(--border)] dark:bg-[var(--surface-2)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.02)]">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="text-base font-semibold text-[var(--text-base)]">
+                작업 검색 및 필터
+              </h3>
+              <p className="text-sm text-[var(--text-blur)]">
+                제목/본문 검색, 담당자, 우선순위, 마감 임박 기준으로 보드를 빠르게 좁혀볼 수 있습니다.
+              </p>
+            </div>
+            {isFilteredView && (
+              <button
+                type="button"
+                className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedAssignee(
+                    assigneeFilterParam === "me" && user?.id ? String(user.id) : "all",
+                  );
+                  setSelectedPriority("all");
+                  setSelectedDueFilter("all");
+                }}
+              >
+                필터 초기화
+              </button>
+            )}
+          </div>
+          <div
+            className={`grid gap-3 md:grid-cols-2 ${isPersonal ? "xl:grid-cols-3" : "xl:grid-cols-4"}`}
+          >
+            <TextareaAutosize
+              minRows={1}
+              maxRows={1}
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="제목 또는 본문 검색"
+              className="app-field resize-none py-2"
+            />
+            {!isPersonal && (
+              <select
+                value={selectedAssignee}
+                onChange={(event) => setSelectedAssignee(event.target.value)}
+                className="app-field"
+              >
+                <option value="all">전체 담당자</option>
+                {projectAssignees.map((assignee) => (
+                  <option key={assignee.id} value={String(assignee.id)}>
+                    {assignee.name} ({assignee.userId})
+                  </option>
+                ))}
+              </select>
+            )}
+            <select
+              value={selectedPriority}
+              onChange={(event) => setSelectedPriority(event.target.value)}
+              className="app-field"
+            >
+              <option value="all">전체 우선순위</option>
+              <option value="HIGH">{TASK_PRIORITY_LABELS.HIGH}</option>
+              <option value="MEDIUM">{TASK_PRIORITY_LABELS.MEDIUM}</option>
+              <option value="LOW">{TASK_PRIORITY_LABELS.LOW}</option>
+            </select>
+            <select
+              value={selectedDueFilter}
+              onChange={(event) => setSelectedDueFilter(event.target.value)}
+              className="app-field"
+            >
+              <option value="all">전체 마감 상태</option>
+              <option value="soon">3일 이내 마감</option>
+              <option value="overdue">기한 지난 작업</option>
+              <option value="none">마감일 미설정</option>
+            </select>
+          </div>
+        </div>
+
         {isDetailLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
             {Array.from({ length: 5 }).map((_, i) => (
               <CardSkeleton key={i} />
             ))}
+          </div>
+        ) : isFilteredView ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 items-start">
+            {Object.keys(columns).map((columnKey) => {
+              const status = columnKey as Status;
+              const keys = Object.keys(columns);
+              const columnIndex = keys.indexOf(status);
+              const { kanbanBoardBg } = getStatusColors(status, isDark);
+              const visibleTasks = filteredColumns[status] ?? [];
+              const count = visibleTasks.length;
+
+              return (
+                <div
+                  key={columnKey}
+                  className={`flex flex-col ${kanbanBoardBg} border border-[var(--border)] rounded-xl p-4`}
+                >
+                  <ColumnHeader
+                    status={status}
+                    isDark={isDark}
+                    columnIndex={columnIndex}
+                    count={count}
+                    onCreateTask={(nextStatus, nextColumnIndex) =>
+                      handleCreateTask(nextStatus, nextColumnIndex, "top")
+                    }
+                    isDisabled
+                  />
+
+                  <div className="flex flex-col flex-1 space-y-3">
+                    {renderTaskItems(status)}
+                    <button
+                      disabled
+                      className="mt-3 rounded-lg border-2 border-dashed border-[var(--btn-border)] bg-[var(--btn-bg)] p-3 text-center font-medium text-[var(--text-base)] opacity-50 cursor-not-allowed"
+                    >
+                      + 새 작업 추가
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <DragDropContext onDragEnd={handleDragEnd}>
@@ -275,7 +490,8 @@ const KanbanBoard = () => {
                 const keys = Object.keys(columns);
                 const columnIndex = keys.indexOf(status);
                 const { kanbanBoardBg } = getStatusColors(status, isDark);
-                const count = columns[status].length;
+                const visibleTasks = filteredColumns[status] ?? [];
+                const count = visibleTasks.length;
 
                 return (
                   <div
@@ -290,41 +506,26 @@ const KanbanBoard = () => {
                       onCreateTask={(status, columnIndex) =>
                         handleCreateTask(status, columnIndex, "top")
                       }
-                      isDisabled={creatingColumns.has(status)}
+                      isDisabled={creatingColumns.has(status) || isFilteredView}
                     />
 
                     <Droppable droppableId={columnKey}>
                       {(provided) => (
                         <div
-                          className="flex flex-col flex-1 space-y-3 overflow-y-auto"
+                          className="flex flex-col flex-1 space-y-3"
                           ref={provided.innerRef}
                           {...provided.droppableProps}
                         >
-                          {columns[status]?.map((task, itemIndex) => {
-                            if (!task) return null;
-                            return (
-                              <TaskItem
-                                key={`${columnKey}-${itemIndex}`}
-                                columnKey={status}
-                                itemIndex={itemIndex}
-                                task={task}
-                                handleDeleteTask={handleDeleteTask}
-                                handleUpdateTask={handleUpdateTask}
-                                setFocusedInputKey={setFocusedInputKey}
-                                openPanel={openPanel}
-                                inputRefs={inputRefs}
-                              />
-                            );
-                          })}
+                          {renderTaskItems(status)}
 
                           {provided.placeholder}
 
                           <button
                             onClick={() => handleCreateTask(status, columnIndex, "bottom")}
-                            disabled={creatingColumns.has(status)}
+                            disabled={creatingColumns.has(status) || isFilteredView}
                             className={cn(
                               "mt-3 rounded-lg border-2 border-dashed border-[var(--btn-border)] bg-[var(--btn-bg)] p-3 text-center font-medium text-[var(--text-base)] transition-all duration-200",
-                              creatingColumns.has(status)
+                              creatingColumns.has(status) || isFilteredView
                                 ? "opacity-50 cursor-not-allowed"
                                 : "hover:bg-[var(--btn-hover-bg)] hover:border-[var(--btn-hover-border)] hover:text-[var(--foreground)] cursor-pointer",
                             )}
