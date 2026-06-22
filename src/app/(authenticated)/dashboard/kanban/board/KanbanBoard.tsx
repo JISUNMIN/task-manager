@@ -323,7 +323,7 @@ const KanbanBoard = () => {
                             onClick={() => handleCreateTask(status, columnIndex, "bottom")}
                             disabled={creatingColumns.has(status)}
                             className={cn(
-                              "bg-[var(--btn-bg)] border-2 border-dashed border-[var(--btn-border)] rounded-lg p-3 text-center text-[var(--text-blur)] transition-all duration-200 mt-3",
+                              "mt-3 rounded-lg border-2 border-dashed border-[var(--btn-border)] bg-[var(--btn-bg)] p-3 text-center font-medium text-[var(--text-base)] transition-all duration-200",
                               creatingColumns.has(status)
                                 ? "opacity-50 cursor-not-allowed"
                                 : "hover:bg-[var(--btn-hover-bg)] hover:border-[var(--btn-hover-border)] hover:text-[var(--foreground)] cursor-pointer",

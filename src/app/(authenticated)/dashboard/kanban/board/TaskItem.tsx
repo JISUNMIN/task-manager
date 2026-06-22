@@ -43,7 +43,7 @@ const TaskItem = ({
     >
       {(provided) => (
         <div
-          className="bg-[var(--box-bg)] border rounded-lg p-3 cursor-pointer"
+          className="cursor-pointer rounded-lg border border-[var(--border)] bg-[var(--box-bg)] p-3 shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:border-[var(--border-strong)] dark:bg-[var(--surface-3)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.25)]"
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
@@ -60,7 +60,7 @@ const TaskItem = ({
             onFocus={() => setFocusedInputKey(`${columnKey}-${itemIndex}`)}
             onClick={openPanel}
             placeholder="제목을 입력하세요"
-            className="w-full p-2 border text-[var(--text-base)] rounded dark:focus:border-gray-300 dark:focus:outline-none"
+            className="w-full rounded border p-2 font-semibold text-[var(--text-base)] dark:border-gray-600 dark:focus:border-gray-300 dark:focus:outline-none"
           />
         </div>
       )}
