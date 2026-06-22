@@ -1,6 +1,6 @@
 import { Task } from "@prisma/client";
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
+import { devtools, persist } from "zustand/middleware";
 
 export type Status =
   | "To Do"
@@ -19,12 +19,13 @@ export const ALL_STATUS: Status[] = [
 
 export type ClientTask = Omit<
   Task,
-  "id" | "status" | "projectId" | "assignees" | "project" | "managerId" | "dueDate"
+  "id" | "status" | "projectId" | "assignees" | "project" | "managerId" | "dueDate" | "priority"
 > & {
   id: number | string;
   assignees?: number[];
-  dueDate?: string | null;
   managerId?: number;
+  dueDate?: string | null;
+  priority?: Task["priority"];
 };
 
 type Columns = {
@@ -38,14 +39,15 @@ export const useKanbanStore = create<{
   recalcProgress: () => void;
   initializeColumns: (
     tasks: {
-      id: number;
+      id: number | string;
       title: string;
       desc: string;
       status: Status;
       assignees?: number[];
-      priority?: Task["priority"];
-      dueDate?: Date | string | null;
       order: number;
+      priority?: Task["priority"];
+      dueDate?: string | null;
+      managerId?: number;
     }[]
   ) => void;
   addTask: (
@@ -68,7 +70,9 @@ export const useKanbanStore = create<{
   ) => void;
   removeColumn: (columnKey: Status, index: number) => void;
 }>()(
-  devtools((set, get) => ({
+  devtools(
+    persist(
+      (set, get) => ({
         columns: {
           "To Do": [],
           Ready: [],
@@ -89,7 +93,7 @@ export const useKanbanStore = create<{
             total === 0 ? 0 : Math.floor((completed / total) * 100);
           set({ progress: newProgress });
         },
-      initializeColumns: (tasks) => {
+        initializeColumns: (tasks) => {
           const newColumns: Columns = {
             "To Do": [],
             Ready: [],
@@ -105,9 +109,10 @@ export const useKanbanStore = create<{
                 title: task.title,
                 desc: task.desc,
                 assignees: task.assignees || [],
-                priority: task.priority ?? "MEDIUM",
-                dueDate: task.dueDate ? String(task.dueDate) : null,
                 order: task.order,
+                priority: task.priority,
+                dueDate: task.dueDate ?? null,
+                managerId: task.managerId,
               });
             }
           });
@@ -120,14 +125,14 @@ export const useKanbanStore = create<{
           const columnKey = columnKeys[index];
           if (!columnKey) return;
 
-          const newTask: ClientTask = {
-            id: tempId ?? `temp-${Date.now()}`,
+          const newTask = {
+            id: tempId,
             title: "",
             desc: "",
-            priority: "MEDIUM",
-            dueDate: null,
-            order: orderType === "top" ? -1 : Number.MAX_SAFE_INTEGER,
             assignees: [],
+            priority: "MEDIUM" as Task["priority"],
+            dueDate: null,
+            order: 0,
           };
           set((state) => ({
             columns: {
@@ -148,9 +153,10 @@ export const useKanbanStore = create<{
                 String(t.id) === tempId
                   ? {
                       ...t,
-                      ...realTask,
-                      dueDate: realTask.dueDate ? String(realTask.dueDate) : null,
-                      assignees: [],
+                      id: realTask.id,
+                      priority: realTask.priority,
+                      dueDate: realTask.dueDate ?? null,
+                      order: realTask.order ?? t.order,
                     }
                   : t
               ),
@@ -178,13 +184,6 @@ export const useKanbanStore = create<{
           toIndex: number,
           newOrder: number
         ) => {
-          const sortByOrder = (tasks: ClientTask[]) =>
-            [...tasks].sort(
-              (a, b) =>
-                (a.order ?? Number.MAX_SAFE_INTEGER) -
-                (b.order ?? Number.MAX_SAFE_INTEGER)
-            );
-
           set((state) => {
             const fromTasks = [...state.columns[fromColumn]];
             const taskToMove = fromTasks.splice(fromIndex, 1)[0];
@@ -195,12 +194,12 @@ export const useKanbanStore = create<{
             const newColumns = { ...state.columns };
             if (fromColumn === toColumn) {
               fromTasks.splice(toIndex, 0, taskToMove);
-              newColumns[fromColumn] = sortByOrder(fromTasks);
+              newColumns[fromColumn] = fromTasks;
             } else {
               const toTasks = [...state.columns[toColumn]];
               toTasks.splice(toIndex, 0, taskToMove);
-              newColumns[fromColumn] = sortByOrder(fromTasks);
-              newColumns[toColumn] = sortByOrder(toTasks);
+              newColumns[fromColumn] = fromTasks;
+              newColumns[toColumn] = toTasks;
             }
 
             return { columns: newColumns };
@@ -216,5 +215,8 @@ export const useKanbanStore = create<{
           });
           get().recalcProgress();
         },
-      }))
+      }),
+      { name: "kanban-store" }
+    )
+  )
 );

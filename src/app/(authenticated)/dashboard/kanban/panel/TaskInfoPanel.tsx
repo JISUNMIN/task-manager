@@ -33,8 +33,10 @@ import { CalendarDays } from "lucide-react";
 interface TaskInfoPanelProps {
   isTaskInfoPanelOpen: boolean;
   closePanel: () => void;
-  focusedTaskId: string | number | null;
-  setFocusedTaskId: (taskId: string | number | null) => void;
+  focusedTaskId?: string | number | null;
+  setFocusedTaskId?: (taskId: string | number | null) => void;
+  focusedInputKey?: string | null;
+  handleFocusedInputKey?: (columnKey: string, itemIndex: number) => void;
   isPersonal?: boolean;
   panelWidth: number;
   setPanelWidth: (w: number) => void;
@@ -48,6 +50,8 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   closePanel,
   focusedTaskId,
   setFocusedTaskId,
+  focusedInputKey,
+  handleFocusedInputKey,
   isPersonal,
   panelWidth,
   setPanelWidth,
@@ -65,6 +69,21 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId") ?? undefined;
   const taskLocation = useMemo(() => {
+    if (focusedInputKey) {
+      const [status, indexText] = focusedInputKey.split("-");
+      const taskIndex = Number(indexText);
+      const columnKey = status as Status;
+      const task = columns[columnKey]?.[taskIndex];
+
+      if (task) {
+        return {
+          columnKey,
+          taskIndex,
+          task,
+        };
+      }
+    }
+
     if (focusedTaskId == null) return null;
 
     const entries = Object.entries(columns) as [Status, ClientTask[]][];
@@ -80,7 +99,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
     }
 
     return null;
-  }, [columns, focusedTaskId]);
+  }, [columns, focusedInputKey, focusedTaskId]);
   const columnKey = taskLocation?.columnKey;
   const taskIndex = taskLocation?.taskIndex ?? -1;
   const task = taskLocation?.task;
@@ -91,6 +110,26 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
   const currentTaskDueDate = task?.dueDate ? String(task.dueDate) : null;
   const currentTaskAssignees = useMemo(() => task?.assignees ?? [], [task?.assignees]);
   const { upload } = useUpload(task?.id);
+  const syncFocusedTask = useCallback(
+    (taskId: string | number | null) => {
+      if (handleFocusedInputKey) {
+        if (taskId == null) return;
+
+        const entries = Object.entries(columns) as [Status, ClientTask[]][];
+        for (const [status, tasks] of entries) {
+          const itemIndex = tasks.findIndex((candidate) => String(candidate.id) === String(taskId));
+          if (itemIndex >= 0) {
+            handleFocusedInputKey(status, itemIndex);
+            return;
+          }
+        }
+        return;
+      }
+
+      setFocusedTaskId?.(taskId);
+    },
+    [columns, handleFocusedInputKey, setFocusedTaskId],
+  );
 
   const isMobile = useMediaQuery("(max-width: 767px)");
   const saveStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -246,7 +285,7 @@ const TaskInfoPanel: React.FC<TaskInfoPanelProps> = ({
       });
     }
 
-    setFocusedTaskId(task.id);
+    syncFocusedTask(task.id);
   };
 
   const handleUpdatePriority = (newPriority: TaskPriority) => {
